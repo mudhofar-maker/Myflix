@@ -98,9 +98,7 @@
     font-size:0.7rem; font-weight:bold; margin-bottom:16px;
   }
   .ad-overlay .ad-content { font-size:1.1rem; margin-bottom:24px; line-height:1.5; }
-  .ad-overlay .ad-timer {
-    font-size:0.9rem; color:#aaa; margin-bottom:16px;
-  }
+  .ad-overlay .ad-timer { font-size:0.9rem; color:#aaa; margin-bottom:16px; }
   .ad-skip-btn {
     background:#ff0050; border:none; color:#fff;
     padding:10px 24px; border-radius:8px; cursor:pointer;
@@ -180,7 +178,7 @@
     display:block; font-size:0.8rem; color:#aaa;
     margin-bottom:6px; font-weight:500;
   }
-  .form-group input, .form-group textarea {
+  .form-group input, .form-group textarea, .form-group select {
     width:100%; padding:10px 12px; background:#1a1a1a;
     border:1px solid #333; border-radius:8px;
     color:#fff; font-size:0.9rem; font-family:inherit;
@@ -272,6 +270,7 @@
     border-radius:24px; font-size:0.85rem; z-index:500;
     opacity:0; transition:0.3s; pointer-events:none;
     box-shadow:0 4px 20px rgba(0,0,0,0.5);
+    text-align:center; max-width:90%;
   }
   .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
@@ -321,7 +320,7 @@
         <div id="dropzone" class="dropzone">
           <div class="icon">📹</div>
           <p><strong>Tap atau drag video di sini</strong></p>
-          <p style="margin-top:4px;">MP4 / WebM / MOV (max 50MB)</p>
+          <p style="margin-top:4px;">MP4 / WebM / MOV</p>
         </div>
         <input type="file" id="fileInput" accept="video/*" hidden />
 
@@ -339,7 +338,7 @@
 
         <div class="form-group">
           <label>💰 Aktifkan Monetisasi?</label>
-          <select id="uploadMonet" style="width:100%;padding:10px 12px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#fff;font-size:0.9rem;">
+          <select id="uploadMonet">
             <option value="yes">Ya — Video ini bisa menghasilkan uang (iklan)</option>
             <option value="no">Tidak — Video biasa</option>
           </select>
@@ -347,7 +346,7 @@
 
         <button id="btnSubmitUpload" class="btn-primary" disabled>🚀 Publikasikan</button>
         <p style="font-size:0.7rem;color:#666;text-align:center;margin-top:10px;">
-          Video disimpan lokal di browser (demo). Untuk produksi, hubungkan ke Cloudinary / R2.
+          Video disimpan aman di penyimpanan browser (IndexedDB).
         </p>
       </div>
     </div>
@@ -374,7 +373,7 @@
           </div>
           <div class="stat-box">
             <div class="num" id="statEarnings">0</div>
-            <div class="lbl">💵 Earnings (koin)</div>
+            <div class="lbl">💵 Earnings</div>
           </div>
           <div class="stat-box">
             <div class="num" id="statVideos">0</div>
@@ -415,26 +414,21 @@
         </button>
 
         <div class="section-hdr" style="margin-top:20px;">📋 Riwayat Transaksi</div>
-        <div class="tx-list" id="txList">
-          <p style="font-size:0.75rem;color:#666;text-align:center;padding:20px 0;">
-            Belum ada transaksi
-          </p>
-        </div>
+        <div class="tx-list" id="txList"></div>
       </div>
     </div>
   </div>
 
-  <!-- Toast -->
   <div id="toast" class="toast"></div>
 
 <script>
   // ============================================================
-  // ===== STATE & STORAGE =======================================
+  // ===== STATE & STORAGE (LocalStorage untuk teks) ============
   // ============================================================
-  const STORAGE_KEY = 'vidstream_v1';
-  const COIN_TO_RP = 100; // 1 koin = Rp 100
-  const AD_DURATION = 3;  // detik iklan pre-roll
-  const REWARD_PER_VIEW = 1; // koin per view video monetized
+  const STORAGE_KEY = 'vidstream_v2';
+  const COIN_TO_RP = 100;
+  const AD_DURATION = 3;
+  const REWARD_PER_VIEW = 1;
 
   let state = {
     coins: 0,
@@ -442,26 +436,71 @@
     tipsReceived: 0,
     views: 0,
     transactions: [],
-    userVideos: [], // { id, username, caption, src (base64), monetized, likes, views }
+    userVideos: [], // Metadata video disimpan di sini (tanpa file video)
   };
 
   function loadState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const saved = JSON.parse(raw);
-        state = { ...state, ...saved };
-      }
-    } catch (e) { console.warn('Load fail', e); }
+      if (raw) state = { ...state, ...JSON.parse(raw) };
+    } catch (e) { console.warn(e); }
   }
   function saveState() {
     try {
-      // Jangan simpan blob URL (tidak persisten), hanya metadata
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (e) { console.warn('Save fail', e); }
+    } catch (e) { console.warn(e); }
   }
 
-  loadState();
+  // ============================================================
+  // ===== INDEXEDDB UNTUK FILE VIDEO ===========================
+  // ============================================================
+  const DB_NAME = 'vidstream_db';
+  const DB_STORE = 'videos';
+  let db;
+
+  function initDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = e => {
+        const d = e.target.result;
+        if (!d.objectStoreNames.contains(DB_STORE)) {
+          d.createObjectStore(DB_STORE, { keyPath: 'id' });
+        }
+      };
+      req.onsuccess = e => { db = e.target.result; resolve(); };
+      req.onerror = e => reject(e);
+    });
+  }
+
+  function saveVideoToDB(id, blob) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(DB_STORE, 'readwrite');
+      const store = tx.objectStore(DB_STORE);
+      const req = store.put({ id, blob });
+      req.onsuccess = () => resolve();
+      req.onerror = e => reject(e);
+    });
+  }
+
+  function getVideoFromDB(id) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(DB_STORE, 'readonly');
+      const store = tx.objectStore(DB_STORE);
+      const req = store.get(id);
+      req.onsuccess = e => resolve(e.target.result ? e.target.result.blob : null);
+      req.onerror = e => reject(e);
+    });
+  }
+
+  function deleteVideoFromDB(id) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(DB_STORE, 'readwrite');
+      const store = tx.objectStore(DB_STORE);
+      const req = store.delete(id);
+      req.onsuccess = () => resolve();
+      req.onerror = e => reject(e);
+    });
+  }
 
   // ============================================================
   // ===== DATA DEFAULT VIDEO ====================================
@@ -475,7 +514,6 @@
     { id:6, username:"@food_lover", caption:"Resep simple 🍜 #food", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4", likes:780, monetized:false },
   ];
 
-  // Gabungkan default + user videos
   function getAllVideos() {
     return [...state.userVideos, ...defaultVideos];
   }
@@ -517,7 +555,7 @@
 
   const toast = document.getElementById('toast');
 
-  let pendingFile = null; // file yang mau diupload
+  let pendingFile = null;
 
   // ============================================================
   // ===== UTIL ==================================================
@@ -535,7 +573,7 @@
                           : '#333';
     toast.classList.add('show');
     clearTimeout(toast._t);
-    toast._t = setTimeout(() => toast.classList.remove('show'), 2200);
+    toast._t = setTimeout(() => toast.classList.remove('show'), 2500);
   }
 
   function updateBalanceUI() {
@@ -575,39 +613,63 @@
   // ============================================================
   // ===== RENDER FEED ===========================================
   // ============================================================
-  function renderFeed() {
+  async function renderFeed() {
     const all = getAllVideos();
-    feedView.innerHTML = all.map((v, i) => `
-      <div class="video-card" data-index="${i}" data-id="${v.id}">
-        <video src="${v.src}" loop muted playsinline preload="metadata"></video>
+    feedView.innerHTML = ''; // Clear dulu
 
+    for (let i = 0; i < all.length; i++) {
+      const v = all[i];
+      const card = document.createElement('div');
+      card.className = 'video-card';
+      card.dataset.index = i;
+      card.dataset.id = v.id;
+
+      // Placeholder dulu (karena video mungkin perlu di-load dari IndexedDB)
+      card.innerHTML = `
+        <video loop muted playsinline preload="metadata"></video>
         <div class="play-indicator">▶</div>
-
-        <div class="progress-bar">
-          <div class="progress-fill"></div>
-        </div>
-
+        <div class="progress-bar"><div class="progress-fill"></div></div>
         <div class="video-info">
           <div class="username">${v.username}</div>
           <div class="caption">${v.caption}</div>
           ${v.monetized ? '<span class="badge-monet">💰 MONETIZED</span>' : ''}
         </div>
-
         <div class="side-actions">
           <button class="action-btn like-btn">🤍<span>${formatNum(v.likes || 0)}</span></button>
           <button class="action-btn">💬<span>${Math.floor(Math.random()*90)+10}</span></button>
           <button class="action-btn tip-btn" data-tip="${v.id}">🎁<span>Tips</span></button>
           <button class="action-btn">↗️<span>Share</span></button>
         </div>
-
         <div class="ad-overlay hidden" data-ad="${i}">
           <div class="ad-label">IKLAN</div>
           <div class="ad-content">🎬 Nikmati video tanpa batas!<br/>Upgrade ke VidStream Premium</div>
           <div class="ad-timer">Iklan berakhir dalam <strong>3</strong> detik</div>
           <button class="ad-skip-btn" disabled>Lewati Iklan</button>
         </div>
-      </div>
-    `).join('');
+      `;
+
+      const videoEl = card.querySelector('video');
+      
+      // Ambil video source
+      if (v.src) {
+        videoEl.src = v.src;
+      } else {
+        // Load dari IndexedDB
+        try {
+          const blob = await getVideoFromDB(v.id);
+          if (blob) {
+            videoEl.src = URL.createObjectURL(blob);
+          } else {
+            videoEl.src = ''; // File hilang
+            videoEl.style.background = '#222';
+          }
+        } catch (e) {
+          console.warn('Gagal load video', e);
+        }
+      }
+
+      feedView.appendChild(card);
+    }
 
     setupFeedInteractions();
     observeFeed();
@@ -624,10 +686,8 @@
       const videoId = parseInt(card.dataset.id);
       const videoData = getAllVideos().find(v => v.id === videoId);
 
-      // ===== Tap play/pause + ad logic =====
       video.addEventListener('click', async () => {
         if (video.paused) {
-          // Cek iklan
           if (videoData && videoData.monetized) {
             const adShown = sessionStorage.getItem('ad_shown_' + videoId);
             if (!adShown) {
@@ -639,7 +699,7 @@
           indicator.textContent = '▶';
           indicator.classList.add('show');
           setTimeout(() => indicator.classList.remove('show'), 400);
-          // Reward per view (sekali per video per sesi)
+          
           const viewKey = 'view_rewarded_' + videoId;
           if (videoData && videoData.monetized && !sessionStorage.getItem(viewKey)) {
             sessionStorage.setItem(viewKey, '1');
@@ -658,14 +718,12 @@
         }
       });
 
-      // Progress
       video.addEventListener('timeupdate', () => {
         if (video.duration) {
           progressFill.style.width = (video.currentTime / video.duration * 100) + '%';
         }
       });
 
-      // Like
       let liked = false;
       likeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -674,7 +732,6 @@
         likeBtn.firstChild.textContent = liked ? '❤️' : '🤍';
       });
 
-      // Tips
       tipBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         handleTip(videoData);
@@ -682,7 +739,6 @@
     });
   }
 
-  // ===== IKLAN PRE-ROLL =====
   function showAd(overlay, videoId, video) {
     return new Promise(resolve => {
       overlay.classList.remove('hidden');
@@ -714,7 +770,6 @@
     });
   }
 
-  // ===== TIPS / DONASI =====
   function handleTip(videoData) {
     if (!videoData) return;
     const amount = prompt(`🎁 Kirim tips ke ${videoData.username}\n\nMasukkan jumlah koin (min 10):`, '10');
@@ -734,13 +789,11 @@
     showToast(`🎁 Berhasil kirim ${n} koin ke ${videoData.username}!`, 'success');
   }
 
-  // ===== AUTO PLAY/OBSERVER =====
   function observeFeed() {
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         const video = entry.target.querySelector('video');
         if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
-          // Jangan auto-play kalau ada iklan aktif
           if (!entry.target.querySelector('.ad-overlay').classList.contains('hidden')) return;
           video.play().catch(() => {});
         } else {
@@ -756,34 +809,60 @@
   // ============================================================
   // ===== RENDER GRID ===========================================
   // ============================================================
-  function renderGrid() {
+  async function renderGrid() {
     const all = getAllVideos();
-    gridList.innerHTML = all.map((v, i) => `
-      <div class="grid-item" data-index="${i}" data-id="${v.id}">
-        <video src="${v.src}" muted preload="metadata" playsinline></video>
+    gridList.innerHTML = '';
+
+    for (let i = 0; i < all.length; i++) {
+      const v = all[i];
+      const item = document.createElement('div');
+      item.className = 'grid-item';
+      item.dataset.index = i;
+      item.dataset.id = v.id;
+
+      item.innerHTML = `
+        <video muted preload="metadata" playsinline></video>
         ${v.monetized ? '<div class="grid-badge">💰</div>' : ''}
         <div class="play-icon">▶️</div>
         <div class="grid-title">${v.caption}</div>
-      </div>
-    `).join('');
+      `;
 
-    gridList.querySelectorAll('.grid-item').forEach(item => {
-      const vid = item.querySelector('video');
-      item.addEventListener('mouseenter', () => { vid.currentTime = 0; vid.play().catch(()=>{}); });
-      item.addEventListener('mouseleave', () => vid.pause());
+      const videoEl = item.querySelector('video');
+      if (v.src) {
+        videoEl.src = v.src;
+      } else {
+        try {
+          const blob = await getVideoFromDB(v.id);
+          if (blob) videoEl.src = URL.createObjectURL(blob);
+        } catch (e) { console.warn(e); }
+      }
+
+      item.addEventListener('mouseenter', () => { videoEl.currentTime = 0; videoEl.play().catch(()=>{}); });
+      item.addEventListener('mouseleave', () => videoEl.pause());
       item.addEventListener('click', () => openPlayer(parseInt(item.dataset.id)));
-    });
+      
+      gridList.appendChild(item);
+    }
   }
 
-  // ===== PLAYER MODAL =====
-  function openPlayer(id) {
+  async function openPlayer(id) {
     const v = getAllVideos().find(x => x.id === id);
     if (!v) return;
-    modalVideo.src = v.src;
+    
+    if (v.src) {
+      modalVideo.src = v.src;
+    } else {
+      try {
+        const blob = await getVideoFromDB(v.id);
+        if (blob) modalVideo.src = URL.createObjectURL(blob);
+      } catch (e) {}
+    }
+    
     modalTitle.textContent = `${v.username} — ${v.caption}`;
     playerModal.classList.remove('hidden');
     modalVideo.play().catch(()=>{});
   }
+  
   closeModal.addEventListener('click', () => {
     modalVideo.pause(); modalVideo.src = ''; playerModal.classList.add('hidden');
   });
@@ -827,9 +906,6 @@
     if (!file.type.startsWith('video/')) {
       showToast('File harus video!', 'error'); return;
     }
-    if (file.size > 50 * 1024 * 1024) {
-      showToast('Maksimal 50MB', 'error'); return;
-    }
     pendingFile = file;
     previewVideo.src = URL.createObjectURL(file);
     previewVideo.classList.remove('hidden');
@@ -840,19 +916,23 @@
   btnSubmitUpload.addEventListener('click', async () => {
     if (!pendingFile) return;
     btnSubmitUpload.disabled = true;
-    btnSubmitUpload.textContent = '⏳ Mengunggah...';
+    btnSubmitUpload.textContent = '⏳ Menyimpan video...';
 
     try {
-      const base64 = await fileToBase64(pendingFile);
       const username = document.getElementById('uploadUsername').value.trim() || '@user_baru';
       const caption = document.getElementById('uploadCaption').value.trim() || 'Video baru';
       const monetized = document.getElementById('uploadMonet').value === 'yes';
+      const newId = Date.now();
 
+      // Simpan file fisik ke IndexedDB
+      await saveVideoToDB(newId, pendingFile);
+
+      // Simpan metadata ke State (LocalStorage)
       const newVideo = {
-        id: Date.now(),
+        id: newId,
         username,
         caption,
-        src: base64,
+        src: null, // Tidak ada URL, karena pakai IndexedDB
         likes: 0,
         monetized,
         uploadedAt: Date.now(),
@@ -860,33 +940,25 @@
 
       state.userVideos.unshift(newVideo);
       saveState();
-      showToast('🎉 Video berhasil dipublikasikan!', 'success');
+      
+      showToast('🎉 Video berhasil disimpan!', 'success');
 
-      renderFeed();
-      renderGrid();
+      // Re-render
+      await renderFeed();
+      await renderGrid();
       updateBalanceUI();
 
       uploadModal.classList.add('hidden');
       resetUploadForm();
-
-      // Redirect ke feed
       btnFeed.click();
+      
     } catch (err) {
       console.error(err);
-      showToast('Gagal upload: ' + err.message, 'error');
+      showToast('Gagal menyimpan: ' + err.message, 'error');
       btnSubmitUpload.textContent = '🚀 Publikasikan';
       btnSubmitUpload.disabled = false;
     }
   });
-
-  function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
 
   // ============================================================
   // ===== MONETISASI ============================================
@@ -897,12 +969,10 @@
   });
   closeMonet.addEventListener('click', () => monetModal.classList.add('hidden'));
 
-  // Beli koin
   document.querySelectorAll('.price-item').forEach(item => {
     item.addEventListener('click', () => {
       const coins = parseInt(item.dataset.coins);
       const price = parseInt(item.dataset.price);
-      // Simulasi pembayaran
       const confirmBuy = confirm(`Beli ${coins} koin seharga Rp ${price.toLocaleString('id-ID')}?\n\n(Demo: pembayaran disimulasikan)`);
       if (!confirmBuy) return;
       state.coins += coins;
@@ -911,7 +981,6 @@
     });
   });
 
-  // Withdraw
   btnWithdraw.addEventListener('click', () => {
     if (state.coins < 1000) {
       showToast('Minimal 1000 koin untuk withdraw', 'error'); return;
@@ -945,9 +1014,13 @@
   // ============================================================
   // ===== INIT ==================================================
   // ============================================================
-  renderFeed();
-  renderGrid();
-  updateBalanceUI();
+  (async () => {
+    loadState();
+    await initDB(); // Inisialisasi IndexedDB dulu
+    await renderFeed();
+    await renderGrid();
+    updateBalanceUI();
+  })();
 </script>
 </body>
 </html>
