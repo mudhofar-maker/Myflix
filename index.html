@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>VidStream Pro — Final Release</title>
+<title>VidStream Pro — Ultimate All-in-One</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; }
   body { background:#000; color:#fff; overflow-x:hidden; }
@@ -19,22 +19,20 @@
   .profile-nav-btn {
     width:36px; height:36px; border-radius:50%;
     background:#333; border:2px solid #ff0050;
-    cursor:pointer; overflow:hidden; display:flex;
-    justify-content:center; align-items:center;
+    cursor:pointer; overflow:hidden; display:flex; justify-content:center; align-items:center;
   }
   .profile-nav-btn img { width:100%; height:100%; object-fit:cover; }
   
-  .nav-buttons { display:flex; gap:6px; align-items:center; justify-content:flex-end; }
+  .nav-buttons { display:flex; gap:6px; align-items:center; justify-content:flex-end; flex-wrap:wrap; }
   .nav-btn {
     background:#2a2a2a; border:1px solid #444; color:#fff;
-    padding:8px; border-radius:50%; font-size:1rem;
-    cursor:pointer; transition:0.2s; display:flex;
-    justify-content:center; align-items:center; width:36px; height:36px;
+    padding:8px; border-radius:50%; font-size:1rem; cursor:pointer; 
+    display:flex; justify-content:center; align-items:center; width:36px; height:36px;
   }
-  .nav-btn.active { background:linear-gradient(135deg,#ff8a00,#ff0050); border-color:#ff8a00; }
+  .nav-btn.active { background:linear-gradient(135deg,#ff8a00,#ff0050); border-color:#ff8a00; box-shadow:0 0 10px rgba(255,138,0,0.5); }
   .nav-btn.coin-btn {
-    background:linear-gradient(135deg,#f7b733,#fc4a1a);
-    border:none; font-weight:bold; border-radius:20px; width:auto; padding:8px 12px; font-size:0.85rem; gap:4px;
+    background:linear-gradient(135deg,#f7b733,#fc4a1a); border:none; font-weight:bold; 
+    border-radius:20px; width:auto; padding:8px 12px; font-size:0.85rem; gap:4px; color:#fff;
   }
 
   /* ===== FEED ===== */
@@ -44,8 +42,14 @@
     position:relative; height:100vh; width:100%;
     scroll-snap-align:start; display:flex; justify-content:center; align-items:center; background:#000;
   }
-  .video-card video { width:100%; height:100%; object-fit:cover; }
+  .video-card video { width:100%; height:100%; object-fit:cover; transition: filter 0.3s ease; }
   
+  .filter-cinematic { filter: contrast(1.2) saturate(0.8) sepia(0.3); }
+  .filter-vintage { filter: sepia(0.6) contrast(1.1) brightness(0.9); }
+  .filter-bw { filter: grayscale(1) contrast(1.3); }
+  .filter-vivid { filter: saturate(1.5) contrast(1.1); }
+  .filter-warm { filter: sepia(0.4) saturate(1.3) hue-rotate(-10deg); }
+
   .video-text-overlay {
     position:absolute; z-index:2; text-align:center; font-weight:bold;
     text-shadow:0 2px 8px rgba(0,0,0,0.9); pointer-events:none; white-space:nowrap;
@@ -54,10 +58,7 @@
   .video-info { position:absolute; bottom:80px; left:16px; right:80px; z-index:2; text-shadow:0 2px 8px rgba(0,0,0,0.8); }
   .user-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
   .video-info .username { font-weight:bold; font-size:1rem; }
-  .follow-btn {
-    background:transparent; border:1px solid #fff; color:#fff;
-    padding:4px 10px; border-radius:12px; font-size:0.7rem; font-weight:bold; cursor:pointer;
-  }
+  .follow-btn { background:transparent; border:1px solid #fff; color:#fff; padding:4px 10px; border-radius:12px; font-size:0.7rem; font-weight:bold; cursor:pointer; }
   .follow-btn.followed { background:#fff; color:#000; }
   .video-info .caption { font-size:0.85rem; opacity:0.9; line-height:1.3; }
   
@@ -69,31 +70,15 @@
   .marquee span { display:inline-block; padding-left:100%; animation: marquee 8s linear infinite; }
   @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
-  /* SIDE ACTIONS */
-  .side-actions {
-    position:absolute; right:12px; bottom:20px; /* Dinaikkan agar tidak tertutup */
-    display:flex; flex-direction:column; gap:14px; z-index:2;
-  }
+  .side-actions { position:absolute; right:12px; bottom:80px; display:flex; flex-direction:column; gap:14px; z-index:2; }
   .action-btn {
-    background:none; border:none; color:#fff; font-size:1.3rem;
-    cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5); transition: transform 0.15s;
+    background:none; border:none; color:#fff; font-size:1.3rem; cursor:pointer; 
+    display:flex; flex-direction:column; align-items:center; gap:2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
   }
-  .action-btn:active { transform:scale(0.85); }
   .action-btn span { font-size:0.65rem; font-weight:600; }
-  .action-btn.tip-btn { color:#f7b733; }
-  .action-btn.share-btn { color:#00bfff; }
 
-  .mute-btn {
-    position:absolute; top:70px; right:16px; z-index:3;
-    background:rgba(0,0,0,0.5); border:none; color:#fff;
-    width:36px; height:36px; border-radius:50%; font-size:1.2rem;
-    display:flex; justify-content:center; align-items:center;
-  }
-  .play-indicator {
-    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-    font-size:4rem; opacity:0; pointer-events:none; transition:opacity 0.3s;
-  }
+  .mute-btn { position:absolute; top:70px; right:16px; z-index:3; background:rgba(0,0,0,0.5); border:none; color:#fff; width:36px; height:36px; border-radius:50%; font-size:1.2rem; display:flex; justify-content:center; align-items:center; }
+  .play-indicator { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:4rem; opacity:0; pointer-events:none; transition:opacity 0.3s; }
   .play-indicator.show { opacity:0.8; }
   .progress-bar { position:absolute; bottom:0; left:0; right:0; height:3px; background:rgba(255,255,255,0.2); }
   .progress-fill { height:100%; background:#ff0050; width:0%; }
@@ -106,8 +91,7 @@
   /* COMMENT SHEET */
   .comment-sheet {
     position:fixed; bottom:0; left:0; right:0; background:#1a1a1a; border-radius:16px 16px 0 0;
-    z-index:300; height:60vh; display:flex; flex-direction:column;
-    transform:translateY(100%); transition:transform 0.3s ease;
+    z-index:300; height:60vh; display:flex; flex-direction:column; transform:translateY(100%); transition:transform 0.3s ease;
   }
   .comment-sheet.show { transform:translateY(0); }
   .comment-header { display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid #333; }
@@ -127,8 +111,9 @@
   .avatar-edit-label { position:absolute; bottom:0; right:0; background:#ff0050; width:28px; height:28px; border-radius:50%; display:flex; justify-content:center; align-items:center; cursor:pointer; }
   .form-group { padding:0 20px; margin-bottom:16px; }
   .form-group label { display:block; font-size:0.8rem; color:#aaa; margin-bottom:6px; }
-  .form-group input { width:100%; padding:12px; background:#222; border:1px solid #444; border-radius:8px; color:#fff; font-size:1rem; outline:none; }
+  .form-group input, .form-group select, .form-group textarea { width:100%; padding:12px; background:#222; border:1px solid #444; border-radius:8px; color:#fff; font-size:1rem; outline:none; }
   .btn-primary { width:calc(100% - 40px); margin:0 20px 20px; padding:14px; background:linear-gradient(90deg,#ff0050,#ff8a00); border:none; color:#fff; border-radius:8px; font-weight:bold; font-size:1rem; cursor:pointer; }
+  .btn-primary:disabled { opacity:0.5; }
 
   /* MONETISASI & BELANJA */
   .balance-card { background:linear-gradient(135deg,#f7b733,#fc4a1a); border-radius:16px; padding:24px; margin:20px; text-align:center; }
@@ -139,43 +124,97 @@
   .btn-withdraw { width:calc(100% - 40px); margin:0 20px 20px; padding:14px; background:#00c853; border:none; color:#fff; border-radius:8px; font-weight:bold; font-size:1rem; cursor:pointer; }
   .btn-withdraw:disabled { background:#444; color:#888; }
 
-  .toast {
-    position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px);
-    background:#333; color:#fff; padding:12px 20px; border-radius:24px; z-index:500;
-    opacity:0; transition:0.3s; pointer-events:none; text-align:center;
-  }
+  /* UPLOAD & CAMERA */
+  .upload-body { padding:20px; overflow-y:auto; display:flex; flex-direction:column; height:100%; }
+  .camera-container { position:relative; width:100%; aspect-ratio:9/16; background:#000; border-radius:12px; overflow:hidden; margin-bottom:16px; }
+  .camera-container video { width:100%; height:100%; object-fit:cover; }
+  .record-btn { position:absolute; bottom:20px; left:50%; transform:translateX(-50%); width:60px; height:60px; border-radius:50%; background:rgba(255,255,255,0.3); border:4px solid #fff; cursor:pointer; display:flex; justify-content:center; align-items:center; }
+  .record-btn.recording { background:rgba(255,0,80,0.5); border-color:#ff0050; }
+  .record-btn .inner { width:46px; height:46px; border-radius:50%; background:#ff0050; transition:0.2s; }
+  .record-btn.recording .inner { border-radius:8px; width:24px; height:24px; background:#fff; }
+  .flip-cam-btn { position:absolute; top:16px; right:16px; background:rgba(0,0,0,0.6); border:none; color:#fff; width:44px; height:44px; border-radius:50%; cursor:pointer; font-size:1.5rem; display:flex; justify-content:center; align-items:center; }
+
+  /* EDITOR */
+  .preview-wrapper { position:relative; width:100%; margin-bottom:16px; border-radius:12px; overflow:hidden; background:#000; display:flex; justify-content:center; }
+  .preview-wrapper video { width:100%; max-height:300px; object-fit:contain; }
+  .interactive-text { position:absolute; z-index:10; cursor:move; padding:4px; border:1px dashed transparent; user-select:none; touch-action:none; white-space:nowrap; font-weight:bold; text-shadow:0 2px 8px rgba(0,0,0,0.9); }
+  .interactive-text.active { border-color:#ff0050; background:rgba(255,0,80,0.1); }
+  .interactive-text .controls { position:absolute; bottom:-30px; left:50%; transform:translateX(-50%); display:flex; gap:6px; background:#222; padding:4px 8px; border-radius:12px; opacity:0; transition:0.2s; }
+  .interactive-text.active .controls { opacity:1; pointer-events:auto; }
+  .interactive-text .controls button { background:none; border:none; color:#fff; cursor:pointer; font-size:1rem; }
+
+  /* MUSIC KATALOG */
+  .music-catalog-view { position:absolute; inset:0; background:#1a1a1a; z-index:10; display:flex; flex-direction:column; }
+  .music-catalog-header { display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid #333; }
+  .music-list { flex:1; overflow-y:auto; padding:12px; }
+  .song-item { display:flex; align-items:center; gap:12px; background:#222; padding:12px; border-radius:8px; margin-bottom:8px; cursor:pointer; border:1px solid transparent; }
+  .song-item.selected { border-color:#f7b733; background:#333; }
+  .song-icon { width:40px; height:40px; border-radius:8px; background:linear-gradient(135deg,#f7b733,#fc4a1a); display:flex; justify-content:center; align-items:center; font-size:1.2rem; }
+  .song-info { flex:1; }
+  .song-title { font-weight:bold; font-size:0.9rem; }
+  .song-meta { font-size:0.75rem; color:#aaa; }
+
+  .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px); background:#333; color:#fff; padding:12px 20px; border-radius:24px; z-index:500; opacity:0; transition:0.3s; pointer-events:none; text-align:center; }
   .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 
   <header class="navbar">
-    <div class="profile-nav-btn" id="btnProfile" title="Profil Saya">
+    <div class="profile-nav-btn" id="btnProfile">
       <img id="navAvatar" src="https://ui-avatars.com/api/?name=User&background=random" alt="Profile" />
     </div>
     <div class="nav-buttons">
       <button id="btnFeed" class="nav-btn active" title="Feed">📱</button>
+      <button id="btnGrid" class="nav-btn" title="Browse">🍿</button>
+      <button id="btnLive" class="nav-btn" title="Live Bareng">🔴</button>
       <button id="btnUpload" class="nav-btn" title="Buat Video">🎥</button>
-      <button id="btnMonet" class="nav-btn coin-btn" title="Belanja Koin">💰 <span id="navBalance">0</span></button>
+      <button id="btnMonet" class="nav-btn coin-btn" title="Monetisasi">💰 <span id="navBalance">0</span></button>
     </div>
   </header>
 
   <main id="feedView" class="feed-container"></main>
+  
+  <main id="gridView" class="hidden" style="padding:80px 16px 40px; min-height:100vh;">
+    <h2 style="margin-bottom:16px;">🔥 Trending Now</h2>
+    <div id="gridList" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px;"></div>
+  </main>
 
-  <!-- COMMENT SHEET -->
-  <div id="commentSheet" class="comment-sheet">
-    <div class="comment-header">
-      <h3><span id="commentCount">0</span> Komentar</h3>
-      <button id="closeComment" style="background:none;border:none;color:#fff;font-size:1.2rem;">✕</button>
-    </div>
-    <div class="comment-list" id="commentList"></div>
-    <div class="comment-input-area">
-      <input type="text" id="commentInput" placeholder="Tambahkan komentar..." />
-      <button id="sendComment">➤</button>
+  <!-- LIVE MODAL -->
+  <div id="liveModal" class="modal hidden">
+    <div class="modal-content" style="height:80vh;">
+      <button class="close-btn" id="closeLive">✕</button>
+      <div style="padding:20px; display:flex; flex-direction:column; height:100%;">
+        <div id="liveSetup">
+          <h3>🔴 Live Bareng Teman</h3>
+          <p style="color:#aaa; margin-bottom:16px;">Buat ruangan atau gabung.</p>
+          <button id="btnCreateRoom" class="btn-primary" style="width:100%; margin:0 0 10px;">➕ Buat Ruangan</button>
+          <input type="text" id="inputJoinCode" placeholder="KODE UNDANGAN" style="width:100%; padding:12px; background:#222; border:1px solid #444; border-radius:8px; color:#fff; text-align:center; margin-bottom:10px; text-transform:uppercase;">
+          <button id="btnJoinRoom" class="btn-primary" style="width:100%; margin:0; background:#333;">🚪 Gabung</button>
+        </div>
+        <div id="liveActive" class="hidden" style="display:flex; flex-direction:column; height:100%;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+            <span style="color:#ff0000; font-weight:bold;">● LIVE: <span id="roomCodeDisplay"></span></span>
+            <button id="btnLeaveRoom" style="background:none; border:none; color:#ff0050;">Keluar</button>
+          </div>
+          <div id="liveChatBox" style="flex:1; background:#000; border:1px solid #333; border-radius:8px; padding:10px; overflow-y:auto; margin-bottom:10px;"></div>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="liveChatInput" placeholder="Ketik pesan..." style="flex:1; padding:10px; background:#222; border:none; border-radius:8px; color:#fff;">
+            <button id="btnSendLiveChat" class="btn-primary" style="width:auto; margin:0;">Kirim</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- MODAL PROFIL & SETTINGS -->
+  <!-- COMMENT SHEET -->
+  <div id="commentSheet" class="comment-sheet">
+    <div class="comment-header"><h3><span id="commentCount">0</span> Komentar</h3><button id="closeComment">✕</button></div>
+    <div class="comment-list" id="commentList"></div>
+    <div class="comment-input-area"><input type="text" id="commentInput" placeholder="Ketik komentar..." /><button id="sendComment">➤</button></div>
+  </div>
+
+  <!-- PROFILE MODAL -->
   <div id="profileModal" class="modal hidden">
     <div class="modal-content">
       <button class="close-btn" id="closeProfile">✕</button>
@@ -186,120 +225,116 @@
           <input type="file" id="avatarUpload" accept="image/*" hidden />
         </div>
         <h3 id="profileNameDisplay">Nama Pengguna</h3>
-        <p style="color:#aaa; font-size:0.85rem;" id="profileUsernameDisplay">@username</p>
+        <p style="color:#aaa;" id="profileUsernameDisplay">@username</p>
       </div>
-      
-      <div class="form-group" style="margin-top:20px;">
-        <label>Nama Tampilan</label>
-        <input type="text" id="inputDisplayName" placeholder="Nama Kamu" />
-      </div>
-      <div class="form-group">
-        <label>Username (ID)</label>
-        <input type="text" id="inputUsername" placeholder="@username" />
-      </div>
-      <button class="btn-primary" id="btnSaveProfile">Simpan Perubahan</button>
+      <div class="form-group" style="margin-top:20px;"><label>Nama</label><input type="text" id="inputDisplayName" /></div>
+      <div class="form-group"><label>Username</label><input type="text" id="inputUsername" /></div>
+      <button class="btn-primary" id="btnSaveProfile">Simpan Profil</button>
     </div>
   </div>
 
-  <!-- MODAL BELANJA KOIN & MONETISASI -->
+  <!-- MONETISASI MODAL -->
   <div id="monetModal" class="modal hidden">
     <div class="modal-content">
       <button class="close-btn" id="closeMonet">✕</button>
       <div class="balance-card">
-        <div style="font-size:0.9rem; opacity:0.9;">Saldo Koin Kamu</div>
+        <div style="font-size:0.9rem;">Saldo Koin</div>
         <h2>🪙 <span id="coinBalance">0</span></h2>
-        <div style="font-size:1rem; font-weight:bold;">≈ Rp <span id="coinRupiah">0</span></div>
+        <div>≈ Rp <span id="coinRupiah">0</span></div>
       </div>
-      
-      <h3 style="padding:0 20px; margin-bottom:10px; font-size:1rem;">💳 Beli Koin</h3>
+      <h3 style="padding:0 20px; margin-bottom:10px;">Beli Koin</h3>
       <div class="price-list">
-        <div class="price-item" data-coins="100" data-price="10000"><span>🪙 100 Koin</span><span style="color:#f7b733;">Rp 10.000</span></div>
-        <div class="price-item" data-coins="500" data-price="45000"><span>🪙 500 Koin</span><span style="color:#f7b733;">Rp 45.000</span></div>
-        <div class="price-item" data-coins="1200" data-price="100000"><span>🪙 1.200 Koin (+200)</span><span style="color:#f7b733;">Rp 100.000</span></div>
+        <div class="price-item" data-coins="100" data-price="10000"><span>🪙 100 Koin</span><span>Rp 10.000</span></div>
+        <div class="price-item" data-coins="500" data-price="45000"><span>🪙 500 Koin</span><span>Rp 45.000</span></div>
       </div>
-
-      <h3 style="padding:0 20px; margin-bottom:10px; font-size:1rem;">💸 Tarik Uang (Withdraw)</h3>
-      <p style="padding:0 20px 10px; font-size:0.75rem; color:#aaa;">Minimal 1000 koin (Rp 100.000).</p>
-      <button id="btnWithdraw" class="btn-withdraw" disabled>💸 Tarik ke Rekening</button>
+      <button id="btnWithdraw" class="btn-withdraw" disabled>💸 Tarik Uang (Min 1000 Koin)</button>
     </div>
   </div>
 
-  <!-- UPLOAD MODAL (DISEDERHANAKAN) -->
+  <!-- UPLOAD MODAL -->
   <div id="uploadModal" class="modal hidden">
-    <div class="modal-content" style="padding:20px;">
+    <div class="modal-content">
       <button class="close-btn" id="closeUpload">✕</button>
-      <h3>🎥 Buat Video Baru</h3>
-      <p style="color:#aaa; font-size:0.85rem; margin-bottom:20px;">Rekam dari kamera atau pilih dari galeri.</p>
       
-      <div id="dropzone" style="border:2px dashed #444; border-radius:12px; padding:40px 20px; text-align:center; background:#222; margin-bottom:16px;">
-        <div style="font-size:3rem; margin-bottom:10px;">📁</div>
-        <p><strong>Pilih Video dari Galeri</strong></p>
+      <!-- PAGE 1: SELECT METHOD -->
+      <div id="pageSelect" class="upload-body">
+        <div style="display:flex; gap:8px; margin-bottom:16px;">
+          <button id="tabCam" class="nav-btn active" style="flex:1; border-radius:8px; padding:10px;">🎥 Kamera</button>
+          <button id="tabGal" class="nav-btn" style="flex:1; border-radius:8px; padding:10px;">📁 Galeri</button>
+        </div>
+        <div id="sectionCam" style="flex:1;">
+          <div class="camera-container">
+            <video id="liveCamera" autoplay playsinline muted></video>
+            <button class="flip-cam-btn" id="btnFlipCam">🔄</button>
+            <button class="record-btn" id="btnRecord"><div class="inner"></div></button>
+          </div>
+        </div>
+        <div id="sectionGal" class="hidden" style="flex:1; display:flex; align-items:center; justify-content:center;">
+          <div id="dropzone" style="border:2px dashed #444; border-radius:12px; padding:40px; text-align:center; cursor:pointer; width:100%;">
+            <div style="font-size:3rem; margin-bottom:10px;">📁</div>
+            <p>Tap untuk pilih video</p>
+            <input type="file" id="fileInput" accept="video/*" hidden />
+          </div>
+        </div>
       </div>
-      <input type="file" id="fileInput" accept="video/*" hidden />
-      
-      <div class="form-group">
-        <label>Username</label>
-        <input type="text" id="uploadUsername" placeholder="@username" />
+
+      <!-- PAGE 2: EDITOR -->
+      <div id="pageEditor" class="upload-body hidden">
+        <div class="preview-wrapper">
+          <video id="previewVideo" controls playsinline></video>
+          <div id="interactiveText" class="interactive-text hidden" style="top:50%; left:50%; font-size:24px; color:#fff;">Ketik Teks
+            <div class="controls">
+              <button id="btnTxtMin">➖</button><button id="btnTxtPlus">➕</button><button id="btnTxtRot">🔄</button>
+            </div>
+          </div>
+        </div>
+        <div style="background:#222; padding:12px; border-radius:8px; margin-bottom:12px;">
+          <label>✨ Teks Video</label>
+          <input type="text" id="inputText" placeholder="Ketik teks..." style="margin-bottom:8px;" />
+          <div style="display:flex; gap:8px;">
+            <select id="selectFont" style="flex:1;"><option value="inherit">Default</option><option value="Impact">Impact</option></select>
+            <select id="selectColor" style="flex:1;"><option value="#ffffff">Putih</option><option value="#ff0050">Merah</option><option value="#f7b733">Kuning</option></select>
+          </div>
+        </div>
+        <button id="btnOpenMusic" class="btn-primary" style="width:100%; margin:0 0 12px; background:#333;">🎵 Katalog Lagu: <span id="txtSelectedMusic">Suara Asli</span></button>
+        <div class="form-group" style="padding:0;"><label>Username</label><input type="text" id="uploadUsername" /></div>
+        <div class="form-group" style="padding:0;"><label>Caption</label><input type="text" id="uploadCaption" /></div>
+        <button class="btn-primary" id="btnSubmitUpload" style="width:100%; margin:0;" disabled>🚀 Publikasikan</button>
       </div>
-      <div class="form-group">
-        <label>Caption</label>
-        <input type="text" id="uploadCaption" placeholder="Tulis caption..." />
+
+      <!-- PAGE 3: MUSIC -->
+      <div id="pageMusic" class="music-catalog-view hidden">
+        <div class="music-catalog-header">
+          <h3>🎵 Katalog Lagu</h3>
+          <button id="closeMusic" style="background:none;border:none;color:#fff;font-size:1.2rem;">✕</button>
+        </div>
+        <div class="music-list" id="musicList"></div>
       </div>
-      <button class="btn-primary" id="btnSubmitUpload" disabled style="width:100%;margin:0;">🚀 Publikasikan</button>
+
     </div>
   </div>
 
   <div id="toast" class="toast"></div>
 
 <script>
-  const STORAGE_KEY = 'vidstream_v11';
+  // ===== STATE =====
+  const STORAGE_KEY = 'vidstream_final_v2';
+  let state = { coins: 0, userVideos: [], comments: {}, likedVideos: {}, followedUsers: {}, profile: { name: "Pengguna", username: "@user", avatar: "https://ui-avatars.com/api/?name=User&background=random" } };
   
-  // State Aplikasi
-  let state = { 
-    coins: 0, 
-    userVideos: [], 
-    comments: {}, 
-    likedVideos: {}, 
-    followedUsers: {},
-    profile: {
-      name: "Pengguna Baru",
-      username: "@user123",
-      avatar: "https://ui-avatars.com/api/?name=User&background=random"
-    }
-  };
-
-  // DB IndexedDB untuk Video
-  const DB_NAME = 'vidstream_db'; const DB_STORE = 'videos'; let db;
-  function initDB() {
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open(DB_NAME, 1);
-      req.onupgradeneeded = e => { if (!e.target.result.objectStoreNames.contains(DB_STORE)) e.target.result.createObjectStore(DB_STORE, { keyPath: 'id' }); };
-      req.onsuccess = e => { db = e.target.result; resolve(); };
-      req.onerror = e => reject(e);
-    });
-  }
-  function saveVideoToDB(id, blob) { return new Promise((res, rej) => { const tx = db.transaction(DB_STORE, 'readwrite'); tx.objectStore(DB_STORE).put({ id, blob }).onsuccess = () => res(); tx.onerror = rej; }); }
-  function getVideoFromDB(id) { return new Promise((res, rej) => { const tx = db.transaction(DB_STORE, 'readonly'); tx.objectStore(DB_STORE).get(id).onsuccess = e => res(e.target.result ? e.target.result.blob : null); tx.onerror = rej; }); }
-
-  const defaultVideos = [
-    { id:1, username:"@nature_vibes", caption:"Sunset di pantai 🏖️", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes:1240 }
-  ];
-  function getAllVideos() { return [...state.userVideos, ...defaultVideos]; }
-
-  // UTILITIES
-  function formatNum(n) { if (n >= 1000000) return (n/1000000).toFixed(1) + 'M'; if (n >= 1000) return (n/1000).toFixed(1) + 'K'; return n; }
-  function showToast(msg, type='info') {
-    const toast = document.getElementById('toast'); toast.textContent = msg;
-    toast.style.background = type === 'success' ? '#00c853' : type === 'error' ? '#ff0050' : '#333';
-    toast.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => toast.classList.remove('show'), 2500);
-  }
+  // ===== DB & UTILS =====
+  const DB_NAME = 'vidstream_db', DB_STORE = 'videos'; let db;
+  function initDB() { return new Promise((res) => { const req = indexedDB.open(DB_NAME, 1); req.onupgradeneeded = e => { if(!e.target.result.objectStoreNames.contains(DB_STORE)) e.target.result.createObjectStore(DB_STORE, {keyPath:'id'}); }; req.onsuccess = e => { db = e.target.result; res(); }; }); }
+  function saveVideoDB(id, blob) { return new Promise(res => { const tx = db.transaction(DB_STORE, 'readwrite'); tx.objectStore(DB_STORE).put({id, blob}).onsuccess = () => res(); }); }
+  function getVideoDB(id) { return new Promise(res => { const tx = db.transaction(DB_STORE, 'readonly'); tx.objectStore(DB_STORE).get(id).onsuccess = e => res(e.target.result ? e.target.result.blob : null); }); }
+  function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  function showToast(m, t='info') { const el = document.getElementById('toast'); el.textContent = m; el.style.background = t==='error'?'#ff0050':t==='success'?'#00c853':'#333'; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 2500); }
+  function formatNum(n) { return n >= 1000 ? (n/1000).toFixed(1)+'K' : n; }
+  
   function updateUI() {
     document.getElementById('navBalance').textContent = state.coins;
     document.getElementById('coinBalance').textContent = state.coins;
     document.getElementById('coinRupiah').textContent = (state.coins * 100).toLocaleString('id-ID');
     document.getElementById('btnWithdraw').disabled = state.coins < 1000;
-    
-    // Update Profil UI
     document.getElementById('navAvatar').src = state.profile.avatar;
     document.getElementById('profilePreview').src = state.profile.avatar;
     document.getElementById('profileNameDisplay').textContent = state.profile.name;
@@ -307,254 +342,197 @@
     document.getElementById('inputDisplayName').value = state.profile.name;
     document.getElementById('inputUsername').value = state.profile.username;
   }
-  function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
 
-  // ==========================================
-  // LOGIKA PROFIL & SETTINGS
-  // ==========================================
-  document.getElementById('btnProfile').addEventListener('click', () => {
-    document.getElementById('profileModal').classList.remove('hidden');
-  });
-  document.getElementById('closeProfile').addEventListener('click', () => {
-    document.getElementById('profileModal').classList.add('hidden');
-  });
+  const defaultVideos = [
+    { id:1, username:"@nature_vibes", caption:"Sunset di pantai 🏖️", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes:1240 }
+  ];
+  function getAllVideos() { return [...state.userVideos, ...defaultVideos]; }
 
-  document.getElementById('avatarUpload').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        state.profile.avatar = ev.target.result;
-        document.getElementById('profilePreview').src = state.profile.avatar;
-      };
-      reader.readAsDataURL(file);
-    }
-  });
+  // ===== PROFILE =====
+  document.getElementById('btnProfile').onclick = () => document.getElementById('profileModal').classList.remove('hidden');
+  document.getElementById('closeProfile').onclick = () => document.getElementById('profileModal').classList.add('hidden');
+  document.getElementById('avatarUpload').onchange = (e) => {
+    const f = e.target.files[0]; if(f) { const r = new FileReader(); r.onload = ev => { state.profile.avatar = ev.target.result; updateUI(); }; r.readAsDataURL(f); }
+  };
+  document.getElementById('btnSaveProfile').onclick = () => {
+    state.profile.name = document.getElementById('inputDisplayName').value.trim();
+    state.profile.username = document.getElementById('inputUsername').value.trim();
+    saveState(); updateUI(); showToast('Profil disimpan!', 'success'); document.getElementById('profileModal').classList.add('hidden');
+  };
 
-  document.getElementById('btnSaveProfile').addEventListener('click', () => {
-    state.profile.name = document.getElementById('inputDisplayName').value.trim() || "Pengguna";
-    state.profile.username = document.getElementById('inputUsername').value.trim() || "@user123";
-    saveState(); updateUI();
-    showToast('✅ Profil berhasil disimpan!', 'success');
-    document.getElementById('profileModal').classList.add('hidden');
+  // ===== MONETISASI =====
+  document.getElementById('btnMonet').onclick = () => { updateUI(); document.getElementById('monetModal').classList.remove('hidden'); };
+  document.getElementById('closeMonet').onclick = () => document.getElementById('monetModal').classList.add('hidden');
+  document.querySelectorAll('.price-item').forEach(el => {
+    el.onclick = () => { const c = parseInt(el.dataset.coins), p = parseInt(el.dataset.price); if(confirm(`Beli ${c} Koin seharga Rp ${p}?`)) { state.coins += c; saveState(); updateUI(); showToast('Berhasil!', 'success'); } };
   });
+  document.getElementById('btnWithdraw').onclick = () => {
+    if(state.coins < 1000) return; if(confirm(`Tarik ${state.coins} Koin ke Rupiah?`)) { state.coins = 0; saveState(); updateUI(); showToast('Withdraw diproses!', 'success'); }
+  };
 
-  // ==========================================
-  // LOGIKA MONETISASI & BELANJA KOIN
-  // ==========================================
-  document.getElementById('btnMonet').addEventListener('click', () => {
-    updateUI(); document.getElementById('monetModal').classList.remove('hidden');
-  });
-  document.getElementById('closeMonet').addEventListener('click', () => {
-    document.getElementById('monetModal').classList.add('hidden');
-  });
+  // ===== UPLOAD & CAMERA =====
+  let pendingFile = null, streamRef = null, mediaRecorder, chunks = [], facingMode = 'user';
+  let textState = { x: 50, y: 50, size: 24, rot: 0 };
+  let selectedMusicUrl = "", selectedMusicTitle = "Suara Asli";
 
-  document.querySelectorAll('.price-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const coins = parseInt(item.dataset.coins);
-      const price = parseInt(item.dataset.price);
-      if (confirm(`Beli ${coins} Koin seharga Rp ${price.toLocaleString('id-ID')}?`)) {
-        state.coins += coins; saveState(); updateUI();
-        showToast(`✅ Pembelian Berhasil! +${coins} Koin`, 'success');
-      }
-    });
-  });
+  const songList = [
+    { t: 'DJ Remix Viral', u: 'https://cdn.pixabay.com/audio/2022/03/15/audio_c8c8a73467.mp3', g: 'EDM' },
+    { t: 'Aesthetic Bass', u: 'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3', g: 'Chill' },
+    { t: 'Upbeat Pop', u: 'https://cdn.pixabay.com/audio/2021/11/25/audio_91b32e02f9.mp3', g: 'Pop' },
+  ];
 
-  document.getElementById('btnWithdraw').addEventListener('click', () => {
-    if (state.coins < 1000) return;
-    const rp = state.coins * 100;
-    if (confirm(`Tarik ${state.coins} Koin ke Rekening (Rp ${rp.toLocaleString('id-ID')})?`)) {
-      state.coins = 0; saveState(); updateUI();
-      showToast('💸 Withdraw diproses ke rekeningmu!', 'success');
-    }
-  });
-
-  // ==========================================
-  // FITUR KOMENTAR
-  // ==========================================
-  let currentVideoIdForComment = null;
-  function openComments(videoId) {
-    currentVideoIdForComment = videoId;
-    renderComments(videoId);
-    document.getElementById('commentSheet').classList.add('show');
+  async function startCamera() {
+    if(streamRef) streamRef.getTracks().forEach(t => t.stop());
+    try { streamRef = await navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio: true }); document.getElementById('liveCamera').srcObject = streamRef; } catch(e) { showToast('Kamera gagal', 'error'); }
   }
-  function renderComments(videoId) {
-    const comments = state.comments[videoId] || [];
-    document.getElementById('commentCount').textContent = comments.length;
-    const list = document.getElementById('commentList');
-    if (comments.length === 0) { list.innerHTML = `<p style="text-align:center;color:#666;font-size:0.85rem;">Belum ada komentar.</p>`; return; }
-    list.innerHTML = comments.map(c => `
-      <div class="comment-item"><div class="comment-avatar">${c.user.charAt(1).toUpperCase()}</div>
-      <div class="comment-body"><div class="c-user">${c.user}</div><div class="c-text">${c.text}</div></div></div>
-    `).join('');
-    list.scrollTop = list.scrollHeight;
-  }
-  document.getElementById('closeComment').addEventListener('click', () => {
-    document.getElementById('commentSheet').classList.remove('show');
-  });
-  document.getElementById('sendComment').addEventListener('click', () => {
-    const input = document.getElementById('commentInput');
-    if (!input.value.trim() || !currentVideoIdForComment) return;
-    if (!state.comments[currentVideoIdForComment]) state.comments[currentVideoIdForComment] = [];
-    state.comments[currentVideoIdForComment].push({ user: state.profile.username, text: input.value.trim() });
-    saveState(); input.value = ''; renderComments(currentVideoIdForComment);
-  });
+  function stopCamera() { if(streamRef) { streamRef.getTracks().forEach(t => t.stop()); streamRef = null; } }
 
-  // ==========================================
-  // FITUR SHARE & TIPS KOIN
-  // ==========================================
-  function handleShare(v) {
-    const shareUrl = window.location.href;
-    if (navigator.share) {
-      navigator.share({ title: 'VidStream Pro', text: `Tonton video dari ${v.username}`, url: shareUrl }).catch(()=>{});
-    } else {
-      navigator.clipboard.writeText(shareUrl);
-      showToast('🔗 Link disalin ke clipboard!', 'success');
-    }
+  document.getElementById('btnUpload').onclick = () => { document.getElementById('uploadModal').classList.remove('hidden'); document.getElementById('pageSelect').classList.remove('hidden'); document.getElementById('pageEditor').classList.add('hidden'); document.getElementById('pageMusic').classList.add('hidden'); document.getElementById('uploadUsername').value = state.profile.username; document.getElementById('uploadCaption').value = ''; startCamera(); };
+  document.getElementById('closeUpload').onclick = () => { document.getElementById('uploadModal').classList.add('hidden'); stopCamera(); };
+  
+  document.getElementById('tabCam').onclick = () => { document.getElementById('tabCam').classList.add('active'); document.getElementById('tabGal').classList.remove('active'); document.getElementById('sectionCam').classList.remove('hidden'); document.getElementById('sectionGal').classList.add('hidden'); startCamera(); };
+  document.getElementById('tabGal').onclick = () => { document.getElementById('tabGal').classList.add('active'); document.getElementById('tabCam').classList.remove('active'); document.getElementById('sectionGal').classList.remove('hidden'); document.getElementById('sectionCam').classList.add('hidden'); stopCamera(); };
+  
+  document.getElementById('btnFlipCam').onclick = () => { facingMode = facingMode === 'user' ? 'environment' : 'user'; startCamera(); };
+  document.getElementById('btnRecord').onclick = () => {
+    if(!streamRef) return;
+    if(mediaRecorder && mediaRecorder.state === 'recording') { mediaRecorder.stop(); document.getElementById('btnRecord').classList.remove('recording'); }
+    else { chunks = []; mediaRecorder = new MediaRecorder(streamRef); mediaRecorder.ondataavailable = e => chunks.push(e.data); mediaRecorder.onstop = () => { pendingFile = new File([new Blob(chunks, {type:'video/webm'})], "rec.webm", {type:'video/webm'}); stopCamera(); showEditor(); }; mediaRecorder.start(); document.getElementById('btnRecord').classList.add('recording'); }
+  };
+  
+  document.getElementById('dropzone').onclick = () => document.getElementById('fileInput').click();
+  document.getElementById('fileInput').onchange = (e) => { if(e.target.files[0]) { pendingFile = e.target.files[0]; showEditor(); } };
+
+  function showEditor() {
+    document.getElementById('pageSelect').classList.add('hidden'); document.getElementById('pageEditor').classList.remove('hidden');
+    document.getElementById('previewVideo').src = URL.createObjectURL(pendingFile); document.getElementById('previewVideo').play();
+    validateForm();
+  }
+  function validateForm() { document.getElementById('btnSubmitUpload').disabled = !(document.getElementById('uploadUsername').value.trim() && document.getElementById('uploadCaption').value.trim() && pendingFile); }
+  document.getElementById('uploadUsername').oninput = validateForm; document.getElementById('uploadCaption').oninput = validateForm;
+
+  // Editor Text Drag
+  const iText = document.getElementById('interactiveText'); let drag = false, sX, sY, iX, iY;
+  iText.onpointerdown = (e) => { if(e.target.tagName==='BUTTON') return; drag = true; iText.classList.add('active'); sX = e.clientX; sY = e.clientY; const r = document.getElementById('previewVideo').getBoundingClientRect(); iX = (textState.x/100)*r.width; iY = (textState.y/100)*r.height; iText.setPointerCapture(e.pointerId); };
+  iText.onpointermove = (e) => { if(!drag) return; const r = document.getElementById('previewVideo').getBoundingClientRect(); let nX = Math.max(0, Math.min(iX + (e.clientX - sX), r.width)); let nY = Math.max(0, Math.min(iY + (e.clientY - sY), r.height)); textState.x = (nX/r.width)*100; textState.y = (nY/r.height)*100; updateTxtPos(); };
+  iText.onpointerup = (e) => { drag = false; iText.releasePointerCapture(e.pointerId); };
+  function updateTxtPos() { iText.style.left = textState.x + '%'; iText.style.top = textState.y + '%'; iText.style.transform = `translate(-50%,-50%) rotate(${textState.rot}deg)`; }
+  
+  document.getElementById('inputText').oninput = (e) => { if(!e.target.value.trim()) iText.classList.add('hidden'); else { iText.classList.remove('hidden'); iText.childNodes[0].nodeValue = e.target.value; } };
+  document.getElementById('selectFont').onchange = (e) => iText.style.fontFamily = e.target.value;
+  document.getElementById('selectColor').onchange = (e) => iText.style.color = e.target.value;
+  document.getElementById('btnTxtPlus').onclick = (e) => { e.stopPropagation(); textState.size+=4; iText.style.fontSize = textState.size+'px'; };
+  document.getElementById('btnTxtMin').onclick = (e) => { e.stopPropagation(); textState.size=Math.max(10, textState.size-4); iText.style.fontSize = textState.size+'px'; };
+  document.getElementById('btnTxtRot').onclick = (e) => { e.stopPropagation(); textState.rot+=45; updateTxtPos(); };
+  document.getElementById('previewVideo').onclick = () => iText.classList.remove('active');
+
+  // Music Catalog
+  document.getElementById('btnOpenMusic').onclick = () => { document.getElementById('pageMusic').classList.remove('hidden'); renderMusic(); };
+  document.getElementById('closeMusic').onclick = () => document.getElementById('pageMusic').classList.add('hidden');
+  function renderMusic() {
+    const list = document.getElementById('musicList');
+    list.innerHTML = `<div class="song-item ${selectedMusicUrl===''?'selected':''}" data-url="" data-title="Suara Asli"><div class="song-icon">🎤</div><div class="song-info"><div class="song-title">Suara Asli Video</div></div></div>` + 
+    songList.map(s => `<div class="song-item ${selectedMusicUrl===s.u?'selected':''}" data-url="${s.u}" data-title="${s.t}"><div class="song-icon">🎵</div><div class="song-info"><div class="song-title">${s.t}</div><div class="song-meta">${s.g}</div></div></div>`).join('');
+    list.querySelectorAll('.song-item').forEach(el => el.onclick = () => { selectedMusicUrl = el.dataset.url; selectedMusicTitle = el.dataset.title; document.getElementById('txtSelectedMusic').textContent = selectedMusicTitle; document.getElementById('pageMusic').classList.add('hidden'); });
   }
 
+  document.getElementById('btnSubmitUpload').onclick = async () => {
+    if(!pendingFile) return; document.getElementById('btnSubmitUpload').textContent = '⏳ Menyimpan...';
+    const id = Date.now();
+    const overlayData = document.getElementById('inputText').value.trim() ? { text: document.getElementById('inputText').value.trim(), x: textState.x, y: textState.y, size: textState.size, rot: textState.rot, color: document.getElementById('selectColor').value, font: document.getElementById('selectFont').value } : null;
+    await saveVideoDB(id, pendingFile);
+    state.userVideos.unshift({ id, username: document.getElementById('uploadUsername').value.trim(), caption: document.getElementById('uploadCaption').value.trim(), src: null, likes: 0, music: selectedMusicUrl, overlayData });
+    saveState(); showToast('Berhasil publish!', 'success'); document.getElementById('uploadModal').classList.add('hidden'); renderFeed();
+  };
+
+  // ===== KOMENTAR & SHARE =====
+  let commentTargetId = null;
+  function openComments(id) { commentTargetId = id; renderComments(id); document.getElementById('commentSheet').classList.add('show'); }
+  function renderComments(id) {
+    const cmts = state.comments[id] || []; document.getElementById('commentCount').textContent = cmts.length;
+    document.getElementById('commentList').innerHTML = cmts.length ? cmts.map(c => `<div class="comment-item"><div class="comment-avatar">${c.user.charAt(1).toUpperCase()}</div><div class="comment-body"><div class="c-user">${c.user}</div><div class="c-text">${c.text}</div></div></div>`).join('') : `<p style="color:#666; text-align:center;">Belum ada komentar</p>`;
+    document.getElementById('commentList').scrollTop = 9999;
+  }
+  document.getElementById('closeComment').onclick = () => document.getElementById('commentSheet').classList.remove('show');
+  document.getElementById('sendComment').onclick = () => { const v = document.getElementById('commentInput').value.trim(); if(!v || !commentTargetId) return; if(!state.comments[commentTargetId]) state.comments[commentTargetId] = []; state.comments[commentTargetId].push({user:state.profile.username, text:v}); saveState(); document.getElementById('commentInput').value = ''; renderComments(commentTargetId); };
+
+  function shareVideo(v) {
+    if(navigator.share) navigator.share({ title:'VidStream', text:`Tonton ${v.username}`, url: window.location.href });
+    else { navigator.clipboard.writeText(window.location.href); showToast('Link disalin!', 'success'); }
+  }
   function sendTip(v) {
-    if (!v) return;
-    const amount = prompt(`🎁 Kirim koin ke ${v.username}\n\nSaldo kamu: ${state.coins} Koin\nMasukkan jumlah koin (min 10):`, '10');
-    if (amount === null) return;
-    const coins = parseInt(amount);
-    if (isNaN(coins) || coins < 10) { showToast('Minimal 10 Koin', 'error'); return; }
-    if (coins > state.coins) { showToast('Saldo koin tidak cukup!', 'error'); return; }
-    
-    state.coins -= coins;
-    saveState(); updateUI();
-    showToast(`🎁 Berhasil mengirim ${coins} Koin ke ${v.username}!`, 'success');
+    const a = prompt(`Kirim tips ke ${v.username}\nSaldo: ${state.coins} Koin\nMasukkan jumlah (min 10):`, '10');
+    if(!a) return; const n = parseInt(a); if(isNaN(n) || n < 10) { showToast('Minimal 10 koin', 'error'); return; }
+    if(n > state.coins) { showToast('Saldo kurang', 'error'); return; }
+    state.coins -= n; saveState(); updateUI(); showToast(`Berhasil kirim ${n} koin!`, 'success');
   }
 
-  // ==========================================
-  // UPLOAD LOGIC (SEDERHANA)
-  // ==========================================
-  let pendingFile = null;
-  const uploadModal = document.getElementById('uploadModal');
-  
-  document.getElementById('btnUpload').addEventListener('click', () => {
-    uploadModal.classList.remove('hidden');
-    document.getElementById('uploadUsername').value = state.profile.username;
-    document.getElementById('uploadCaption').value = '';
-    pendingFile = null;
-    document.getElementById('btnSubmitUpload').disabled = true;
-  });
-  document.getElementById('closeUpload').addEventListener('click', () => {
-    uploadModal.classList.add('hidden');
-  });
-  document.getElementById('dropzone').addEventListener('click', () => document.getElementById('fileInput').click());
-  document.getElementById('fileInput').addEventListener('change', (e) => {
-    if (e.target.files[0]) {
-      pendingFile = e.target.files[0];
-      document.getElementById('btnSubmitUpload').disabled = false;
-      showToast('✅ Video dipilih. Siap publish!', 'success');
-    }
-  });
-  
-  document.getElementById('uploadCaption').addEventListener('input', (e) => {
-    if (e.target.value.trim() !== '' && pendingFile) document.getElementById('btnSubmitUpload').disabled = false;
-    else document.getElementById('btnSubmitUpload').disabled = true;
-  });
-
-  document.getElementById('btnSubmitUpload').addEventListener('click', async () => {
-    if (!pendingFile) return;
-    const btn = document.getElementById('btnSubmitUpload'); btn.textContent = '⏳ Menyimpan...'; btn.disabled = true;
-    const newId = Date.now();
-    await saveVideoToDB(newId, pendingFile);
-    state.userVideos.unshift({
-      id: newId, username: document.getElementById('uploadUsername').value.trim(),
-      caption: document.getElementById('uploadCaption').value.trim(), src: null, likes: 0
-    });
-    saveState(); showToast('🎉 Video berhasil di-publish!', 'success');
-    uploadModal.classList.add('hidden'); renderFeed();
-  });
-
-  // ==========================================
-  // RENDER FEED (TIKTOK STYLE)
-  // ==========================================
+  // ===== RENDER FEED =====
   async function renderFeed() {
     const feed = document.getElementById('feedView'); feed.innerHTML = '';
-    const all = getAllVideos();
-
-    for (let v of all) {
+    for(let v of getAllVideos()) {
       const card = document.createElement('div'); card.className = 'video-card';
       const isLiked = state.likedVideos[v.id];
+      let overlayHTML = v.overlayData ? `<div class="video-text-overlay" style="left:${v.overlayData.x}%; top:${v.overlayData.y}%; transform:translate(-50%,-50%) rotate(${v.overlayData.rot}deg); font-size:${v.overlayData.size}px; color:${v.overlayData.color}; font-family:${v.overlayData.font};">${v.overlayData.text}</div>` : '';
       
       card.innerHTML = `
         <video loop muted playsinline preload="metadata"></video>
+        ${v.music ? `<audio class="bg-music" src="${v.music}" loop></audio>` : ''}
         <button class="mute-btn">🔇</button>
+        ${overlayHTML}
         <div class="play-indicator">▶</div>
         <div class="progress-bar"><div class="progress-fill"></div></div>
         <div class="video-info">
           <div class="user-row">
             <div class="username">${v.username}</div>
-            <button class="follow-btn ${state.followedUsers[v.username] ? 'followed' : ''}" data-user="${v.username}">
-              ${state.followedUsers[v.username] ? '✓ Following' : '+ Follow'}
-            </button>
+            <button class="follow-btn ${state.followedUsers[v.username] ? 'followed' : ''}" data-u="${v.username}">${state.followedUsers[v.username] ? '✓ Following' : '+ Follow'}</button>
           </div>
           <div class="caption">${v.caption}</div>
         </div>
-        <div class="side-actions" style="bottom: 80px;">
-          <button class="action-btn like-btn" style="${isLiked ? 'filter:drop-shadow(0 0 6px #ff0050)' : ''}">
-            ${isLiked ? '❤️' : '🤍'}<span>${formatNum(v.likes + (isLiked ? 1 : 0))}</span>
-          </button>
-          <button class="action-btn comment-btn">💬<span>${formatNum((state.comments[v.id] || []).length)}</span></button>
+        <div class="side-actions">
+          <button class="action-btn like-btn" style="${isLiked ? 'filter:drop-shadow(0 0 6px #ff0050)' : ''}">${isLiked ? '❤️' : '🤍'}<span>${formatNum(v.likes + (isLiked?1:0))}</span></button>
+          <button class="action-btn comment-btn">💬<span>${formatNum((state.comments[v.id]||[]).length)}</span></button>
           <button class="action-btn tip-btn" style="color:#f7b733;">🎁<span>Tips</span></button>
           <button class="action-btn share-btn" style="color:#00bfff;">↗️<span>Share</span></button>
         </div>
       `;
-
-      const videoEl = card.querySelector('video');
-      if (v.src) videoEl.src = v.src;
-      else { try { const b = await getVideoFromDB(v.id); if(b) videoEl.src = URL.createObjectURL(b); } catch(e){} }
+      
+      const vid = card.querySelector('video');
+      if(v.src) vid.src = v.src; else { try { const b = await getVideoDB(v.id); if(b) vid.src = URL.createObjectURL(b); } catch(e){} }
 
       // Listeners
-      card.querySelector('.mute-btn').addEventListener('click', (e) => {
-        e.stopPropagation(); videoEl.muted = !videoEl.muted;
-        e.target.textContent = videoEl.muted ? '🔇' : '🔊';
-      });
+      card.querySelector('.mute-btn').onclick = (e) => { e.stopPropagation(); vid.muted = !vid.muted; if(card.querySelector('.bg-music')) card.querySelector('.bg-music').muted = vid.muted; e.target.textContent = vid.muted ? '🔇' : '🔊'; };
+      card.querySelector('.like-btn').onclick = (e) => { e.stopPropagation(); if(state.likedVideos[v.id]) delete state.likedVideos[v.id]; else state.likedVideos[v.id] = true; saveState(); renderFeed(); };
+      card.querySelector('.comment-btn').onclick = (e) => { e.stopPropagation(); openComments(v.id); };
+      card.querySelector('.share-btn').onclick = (e) => { e.stopPropagation(); shareVideo(v); };
+      card.querySelector('.tip-btn').onclick = (e) => { e.stopPropagation(); sendTip(v); };
+      card.querySelector('.follow-btn').onclick = (e) => { e.stopPropagation(); const u = v.username; if(state.followedUsers[u]) delete state.followedUsers[u]; else state.followedUsers[u] = true; saveState(); renderFeed(); };
       
-      card.querySelector('.like-btn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (state.likedVideos[v.id]) {
-          delete state.likedVideos[v.id]; e.currentTarget.style.filter = 'none'; e.currentTarget.firstChild.textContent = '🤍';
-        } else {
-          state.likedVideos[v.id] = true; e.currentTarget.style.filter = 'drop-shadow(0 0 6px #ff0050)'; e.currentTarget.firstChild.textContent = '❤️';
-        }
-        saveState(); renderFeed();
-      });
-
-      card.querySelector('.comment-btn').addEventListener('click', (e) => { e.stopPropagation(); openComments(v.id); });
-      card.querySelector('.share-btn').addEventListener('click', (e) => { e.stopPropagation(); handleShare(v); });
-      card.querySelector('.tip-btn').addEventListener('click', (e) => { e.stopPropagation(); sendTip(v); });
+      vid.onclick = () => { const ind = card.querySelector('.play-indicator'); if(vid.paused) { vid.play(); ind.textContent = '▶'; } else { vid.pause(); ind.textContent = '⏸'; } ind.classList.add('show'); setTimeout(() => ind.classList.remove('show'), 400); };
+      vid.ontimeupdate = () => { if(vid.duration) card.querySelector('.progress-fill').style.width = (vid.currentTime/vid.duration*100)+'%'; };
       
-      card.querySelector('.follow-btn').addEventListener('click', (e) => {
-        e.stopPropagation(); const u = v.username;
-        if (state.followedUsers[u]) delete state.followedUsers[u];
-        else state.followedUsers[u] = true;
-        saveState(); renderFeed();
-      });
-
-      videoEl.addEventListener('click', () => {
-        const ind = card.querySelector('.play-indicator');
-        if (videoEl.paused) { videoEl.play(); ind.textContent = '▶'; } else { videoEl.pause(); ind.textContent = '⏸'; }
-        ind.classList.add('show'); setTimeout(() => ind.classList.remove('show'), 400);
-      });
-      videoEl.addEventListener('timeupdate', () => {
-        if (videoEl.duration) card.querySelector('.progress-fill').style.width = (videoEl.currentTime / videoEl.duration * 100) + '%';
-      });
-
       feed.appendChild(card);
     }
+    observeFeed();
   }
 
-  // ==========================================
-  // INISIALISASI
-  // ==========================================
+  function observeFeed() {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(en => { const vid = en.target.querySelector('video'); const bg = en.target.querySelector('.bg-music'); if(en.isIntersecting && en.intersectionRatio > 0.6) { vid.play().catch(()=>{}); if(bg) bg.play().catch(()=>{}); } else { vid.pause(); vid.currentTime = 0; if(bg) { bg.pause(); bg.currentTime = 0; } } });
+    }, { threshold: [0, 0.6, 1] });
+    document.querySelectorAll('.video-card').forEach(c => obs.observe(c));
+  }
+
+  // ===== NAVIGASI & INIT =====
+  document.getElementById('btnFeed').onclick = () => { document.getElementById('feedView').classList.remove('hidden'); document.getElementById('gridView').classList.add('hidden'); document.getElementById('btnFeed').classList.add('active'); document.getElementById('btnGrid').classList.remove('active'); };
+  document.getElementById('btnGrid').onclick = () => { document.getElementById('gridView').classList.remove('hidden'); document.getElementById('feedView').classList.add('hidden'); document.getElementById('btnGrid').classList.add('active'); document.getElementById('btnFeed').classList.remove('active'); };
+  
+  document.getElementById('btnLive').onclick = () => document.getElementById('liveModal').classList.remove('hidden');
+  document.getElementById('closeLive').onclick = () => document.getElementById('liveModal').classList.add('hidden');
+
   (async () => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) state = { ...state, ...JSON.parse(saved) };
-    await initDB(); updateUI(); await renderFeed();
+    const s = localStorage.getItem(STORAGE_KEY); if(s) state = { ...state, ...JSON.parse(s) };
+    await initDB(); updateUI(); renderFeed();
   })();
 </script>
 </body>
