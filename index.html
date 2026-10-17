@@ -16,6 +16,7 @@ body {
   background: #141414;
   color: #fff;
   min-height: 100vh;
+  padding-bottom: 80px;
 }
 
 .header {
@@ -27,6 +28,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  backdrop-filter: blur(10px);
 }
 
 .logo {
@@ -94,10 +96,11 @@ body {
 .hero-buttons {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .btn {
-  padding: 10px 20px;
+  padding: 12px 20px;
   border: none;
   border-radius: 5px;
   font-size: 14px;
@@ -123,77 +126,18 @@ body {
   color: #fff;
 }
 
-.btn-info:hover {
-  background: rgba(109,109,110,0.9);
-}
-
-.modal {
-  display: none;
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.95);
-  z-index: 1000;
-  padding: 20px;
-  overflow-y: auto;
-}
-
-.modal.active {
-  display: block;
-}
-
-.modal-close {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  background: rgba(0,0,0,0.7);
-  border: none;
+.btn-upload {
+  background: #e50914;
   color: #fff;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  font-size: 20px;
-  cursor: pointer;
-  z-index: 1001;
 }
 
-.video-container {
-  max-width: 900px;
-  margin: 40px auto;
-  background: #000;
-  border-radius: 10px;
-  overflow: hidden;
+.btn-upload:hover {
+  background: #f40612;
 }
 
-video {
-  width: 100%;
-  max-height: 70vh;
-  display: block;
-}
-
-.modal-info {
-  max-width: 900px;
-  margin: 20px auto;
-  padding: 20px;
-}
-
-.modal-title {
-  font-size: 28px;
-  margin-bottom: 15px;
-}
-
-.modal-meta {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 15px;
-  font-size: 14px;
-  color: #46d369;
-  font-weight: bold;
-}
-
-.modal-desc {
-  font-size: 15px;
-  line-height: 1.6;
-  opacity: 0.9;
+.btn-camera {
+  background: #46d369;
+  color: #000;
 }
 
 .section {
@@ -251,6 +195,75 @@ video {
   opacity: 0.7;
 }
 
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.95);
+  z-index: 1000;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.modal.active {
+  display: block;
+}
+
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: rgba(0,0,0,0.7);
+  border: none;
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.video-container {
+  max-width: 900px;
+  margin: 40px auto 20px;
+  background: #000;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+video {
+  width: 100%;
+  max-height: 70vh;
+  display: block;
+}
+
+.modal-info {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.modal-title {
+  font-size: 28px;
+  margin-bottom: 15px;
+}
+
+.modal-meta {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #46d369;
+  font-weight: bold;
+}
+
+.modal-desc {
+  font-size: 15px;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
 .error-box {
   background: #e50914;
   color: #fff;
@@ -265,11 +278,66 @@ video {
   display: block;
 }
 
+.success-box {
+  background: #46d369;
+  color: #000;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 20px;
+  text-align: center;
+  display: none;
+  font-weight: bold;
+}
+
+.success-box.show {
+  display: block;
+}
+
+.upload-section {
+  background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
+  padding: 20px;
+  margin: 20px;
+  border-radius: 12px;
+  border: 2px dashed #e50914;
+}
+
+.upload-title {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #e50914;
+  font-weight: bold;
+}
+
+.upload-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.upload-info {
+  margin-top: 15px;
+  font-size: 12px;
+  opacity: 0.7;
+  line-height: 1.5;
+}
+
+.my-video-card {
+  background: linear-gradient(135deg, #e50914 0%, #b20710 100%);
+}
+
+.hidden-input {
+  display: none;
+}
+
 @media (max-width: 600px) {
   .hero { height: 300px; }
   .hero-title { font-size: 24px; }
   .movie-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .btn {
+    padding: 10px 15px;
+    font-size: 13px;
   }
 }
 </style>
@@ -290,18 +358,45 @@ video {
     <h1 class="hero-title">Big Buck Bunny</h1>
     <p class="hero-desc">Animasi pendek tentang kelinci raksasa yang menghadapi tiga hewan pengganggu yang nakal. Film open source dari Blender Foundation.</p>
     <div class="hero-buttons">
-      <button class="btn btn-play" onclick="playVideo(0)">▶ Putar</button>
-      <button class="btn btn-info" onclick="showInfo(0)">ℹ Info</button>
+      <button class="btn btn-play" onclick="playSampleVideo()">▶ Putar</button>
+      <button class="btn btn-info" onclick="showInfo()">ℹ Info</button>
     </div>
   </div>
 </div>
 
-<div class="error-box" id="errorBox">
-  ️ Video gagal dimuat. Coba video lain.
+<div class="error-box" id="errorBox"></div>
+<div class="success-box" id="successBox"></div>
+
+<!-- UPLOAD SECTION -->
+<div class="upload-section">
+  <h3 class="upload-title">📤 Upload Video dari HP</h3>
+  <p style="margin-bottom: 15px; font-size: 14px; opacity: 0.9;">
+    Upload video dari galeri atau rekam langsung dari kamera!
+  </p>
+  <div class="upload-buttons">
+    <button class="btn btn-upload" onclick="document.getElementById('fileInput').click()">
+       Pilih dari Galeri
+    </button>
+    <button class="btn btn-camera" onclick="document.getElementById('cameraInput').click()">
+       Rekam dari Kamera
+    </button>
+  </div>
+  <input type="file" id="fileInput" class="hidden-input" accept="video/*" onchange="handleVideoUpload(event)">
+  <input type="file" id="cameraInput" class="hidden-input" accept="video/*" capture="environment" onchange="handleVideoUpload(event)">
+  <p class="upload-info">
+     Format: MP4, WebM, MOV | Maksimal: 500MB<br>
+    Video akan diputar langsung di browser (tidak diupload ke server)
+  </p>
+</div>
+
+<!-- MY VIDEOS SECTION -->
+<div class="section" id="myVideosSection" style="display: none;">
+  <h2 class="section-title">🎬 Video Saya</h2>
+  <div class="movie-grid" id="myVideosGrid"></div>
 </div>
 
 <div class="section">
-  <h2 class="section-title"> Sedang Trending</h2>
+  <h2 class="section-title">🔥 Sedang Trending</h2>
   <div class="movie-grid" id="movieGrid"></div>
 </div>
 
@@ -310,11 +405,11 @@ video {
   <div class="movie-grid" id="popularGrid"></div>
 </div>
 
+<!-- VIDEO MODAL -->
 <div class="modal" id="videoModal">
   <button class="modal-close" onclick="closeModal()">✕</button>
   <div class="video-container">
-    <video id="videoPlayer" controls playsinline preload="metadata">
-      <source src="" type="video/mp4">
+    <video id="videoPlayer" controls playsinline preload="auto">
       Browser Anda tidak mendukung video.
     </video>
   </div>
@@ -322,7 +417,7 @@ video {
     <h2 class="modal-title" id="modalTitle"></h2>
     <div class="modal-meta">
       <span id="modalMatch">98% Cocok</span>
-      <span id="modalYear">2008</span>
+      <span id="modalYear">2024</span>
       <span>HD</span>
     </div>
     <p class="modal-desc" id="modalDesc"></p>
@@ -330,7 +425,8 @@ video {
 </div>
 
 <script>
-const movies = [
+// Database film sample (fallback)
+const sampleMovies = [
   {
     title: "Big Buck Bunny",
     year: "2008",
@@ -341,40 +437,30 @@ const movies = [
   {
     title: "Elephant Dream",
     year: "2006",
-    desc: "Film animasi pendek pertama dari Blender Foundation. Kisah dua karakter di dunia mesin yang aneh.",
+    desc: "Film animasi pendek pertama dari Blender Foundation.",
     poster: "https://orange.blender.org/wp-content/themes/orange/images/media/gallery/s1_proog.jpg",
     video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
   },
   {
-    title: "For Bigger Blazes",
-    year: "2014",
-    desc: "Video demo Chromecast. Petualangan seru dengan visual yang memukau.",
-    poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400",
-    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
-  },
-  {
     title: "Sintel",
     year: "2010",
-    desc: "Film animasi epik tentang seorang gadis yang mencari naga kesayangannya. Karya Blender Institute.",
+    desc: "Film animasi epik tentang seorang gadis yang mencari naga kesayangannya.",
     poster: "https://durian.blender.org/wp-content/uploads/2010/06/sintel_poster.jpg",
     video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
   },
   {
     title: "Tears of Steel",
     year: "2012",
-    desc: "Film sci-fi live-action dengan efek visual luar biasa dari Blender Foundation.",
+    desc: "Film sci-fi live-action dengan efek visual luar biasa.",
     poster: "https://mango.blender.org/wp-content/uploads/2013/05/01_thom_celia_bridge.jpg",
     video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
-  },
-  {
-    title: "For Bigger Fun",
-    year: "2014",
-    desc: "Keseruan tanpa batas dalam video pendek ini.",
-    poster: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400",
-    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"
   }
 ];
 
+// Database video yang diupload user
+let myVideos = [];
+
+// Render movie grids
 function renderMovies() {
   const trendingGrid = document.getElementById('movieGrid');
   const popularGrid = document.getElementById('popularGrid');
@@ -382,18 +468,19 @@ function renderMovies() {
   trendingGrid.innerHTML = '';
   popularGrid.innerHTML = '';
   
-  movies.slice(0, 4).forEach((movie, index) => {
-    trendingGrid.innerHTML += createMovieCard(movie, index);
+  sampleMovies.slice(0, 2).forEach((movie, index) => {
+    trendingGrid.innerHTML += createMovieCard(movie, index, false);
   });
   
-  movies.slice(4).forEach((movie, index) => {
-    popularGrid.innerHTML += createMovieCard(movie, index + 4);
+  sampleMovies.slice(2).forEach((movie, index) => {
+    popularGrid.innerHTML += createMovieCard(movie, index + 2, false);
   });
 }
 
-function createMovieCard(movie, index) {
+function createMovieCard(movie, index, isMyVideo) {
+  const videoIndex = isMyVideo ? `my-${index}` : index;
   return `
-    <div class="movie-card" onclick="playVideo(${index})">
+    <div class="movie-card ${isMyVideo ? 'my-video-card' : ''}" onclick="playVideo(${videoIndex}, ${isMyVideo})">
       <img src="${movie.poster}" alt="${movie.title}" 
            onerror="this.src='https://via.placeholder.com/300x450/333/fff?text=${encodeURIComponent(movie.title)}'">
       <div class="overlay">
@@ -404,8 +491,79 @@ function createMovieCard(movie, index) {
   `;
 }
 
-function playVideo(index) {
-  const movie = movies[index];
+// Handle video upload dari HP
+function handleVideoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  // Validasi tipe file
+  if (!file.type.startsWith('video/')) {
+    showError('File harus berupa video!');
+    return;
+  }
+  
+  // Validasi ukuran (max 500MB)
+  if (file.size > 500 * 1024 * 1024) {
+    showError('Ukuran video maksimal 500MB!');
+    return;
+  }
+  
+  // Buat blob URL untuk video
+  const videoURL = URL.createObjectURL(file);
+  const fileName = file.name.replace(/\.[^/.]+$/, "");
+  
+  // Tambah ke database myVideos
+  const newVideo = {
+    title: fileName,
+    year: new Date().getFullYear().toString(),
+    desc: `Video diupload dari HP pada ${new Date().toLocaleString('id-ID')}`,
+    poster: 'https://via.placeholder.com/300x450/e50914/fff?text=MY+VIDEO',
+    video: videoURL,
+    isLocal: true
+  };
+  
+  myVideos.push(newVideo);
+  
+  // Render ulang grid video saya
+  renderMyVideos();
+  
+  // Tampilkan pesan sukses
+  showSuccess(`✅ Video "${fileName}" berhasil diupload!`);
+  
+  // Otomatis putar video
+  setTimeout(() => {
+    playVideo(myVideos.length - 1, true);
+  }, 500);
+  
+  // Reset input
+  event.target.value = '';
+}
+
+function renderMyVideos() {
+  const section = document.getElementById('myVideosSection');
+  const grid = document.getElementById('myVideosGrid');
+  
+  if (myVideos.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  
+  section.style.display = 'block';
+  grid.innerHTML = '';
+  
+  myVideos.forEach((video, index) => {
+    grid.innerHTML += createMovieCard(video, index, true);
+  });
+}
+
+// Play video dari sample
+function playSampleVideo() {
+  playVideo(0, false);
+}
+
+// Play video (sample atau my video)
+function playVideo(index, isMyVideo) {
+  const movie = isMyVideo ? myVideos[index] : sampleMovies[index];
   const modal = document.getElementById('videoModal');
   const video = document.getElementById('videoPlayer');
   const errorBox = document.getElementById('errorBox');
@@ -414,30 +572,29 @@ function playVideo(index) {
   document.getElementById('modalYear').textContent = movie.year;
   document.getElementById('modalDesc').textContent = movie.desc;
   
+  // Set video source
   video.src = movie.video;
   video.load();
   
   modal.classList.add('active');
   errorBox.classList.remove('show');
   
+  // Play video
   video.play().then(() => {
     console.log('Video playing:', movie.title);
   }).catch(err => {
     console.error('Play error:', err);
-    errorBox.textContent = `⚠️ Video "${movie.title}" gagal dimuat. Coba video lain.`;
-    errorBox.classList.add('show');
-    setTimeout(() => errorBox.classList.remove('show'), 5000);
+    showError(`️ Video "${movie.title}" gagal diputar. Coba video lain.`);
   });
   
   video.onerror = function() {
     console.error('Video load error:', video.error);
-    errorBox.textContent = `⚠️ Video "${movie.title}" tidak tersedia. Coba video lain.`;
-    errorBox.classList.add('show');
+    showError(`⚠️ Video "${movie.title}" tidak tersedia. Coba upload video sendiri!`);
   };
 }
 
-function showInfo(index) {
-  const movie = movies[index];
+function showInfo() {
+  const movie = sampleMovies[0];
   const modal = document.getElementById('videoModal');
   const video = document.getElementById('videoPlayer');
   
@@ -460,10 +617,25 @@ function closeModal() {
   modal.classList.remove('active');
 }
 
+function showError(msg) {
+  const errorBox = document.getElementById('errorBox');
+  errorBox.textContent = msg;
+  errorBox.classList.add('show');
+  setTimeout(() => errorBox.classList.remove('show'), 5000);
+}
+
+function showSuccess(msg) {
+  const successBox = document.getElementById('successBox');
+  successBox.textContent = msg;
+  successBox.classList.add('show');
+  setTimeout(() => successBox.classList.remove('show'), 3000);
+}
+
 window.addEventListener('popstate', function() {
   closeModal();
 });
 
+// Init
 renderMovies();
 </script>
 
