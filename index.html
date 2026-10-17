@@ -205,9 +205,7 @@
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-    // =========================================================
-    // ⚠️ 2. CONFIG FIREBASE (SUDAH DIISI OTOMATIS)
-    // =========================================================
+    // 2. CONFIG FIREBASE KAMU
     const firebaseConfig = {
       apiKey: "AIzaSyDilKHyfY3GXstC4PyS5JRrqFEnJc1DD10",
       authDomain: "cod-app-476f6.firebaseapp.com",
@@ -230,10 +228,9 @@
       profile: { name: "Pengguna", username: "@user", avatar: "https://ui-avatars.com/api/?name=User&background=random" }
     };
 
-    // --- FUNGSI TOAST (PAKAI ALERT AGAR PESAN ERROR KELIHATAN) ---
+    // --- FUNGSI TOAST ---
     function showToast(m, t='info') { 
       if(t === 'error') { alert("PESAN ERROR:\n\n" + m); }
-      
       const el = document.getElementById('toast'); el.textContent = m; 
       el.style.background = t==='error'?'#ff0050':t==='success'?'#00c853':'#333'; 
       el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 3000); 
@@ -307,6 +304,7 @@
         document.getElementById('mainApp').classList.remove('hidden');
         
         updateUI();
+        renderFeed(); // RENDER FEED SETELAH LOGIN
       } else {
         document.getElementById('authLoading').classList.add('hidden');
         document.getElementById('authScreen').classList.remove('hidden');
@@ -358,9 +356,187 @@
       document.getElementById('adBalance').textContent = (state.profile.adBalance || 0).toLocaleString('id-ID');
     }
 
-    // --- INITIAL UI ---
-    updateUI();
+    // ==========================================
+    // LOGIKA UPLOAD & VIDEO (DIPULIHKAN)
+    // ==========================================
+    const DB_NAME = 'myflix_db', DB_STORE = 'videos'; let dbLocal;
+    function initDB() { return new Promise((res) => { const req = indexedDB.open(DB_NAME, 1); req.onupgradeneeded = e => { if(!e.target.result.objectStoreNames.contains(DB_STORE)) e.target.result.createObjectStore(DB_STORE, {keyPath:'id'}); }; req.onsuccess = e => { dbLocal = e.target.result; res(); }; }); }
+    function saveVideoDB(id, blob) { return new Promise(res => { const tx = dbLocal.transaction(DB_STORE, 'readwrite'); tx.objectStore(DB_STORE).put({id, blob}).onsuccess = () => res(); }); }
+    function getVideoDB(id) { return new Promise(res => { const tx = dbLocal.transaction(DB_STORE, 'readonly'); tx.objectStore(DB_STORE).get(id).onsuccess = e => res(e.target.result ? e.target.result.blob : null); }); }
 
+    const defaultVideos = [
+      { id:101, username:"@nature_vibes", caption:"Sunset di pantai 🏖️", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes:1240, monetize: true },
+      { id:102, username:"@funny_cat", caption:"Kucing lucu 😹", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", likes:892, monetize: false },
+    ];
+    function getAllVideos() { return [...state.userVideos, ...defaultVideos]; }
+
+    let pendingFile = null, streamRef = null, mediaRecorder, chunks = [], facingMode = 'user';
+    let textState = { x: 50, y: 50, size: 24, rot: 0 };
+    let selectedMusicUrl = "", selectedMusicTitle = "Suara Asli";
+
+    const songList = [
+      { t: 'DJ Remix Viral', u: 'https://cdn.pixabay.com/audio/2022/03/15/audio_c8c8a73467.mp3', g: 'EDM' },
+      { t: 'Aesthetic Bass', u: 'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3', g: 'Chill' },
+    ];
+
+    async function startCamera() {
+      if(streamRef) streamRef.getTracks().forEach(t => t.stop());
+      try { streamRef = await navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio: true }); document.getElementById('liveCamera').srcObject = streamRef; } catch(e) { showToast('Kamera gagal', 'error'); }
+    }
+    function stopCamera() { if(streamRef) { streamRef.getTracks().forEach(t => t.stop()); streamRef = null; } }
+
+    document.getElementById('btnUpload').onclick = () => { document.getElementById('uploadModal').classList.remove('hidden'); document.getElementById('pageSelect').classList.remove('hidden'); document.getElementById('pageEditor').classList.add('hidden'); document.getElementById('pageMusic').classList.add('hidden'); document.getElementById('uploadUsername').value = state.profile.username; document.getElementById('uploadCaption').value = ''; startCamera(); };
+    document.getElementById('closeUpload').onclick = () => { document.getElementById('uploadModal').classList.add('hidden'); stopCamera(); };
+    document.getElementById('tabCam').onclick = () => { document.getElementById('tabCam').classList.add('active'); document.getElementById('tabGal').classList.remove('active'); document.getElementById('sectionCam').classList.remove('hidden'); document.getElementById('sectionGal').classList.add('hidden'); startCamera(); };
+    document.getElementById('tabGal').onclick = () => { document.getElementById('tabGal').classList.add('active'); document.getElementById('tabCam').classList.remove('active'); document.getElementById('sectionGal').classList.remove('hidden'); document.getElementById('sectionCam').classList.add('hidden'); stopCamera(); };
+    document.getElementById('btnFlipCam').onclick = () => { facingMode = facingMode === 'user' ? 'environment' : 'user'; startCamera(); };
+    document.getElementById('btnRecord').onclick = () => {
+      if(!streamRef) return;
+      if(mediaRecorder && mediaRecorder.state === 'recording') { mediaRecorder.stop(); document.getElementById('btnRecord').classList.remove('recording'); }
+      else { chunks = []; mediaRecorder = new MediaRecorder(streamRef); mediaRecorder.ondataavailable = e => chunks.push(e.data); mediaRecorder.onstop = () => { pendingFile = new File([new Blob(chunks, {type:'video/webm'})], "rec.webm", {type:'video/webm'}); stopCamera(); showEditor(); }; mediaRecorder.start(); document.getElementById('btnRecord').classList.add('recording'); }
+    };
+    document.getElementById('dropzone').onclick = () => document.getElementById('fileInput').click();
+    document.getElementById('fileInput').onchange = (e) => { if(e.target.files[0]) { pendingFile = e.target.files[0]; showEditor(); } };
+
+    function showEditor() {
+      document.getElementById('pageSelect').classList.add('hidden'); document.getElementById('pageEditor').classList.remove('hidden');
+      document.getElementById('previewVideo').src = URL.createObjectURL(pendingFile); document.getElementById('previewVideo').play();
+      validateForm();
+    }
+    function validateForm() { document.getElementById('btnSubmitUpload').disabled = !(document.getElementById('uploadUsername').value.trim() && document.getElementById('uploadCaption').value.trim() && pendingFile); }
+    document.getElementById('uploadUsername').oninput = validateForm; document.getElementById('uploadCaption').oninput = validateForm;
+
+    const iText = document.getElementById('interactiveText'); let drag = false, sX, sY, iX, iY;
+    iText.onpointerdown = (e) => { if(e.target.tagName==='BUTTON') return; drag = true; iText.classList.add('active'); sX = e.clientX; sY = e.clientY; const r = document.getElementById('previewVideo').getBoundingClientRect(); iX = (textState.x/100)*r.width; iY = (textState.y/100)*r.height; iText.setPointerCapture(e.pointerId); };
+    iText.onpointermove = (e) => { if(!drag) return; const r = document.getElementById('previewVideo').getBoundingClientRect(); let nX = Math.max(0, Math.min(iX + (e.clientX - sX), r.width)); let nY = Math.max(0, Math.min(iY + (e.clientY - sY), r.height)); textState.x = (nX/r.width)*100; textState.y = (nY/r.height)*100; updateTxtPos(); };
+    iText.onpointerup = (e) => { drag = false; iText.releasePointerCapture(e.pointerId); };
+    function updateTxtPos() { iText.style.left = textState.x + '%'; iText.style.top = textState.y + '%'; iText.style.transform = `translate(-50%,-50%) rotate(${textState.rot}deg)`; }
+    document.getElementById('inputText').oninput = (e) => { if(!e.target.value.trim()) iText.classList.add('hidden'); else { iText.classList.remove('hidden'); iText.childNodes[0].nodeValue = e.target.value; } };
+    document.getElementById('selectFont').onchange = (e) => iText.style.fontFamily = e.target.value;
+    document.getElementById('selectColor').onchange = (e) => iText.style.color = e.target.value;
+    document.getElementById('btnTxtPlus').onclick = (e) => { e.stopPropagation(); textState.size+=4; iText.style.fontSize = textState.size+'px'; };
+    document.getElementById('btnTxtMin').onclick = (e) => { e.stopPropagation(); textState.size=Math.max(10, textState.size-4); iText.style.fontSize = textState.size+'px'; };
+    document.getElementById('btnTxtRot').onclick = (e) => { e.stopPropagation(); textState.rot+=45; updateTxtPos(); };
+    document.getElementById('previewVideo').onclick = () => iText.classList.remove('active');
+
+    document.getElementById('btnOpenMusic').onclick = () => { document.getElementById('pageMusic').classList.remove('hidden'); renderMusic(); };
+    document.getElementById('closeMusic').onclick = () => document.getElementById('pageMusic').classList.add('hidden');
+    function renderMusic() {
+      const list = document.getElementById('musicList');
+      list.innerHTML = `<div class="song-item ${selectedMusicUrl===''?'selected':''}" data-url="" data-title="Suara Asli"><div class="song-icon">🎤</div><div class="song-info"><div class="song-title">Suara Asli Video</div></div></div>` + 
+      songList.map(s => `<div class="song-item ${selectedMusicUrl===s.u?'selected':''}" data-url="${s.u}" data-title="${s.t}"><div class="song-icon">🎵</div><div class="song-info"><div class="song-title">${s.t}</div><div class="song-meta">${s.g}</div></div></div>`).join('');
+      list.querySelectorAll('.song-item').forEach(el => el.onclick = () => { selectedMusicUrl = el.dataset.url; selectedMusicTitle = el.dataset.title; document.getElementById('txtSelectedMusic').textContent = selectedMusicTitle; document.getElementById('pageMusic').classList.add('hidden'); });
+    }
+
+    document.getElementById('btnSubmitUpload').onclick = async () => {
+      if(!pendingFile) return; document.getElementById('btnSubmitUpload').textContent = '⏳ Menyimpan...';
+      const id = Date.now();
+      const overlayData = document.getElementById('inputText').value.trim() ? { text: document.getElementById('inputText').value.trim(), x: textState.x, y: textState.y, size: textState.size, rot: textState.rot, color: document.getElementById('selectColor').value, font: document.getElementById('selectFont').value } : null;
+      const isMonetize = document.getElementById('uploadMonetize').value === 'yes';
+      await saveVideoDB(id, pendingFile);
+      state.userVideos.unshift({ id, username: document.getElementById('uploadUsername').value.trim(), caption: document.getElementById('uploadCaption').value.trim(), src: null, likes: 0, music: selectedMusicUrl, overlayData, monetize: isMonetize });
+      showToast('Berhasil publish!', 'success'); document.getElementById('uploadModal').classList.add('hidden'); renderFeed();
+    };
+
+    // ==========================================
+    // KOMENTAR, SHARE & TIPS
+    // ==========================================
+    let commentTargetId = null;
+    function openComments(id) { commentTargetId = id; renderComments(id); document.getElementById('commentSheet').style.transform = 'translateY(0)'; }
+    function renderComments(id) {
+      const cmts = state.comments[id] || []; document.getElementById('commentCount').textContent = cmts.length;
+      document.getElementById('commentList').innerHTML = cmts.length ? cmts.map(c => `<div style="display:flex; gap:12px;"><div style="width:36px;height:36px;border-radius:50%;background:#ff0050;display:flex;justify-content:center;align-items:center;font-weight:bold;">${c.user.charAt(1).toUpperCase()}</div><div><div style="font-weight:bold;font-size:0.8rem;color:#ccc;">${c.user}</div><div style="font-size:0.9rem;">${c.text}</div></div></div>`).join('') : `<p style="color:#666; text-align:center;">Belum ada komentar</p>`;
+      document.getElementById('commentList').scrollTop = 9999;
+    }
+    document.getElementById('closeComment').onclick = () => document.getElementById('commentSheet').style.transform = 'translateY(100%)';
+    document.getElementById('sendComment').onclick = () => { const v = document.getElementById('commentInput').value.trim(); if(!v || !commentTargetId) return; if(!state.comments[commentTargetId]) state.comments[commentTargetId] = []; state.comments[commentTargetId].push({user:state.profile.username, text:v}); document.getElementById('commentInput').value = ''; renderComments(commentTargetId); };
+    function shareVideo(v) { if(navigator.share) navigator.share({ title:'MyFlix', text:`Tonton ${v.username}`, url: window.location.href }); else { navigator.clipboard.writeText(window.location.href); showToast('Link disalin!', 'success'); } }
+    function sendTip(v) { const a = prompt(`Kirim tips ke ${v.username}\nSaldo: ${state.coins} Koin\nMasukkan jumlah (min 10):`, '10'); if(!a) return; const n = parseInt(a); if(isNaN(n) || n < 10 || n > state.coins) { showToast('Jumlah koin tidak valid / Saldo kurang', 'error'); return; } state.coins -= n; updateUI(); showToast(`Berhasil kirim ${n} koin!`, 'success'); }
+
+    // ==========================================
+    // IKLAN PRE-ROLL & RENDER FEED
+    // ==========================================
+    async function playAd(videoEl, adContainer, skipBtn) {
+      let adSrc = "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4";
+      let adBrand = "MyFlix Premium";
+      const adVideo = adContainer.querySelector('video');
+      adVideo.src = adSrc; adContainer.querySelector('.ad-brand').textContent = `Iklan: ${adBrand}`;
+      adContainer.classList.remove('hidden'); adVideo.muted = false; adVideo.play().catch(()=>{ adVideo.muted = true; adVideo.play(); });
+      let timeLeft = 5; skipBtn.textContent = `Lewati Iklan (${timeLeft}s)`; skipBtn.disabled = true;
+      const timer = setInterval(() => { timeLeft--; skipBtn.textContent = `Lewati Iklan (${timeLeft}s)`; if(timeLeft <= 0) { clearInterval(timer); skipBtn.textContent = 'Lewati Iklan ▶'; skipBtn.disabled = false; } }, 1000);
+      skipBtn.onclick = () => { if(skipBtn.disabled) return; clearInterval(timer); adVideo.pause(); adContainer.classList.add('hidden'); adVideo.src = ''; videoEl.play(); };
+    }
+
+    async function renderFeed() {
+      const feed = document.getElementById('feedView'); feed.innerHTML = '';
+      for(let v of getAllVideos()) {
+        const card = document.createElement('div'); card.className = 'video-card';
+        const isLiked = state.likedVideos[v.id];
+        let overlayHTML = v.overlayData ? `<div class="video-text-overlay" style="left:${v.overlayData.x}%; top:${v.overlayData.y}%; transform:translate(-50%,-50%) rotate(${v.overlayData.rot}deg); font-size:${v.overlayData.size}px; color:${v.overlayData.color}; font-family:${v.overlayData.font};">${v.overlayData.text}</div>` : '';
+        
+        card.innerHTML = `
+          <div class="ad-overlay hidden"><video playsinline></video><div class="ad-label">Iklan</div><div style="position:absolute; top:120px; left:20px; background:rgba(0,0,0,0.5); padding:4px 10px; border-radius:8px; font-size:0.8rem;" class="ad-brand"></div><button class="ad-skip">Lewati Iklan</button></div>
+          <video class="main-video" loop muted playsinline preload="metadata"></video>
+          ${v.music ? `<audio class="bg-music" src="${v.music}" loop></audio>` : ''}
+          <button class="mute-btn">🔇</button>
+          ${overlayHTML}
+          <div class="play-indicator">▶</div>
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+          <div class="video-info">
+            <div class="user-row">
+              <div class="username">${v.username}</div>
+              <button class="follow-btn ${state.followedUsers[v.username] ? 'followed' : ''}" data-u="${v.username}">${state.followedUsers[v.username] ? '✓ Following' : '+ Follow'}</button>
+            </div>
+            <div class="caption">${v.caption}</div>
+            ${v.monetize ? '<div class="badge-ad">💰 MONETIZED</div>' : ''}
+          </div>
+          <div class="side-actions">
+            <button class="action-btn like-btn" style="${isLiked ? 'filter:drop-shadow(0 0 6px #ff0050)' : ''}">${isLiked ? '❤️' : '🤍'}<span>${v.likes + (isLiked?1:0)}</span></button>
+            <button class="action-btn comment-btn">💬<span>${(state.comments[v.id]||[]).length}</span></button>
+            <button class="action-btn tip-btn" style="color:#f7b733;">🎁<span>Tips</span></button>
+            <button class="action-btn share-btn" style="color:#00bfff;">↗️<span>Share</span></button>
+          </div>
+        `;
+        
+        const vid = card.querySelector('.main-video');
+        if(v.src) vid.src = v.src; else { try { const b = await getVideoDB(v.id); if(b) vid.src = URL.createObjectURL(b); } catch(e){} }
+
+        card.querySelector('.mute-btn').onclick = (e) => { e.stopPropagation(); vid.muted = !vid.muted; if(card.querySelector('.bg-music')) card.querySelector('.bg-music').muted = vid.muted; e.target.textContent = vid.muted ? '🔇' : '🔊'; };
+        card.querySelector('.like-btn').onclick = (e) => { e.stopPropagation(); if(state.likedVideos[v.id]) delete state.likedVideos[v.id]; else state.likedVideos[v.id] = true; renderFeed(); };
+        card.querySelector('.comment-btn').onclick = (e) => { e.stopPropagation(); openComments(v.id); };
+        card.querySelector('.share-btn').onclick = (e) => { e.stopPropagation(); shareVideo(v); };
+        card.querySelector('.tip-btn').onclick = (e) => { e.stopPropagation(); sendTip(v); };
+        card.querySelector('.follow-btn').onclick = (e) => { e.stopPropagation(); const u = v.username; if(state.followedUsers[u]) delete state.followedUsers[u]; else state.followedUsers[u] = true; renderFeed(); };
+        
+        vid.onclick = async () => { 
+          if(vid.paused) {
+            if(v.monetize) {
+              const adContainer = card.querySelector('.ad-overlay'); const skipBtn = card.querySelector('.ad-skip');
+              await playAd(vid, adContainer, skipBtn);
+            } else { vid.play(); }
+            const ind = card.querySelector('.play-indicator'); ind.textContent = '▶'; ind.classList.add('show'); setTimeout(() => ind.classList.remove('show'), 400);
+          } else { vid.pause(); const ind = card.querySelector('.play-indicator'); ind.textContent = '⏸'; ind.classList.add('show'); setTimeout(() => ind.classList.remove('show'), 400); }
+        };
+        vid.ontimeupdate = () => { if(vid.duration) card.querySelector('.progress-fill').style.width = (vid.currentTime/vid.duration*100)+'%'; };
+        feed.appendChild(card);
+      }
+      observeFeed();
+    }
+
+    function observeFeed() {
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(en => { const vid = en.target.querySelector('.main-video'); const bg = en.target.querySelector('.bg-music'); if(en.isIntersecting && en.intersectionRatio > 0.6) { vid.play().catch(()=>{}); if(bg) bg.play().catch(()=>{}); } else { vid.pause(); vid.currentTime = 0; if(bg) { bg.pause(); bg.currentTime = 0; } } });
+      }, { threshold: [0, 0.6, 1] });
+      document.querySelectorAll('.video-card').forEach(c => obs.observe(c));
+    }
+
+    document.getElementById('btnFeed').onclick = () => { document.getElementById('btnFeed').classList.add('active'); };
+
+    // INIT
+    (async () => {
+      await initDB();
+      updateUI();
+    })();
   </script>
 </body>
 </html>
