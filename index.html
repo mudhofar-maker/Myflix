@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>VidStream Pro — Ultimate All-in-One</title>
+<title>MyFlix — Ultimate Creator & Ads Platform</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; }
   body { background:#000; color:#fff; overflow-x:hidden; }
@@ -16,6 +16,8 @@
     padding:10px 12px; background:linear-gradient(180deg,rgba(0,0,0,0.95),transparent);
     backdrop-filter:blur(10px);
   }
+  .brand-logo { display:flex; align-items:center; gap:6px; font-size:1.3rem; font-weight:900; letter-spacing:1px; }
+  .brand-logo span { color:#ff0050; }
   .profile-nav-btn {
     width:36px; height:36px; border-radius:50%;
     background:#333; border:2px solid #ff0050;
@@ -34,6 +36,7 @@
     background:linear-gradient(135deg,#f7b733,#fc4a1a); border:none; font-weight:bold; 
     border-radius:20px; width:auto; padding:8px 12px; font-size:0.85rem; gap:4px; color:#fff;
   }
+  .nav-btn.ads-btn { background:#0050ff; color:#fff; border-color:#0050ff; }
 
   /* ===== FEED ===== */
   .feed-container { height:100vh; overflow-y:scroll; scroll-snap-type:y mandatory; scrollbar-width:none; }
@@ -42,14 +45,8 @@
     position:relative; height:100vh; width:100%;
     scroll-snap-align:start; display:flex; justify-content:center; align-items:center; background:#000;
   }
-  .video-card video { width:100%; height:100%; object-fit:cover; transition: filter 0.3s ease; }
+  .video-card video { width:100%; height:100%; object-fit:cover; }
   
-  .filter-cinematic { filter: contrast(1.2) saturate(0.8) sepia(0.3); }
-  .filter-vintage { filter: sepia(0.6) contrast(1.1) brightness(0.9); }
-  .filter-bw { filter: grayscale(1) contrast(1.3); }
-  .filter-vivid { filter: saturate(1.5) contrast(1.1); }
-  .filter-warm { filter: sepia(0.4) saturate(1.3) hue-rotate(-10deg); }
-
   .video-text-overlay {
     position:absolute; z-index:2; text-align:center; font-weight:bold;
     text-shadow:0 2px 8px rgba(0,0,0,0.9); pointer-events:none; white-space:nowrap;
@@ -66,9 +63,10 @@
     display:flex; align-items:center; gap:6px; font-size:0.75rem; margin-top:8px; color:#fff;
     background:rgba(0,0,0,0.6); padding:4px 10px; border-radius:12px; width:fit-content; border:1px solid rgba(255,255,255,0.2);
   }
-  .marquee { width:150px; overflow:hidden; white-space:nowrap; }
-  .marquee span { display:inline-block; padding-left:100%; animation: marquee 8s linear infinite; }
-  @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+  .badge-ad {
+    display:inline-block; font-size:0.65rem; background:#0050ff; color:#fff;
+    padding:2px 8px; border-radius:10px; margin-top:6px; font-weight:bold;
+  }
 
   .side-actions { position:absolute; right:12px; bottom:80px; display:flex; flex-direction:column; gap:14px; z-index:2; }
   .action-btn {
@@ -88,22 +86,6 @@
   .modal-content { position:relative; width:100%; max-width:520px; background:#1a1a1a; border-radius:16px; overflow:hidden; max-height:90vh; display:flex; flex-direction:column; }
   .close-btn { position:absolute; top:12px; right:12px; z-index:10; background:rgba(255,255,255,0.1); border:none; color:#fff; width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:1rem; }
 
-  /* COMMENT SHEET */
-  .comment-sheet {
-    position:fixed; bottom:0; left:0; right:0; background:#1a1a1a; border-radius:16px 16px 0 0;
-    z-index:300; height:60vh; display:flex; flex-direction:column; transform:translateY(100%); transition:transform 0.3s ease;
-  }
-  .comment-sheet.show { transform:translateY(0); }
-  .comment-header { display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid #333; }
-  .comment-list { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:16px; }
-  .comment-item { display:flex; gap:12px; }
-  .comment-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#ff0050,#ff8a00); display:flex; justify-content:center; align-items:center; font-weight:bold; flex-shrink:0; }
-  .comment-body .c-user { font-weight:bold; font-size:0.8rem; color:#ccc; }
-  .comment-body .c-text { font-size:0.9rem; }
-  .comment-input-area { padding:12px 16px; border-top:1px solid #333; display:flex; gap:10px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
-  .comment-input-area input { flex:1; background:#222; border:none; border-radius:20px; padding:10px 16px; color:#fff; outline:none; }
-  .comment-input-area button { background:#ff0050; border:none; color:#fff; width:40px; height:40px; border-radius:50%; font-size:1.2rem; }
-
   /* PROFIL & SETTINGS */
   .profile-header { text-align:center; padding:30px 20px 20px; border-bottom:1px solid #333; }
   .avatar-preview { width:80px; height:80px; border-radius:50%; background:#333; margin:0 auto 12px; overflow:hidden; border:3px solid #ff0050; position:relative; }
@@ -115,14 +97,14 @@
   .btn-primary { width:calc(100% - 40px); margin:0 20px 20px; padding:14px; background:linear-gradient(90deg,#ff0050,#ff8a00); border:none; color:#fff; border-radius:8px; font-weight:bold; font-size:1rem; cursor:pointer; }
   .btn-primary:disabled { opacity:0.5; }
 
-  /* MONETISASI & BELANJA */
+  /* MONETISASI & ADS */
   .balance-card { background:linear-gradient(135deg,#f7b733,#fc4a1a); border-radius:16px; padding:24px; margin:20px; text-align:center; }
   .balance-card h2 { font-size:2.5rem; margin:8px 0; }
+  .balance-card.ad-balance { background:linear-gradient(135deg,#0050ff,#00bfff); }
+  
   .price-list { padding:0 20px; display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
   .price-item { display:flex; justify-content:space-between; background:#222; padding:14px; border-radius:12px; cursor:pointer; border:1px solid #444; }
   .price-item:active { background:#333; border-color:#f7b733; }
-  .btn-withdraw { width:calc(100% - 40px); margin:0 20px 20px; padding:14px; background:#00c853; border:none; color:#fff; border-radius:8px; font-weight:bold; font-size:1rem; cursor:pointer; }
-  .btn-withdraw:disabled { background:#444; color:#888; }
 
   /* UPLOAD & CAMERA */
   .upload-body { padding:20px; overflow-y:auto; display:flex; flex-direction:column; height:100%; }
@@ -154,6 +136,22 @@
   .song-title { font-weight:bold; font-size:0.9rem; }
   .song-meta { font-size:0.75rem; color:#aaa; }
 
+  /* AD OVERLAY */
+  .ad-overlay {
+    position:absolute; inset:0; background:#000; z-index:50;
+    display:flex; justify-content:center; align-items:center;
+  }
+  .ad-overlay video { width:100%; height:100%; object-fit:contain; }
+  .ad-skip {
+    position:absolute; bottom:30px; right:20px; background:rgba(0,0,0,0.7);
+    color:#fff; padding:10px 20px; border-radius:20px; border:1px solid #fff;
+    cursor:pointer; font-weight:bold;
+  }
+  .ad-label {
+    position:absolute; top:80px; left:20px; background:#0050ff;
+    padding:4px 10px; border-radius:4px; font-weight:bold; font-size:0.8rem;
+  }
+
   .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px); background:#333; color:#fff; padding:12px 20px; border-radius:24px; z-index:500; opacity:0; transition:0.3s; pointer-events:none; text-align:center; }
   .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
@@ -161,12 +159,15 @@
 <body>
 
   <header class="navbar">
-    <div class="profile-nav-btn" id="btnProfile">
-      <img id="navAvatar" src="https://ui-avatars.com/api/?name=User&background=random" alt="Profile" />
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="profile-nav-btn" id="btnProfile">
+        <img id="navAvatar" src="https://ui-avatars.com/api/?name=User&background=random" alt="Profile" />
+      </div>
+      <div class="brand-logo">MY<span>FLIX</span></div>
     </div>
     <div class="nav-buttons">
       <button id="btnFeed" class="nav-btn active" title="Feed">📱</button>
-      <button id="btnGrid" class="nav-btn" title="Browse">🍿</button>
+      <button id="btnAds" class="nav-btn ads-btn" title="Ruang Iklan">📢</button>
       <button id="btnLive" class="nav-btn" title="Live Bareng">🔴</button>
       <button id="btnUpload" class="nav-btn" title="Buat Video">🎥</button>
       <button id="btnMonet" class="nav-btn coin-btn" title="Monetisasi">💰 <span id="navBalance">0</span></button>
@@ -174,44 +175,20 @@
   </header>
 
   <main id="feedView" class="feed-container"></main>
-  
-  <main id="gridView" class="hidden" style="padding:80px 16px 40px; min-height:100vh;">
-    <h2 style="margin-bottom:16px;">🔥 Trending Now</h2>
-    <div id="gridList" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px;"></div>
-  </main>
 
-  <!-- LIVE MODAL -->
+  <!-- LIVE MODAL (Sederhana) -->
   <div id="liveModal" class="modal hidden">
     <div class="modal-content" style="height:80vh;">
       <button class="close-btn" id="closeLive">✕</button>
       <div style="padding:20px; display:flex; flex-direction:column; height:100%;">
-        <div id="liveSetup">
-          <h3>🔴 Live Bareng Teman</h3>
-          <p style="color:#aaa; margin-bottom:16px;">Buat ruangan atau gabung.</p>
-          <button id="btnCreateRoom" class="btn-primary" style="width:100%; margin:0 0 10px;">➕ Buat Ruangan</button>
-          <input type="text" id="inputJoinCode" placeholder="KODE UNDANGAN" style="width:100%; padding:12px; background:#222; border:1px solid #444; border-radius:8px; color:#fff; text-align:center; margin-bottom:10px; text-transform:uppercase;">
-          <button id="btnJoinRoom" class="btn-primary" style="width:100%; margin:0; background:#333;">🚪 Gabung</button>
-        </div>
-        <div id="liveActive" class="hidden" style="display:flex; flex-direction:column; height:100%;">
-          <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-            <span style="color:#ff0000; font-weight:bold;">● LIVE: <span id="roomCodeDisplay"></span></span>
-            <button id="btnLeaveRoom" style="background:none; border:none; color:#ff0050;">Keluar</button>
-          </div>
-          <div id="liveChatBox" style="flex:1; background:#000; border:1px solid #333; border-radius:8px; padding:10px; overflow-y:auto; margin-bottom:10px;"></div>
-          <div style="display:flex; gap:8px;">
-            <input type="text" id="liveChatInput" placeholder="Ketik pesan..." style="flex:1; padding:10px; background:#222; border:none; border-radius:8px; color:#fff;">
-            <button id="btnSendLiveChat" class="btn-primary" style="width:auto; margin:0;">Kirim</button>
-          </div>
+        <h3>🔴 Live Bareng Teman</h3>
+        <div id="liveChatBox" style="flex:1; background:#000; border:1px solid #333; border-radius:8px; padding:10px; overflow-y:auto; margin:10px 0;"></div>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="liveChatInput" placeholder="Ketik pesan..." style="flex:1; padding:10px; background:#222; border:none; border-radius:8px; color:#fff;">
+          <button id="btnSendLiveChat" class="btn-primary" style="width:auto; margin:0;">Kirim</button>
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- COMMENT SHEET -->
-  <div id="commentSheet" class="comment-sheet">
-    <div class="comment-header"><h3><span id="commentCount">0</span> Komentar</h3><button id="closeComment">✕</button></div>
-    <div class="comment-list" id="commentList"></div>
-    <div class="comment-input-area"><input type="text" id="commentInput" placeholder="Ketik komentar..." /><button id="sendComment">➤</button></div>
   </div>
 
   <!-- PROFILE MODAL -->
@@ -233,12 +210,12 @@
     </div>
   </div>
 
-  <!-- MONETISASI MODAL -->
+  <!-- MONETISASI MODAL (KREATOR) -->
   <div id="monetModal" class="modal hidden">
     <div class="modal-content">
       <button class="close-btn" id="closeMonet">✕</button>
       <div class="balance-card">
-        <div style="font-size:0.9rem;">Saldo Koin</div>
+        <div style="font-size:0.9rem;">Saldo Koin Kreator</div>
         <h2>🪙 <span id="coinBalance">0</span></h2>
         <div>≈ Rp <span id="coinRupiah">0</span></div>
       </div>
@@ -247,7 +224,38 @@
         <div class="price-item" data-coins="100" data-price="10000"><span>🪙 100 Koin</span><span>Rp 10.000</span></div>
         <div class="price-item" data-coins="500" data-price="45000"><span>🪙 500 Koin</span><span>Rp 45.000</span></div>
       </div>
-      <button id="btnWithdraw" class="btn-withdraw" disabled>💸 Tarik Uang (Min 1000 Koin)</button>
+      <button id="btnWithdraw" class="btn-primary" style="background:#00c853;" disabled>💸 Tarik Uang (Min 1000 Koin)</button>
+    </div>
+  </div>
+
+  <!-- RUANG IKLAN MODAL (ADVERTISER) -->
+  <div id="adsModal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close-btn" id="closeAds">✕</button>
+      <div class="balance-card ad-balance">
+        <div style="font-size:0.9rem;">Saldo Dompet Iklan</div>
+        <h2>💳 Rp <span id="adBalance">0</span></h2>
+      </div>
+      
+      <h3 style="padding:0 20px; margin-bottom:10px;">Isi Ulang Saldo Iklan</h3>
+      <div class="price-list">
+        <div class="price-item topup-item" data-amount="50000"><span>💵 Isi Saldo Rp 50.000</span><span>Top Up</span></div>
+        <div class="price-item topup-item" data-amount="100000"><span>💵 Isi Saldo Rp 100.000</span><span>Top Up</span></div>
+      </div>
+
+      <h3 style="padding:0 20px; margin-bottom:10px;">Pasang Iklan Video</h3>
+      <p style="padding:0 20px 10px; font-size:0.8rem; color:#aaa;">Biaya: Rp 20.000 per iklan. Iklan akan diputar sebelum video kreator.</p>
+      
+      <div class="form-group">
+        <label>Pilih Video Iklan (Max 10 detik)</label>
+        <input type="file" id="adVideoFile" accept="video/*" style="padding:8px;" />
+      </div>
+      <div class="form-group">
+        <label>Nama Produk / Brand</label>
+        <input type="text" id="adBrandName" placeholder="Contoh: Kopi Kenangan" />
+      </div>
+      
+      <button class="btn-primary" id="btnSubmitAd" style="width:100%; margin:0 0 20px;">📢 Tayangkan Iklan (Rp 20.000)</button>
     </div>
   </div>
 
@@ -293,12 +301,22 @@
           <input type="text" id="inputText" placeholder="Ketik teks..." style="margin-bottom:8px;" />
           <div style="display:flex; gap:8px;">
             <select id="selectFont" style="flex:1;"><option value="inherit">Default</option><option value="Impact">Impact</option></select>
-            <select id="selectColor" style="flex:1;"><option value="#ffffff">Putih</option><option value="#ff0050">Merah</option><option value="#f7b733">Kuning</option></select>
+            <select id="selectColor" style="flex:1;"><option value="#ffffff">Putih</option><option value="#ff0050">Merah</option></select>
           </div>
         </div>
         <button id="btnOpenMusic" class="btn-primary" style="width:100%; margin:0 0 12px; background:#333;">🎵 Katalog Lagu: <span id="txtSelectedMusic">Suara Asli</span></button>
         <div class="form-group" style="padding:0;"><label>Username</label><input type="text" id="uploadUsername" /></div>
         <div class="form-group" style="padding:0;"><label>Caption</label><input type="text" id="uploadCaption" /></div>
+        
+        <!-- OPSI MONETISASI KREATOR -->
+        <div class="form-group" style="padding:0; background:#222; border-radius:8px; padding:10px; margin-bottom:16px;">
+          <label style="color:#00c853; font-weight:bold;">💰 Monetisasi Video Ini?</label>
+          <select id="uploadMonetize" style="margin-top:6px;">
+            <option value="yes">Ya (Tampilkan Iklan, Dapat Koin per View)</option>
+            <option value="no">Tidak (Video Biasa)</option>
+          </select>
+        </div>
+
         <button class="btn-primary" id="btnSubmitUpload" style="width:100%; margin:0;" disabled>🚀 Publikasikan</button>
       </div>
 
@@ -314,15 +332,27 @@
     </div>
   </div>
 
+  <!-- COMMENT SHEET -->
+  <div id="commentSheet" style="position:fixed; bottom:0; left:0; right:0; background:#1a1a1a; border-radius:16px 16px 0 0; z-index:300; height:60vh; display:flex; flex-direction:column; transform:translateY(100%); transition:transform 0.3s ease;">
+    <div style="display:flex; justify-content:space-between; padding:16px; border-bottom:1px solid #333;"><h3><span id="commentCount">0</span> Komentar</h3><button id="closeComment" style="background:none;border:none;color:#fff;font-size:1.2rem;">✕</button></div>
+    <div id="commentList" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:16px;"></div>
+    <div style="padding:12px 16px; border-top:1px solid #333; display:flex; gap:10px; padding-bottom: calc(12px + env(safe-area-inset-bottom));">
+      <input type="text" id="commentInput" placeholder="Ketik komentar..." style="flex:1; background:#222; border:none; border-radius:20px; padding:10px 16px; color:#fff; outline:none;" />
+      <button id="sendComment" style="background:#ff0050; border:none; color:#fff; width:40px; height:40px; border-radius:50%; font-size:1.2rem;">➤</button>
+    </div>
+  </div>
+
   <div id="toast" class="toast"></div>
 
 <script>
-  // ===== STATE =====
-  const STORAGE_KEY = 'vidstream_final_v2';
-  let state = { coins: 0, userVideos: [], comments: {}, likedVideos: {}, followedUsers: {}, profile: { name: "Pengguna", username: "@user", avatar: "https://ui-avatars.com/api/?name=User&background=random" } };
+  // ===== STATE & DB =====
+  const STORAGE_KEY = 'myflix_v1';
+  let state = { 
+    coins: 0, adBalance: 0, userVideos: [], comments: {}, likedVideos: {}, followedUsers: {}, 
+    profile: { name: "Kreator MyFlix", username: "@kreator", avatar: "https://ui-avatars.com/api/?name=Creator&background=ff0050&color=fff" }
+  };
   
-  // ===== DB & UTILS =====
-  const DB_NAME = 'vidstream_db', DB_STORE = 'videos'; let db;
+  const DB_NAME = 'myflix_db', DB_STORE = 'videos'; let db;
   function initDB() { return new Promise((res) => { const req = indexedDB.open(DB_NAME, 1); req.onupgradeneeded = e => { if(!e.target.result.objectStoreNames.contains(DB_STORE)) e.target.result.createObjectStore(DB_STORE, {keyPath:'id'}); }; req.onsuccess = e => { db = e.target.result; res(); }; }); }
   function saveVideoDB(id, blob) { return new Promise(res => { const tx = db.transaction(DB_STORE, 'readwrite'); tx.objectStore(DB_STORE).put({id, blob}).onsuccess = () => res(); }); }
   function getVideoDB(id) { return new Promise(res => { const tx = db.transaction(DB_STORE, 'readonly'); tx.objectStore(DB_STORE).get(id).onsuccess = e => res(e.target.result ? e.target.result.blob : null); }); }
@@ -335,6 +365,9 @@
     document.getElementById('coinBalance').textContent = state.coins;
     document.getElementById('coinRupiah').textContent = (state.coins * 100).toLocaleString('id-ID');
     document.getElementById('btnWithdraw').disabled = state.coins < 1000;
+    
+    document.getElementById('adBalance').textContent = state.adBalance.toLocaleString('id-ID');
+    
     document.getElementById('navAvatar').src = state.profile.avatar;
     document.getElementById('profilePreview').src = state.profile.avatar;
     document.getElementById('profileNameDisplay').textContent = state.profile.name;
@@ -343,8 +376,15 @@
     document.getElementById('inputUsername').value = state.profile.username;
   }
 
+  // Simulasi Iklan (Iklan Default jika Pengiklan belum pasang)
+  const defaultAd = {
+    brand: "MyFlix Premium",
+    src: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4" // Iklan video sample
+  };
+
   const defaultVideos = [
-    { id:1, username:"@nature_vibes", caption:"Sunset di pantai 🏖️", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes:1240 }
+    { id:101, username:"@nature_vibes", caption:"Sunset di pantai 🏖️", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes:1240, monetize: true },
+    { id:102, username:"@funny_cat", caption:"Kucing lucu 😹", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", likes:892, monetize: false },
   ];
   function getAllVideos() { return [...state.userVideos, ...defaultVideos]; }
 
@@ -360,17 +400,50 @@
     saveState(); updateUI(); showToast('Profil disimpan!', 'success'); document.getElementById('profileModal').classList.add('hidden');
   };
 
-  // ===== MONETISASI =====
+  // ===== KREATOR: MONETISASI & BELI KOIN =====
   document.getElementById('btnMonet').onclick = () => { updateUI(); document.getElementById('monetModal').classList.remove('hidden'); };
   document.getElementById('closeMonet').onclick = () => document.getElementById('monetModal').classList.add('hidden');
-  document.querySelectorAll('.price-item').forEach(el => {
-    el.onclick = () => { const c = parseInt(el.dataset.coins), p = parseInt(el.dataset.price); if(confirm(`Beli ${c} Koin seharga Rp ${p}?`)) { state.coins += c; saveState(); updateUI(); showToast('Berhasil!', 'success'); } };
+  
+  document.querySelectorAll('#monetModal .price-item').forEach(el => {
+    el.onclick = () => { const c = parseInt(el.dataset.coins), p = parseInt(el.dataset.price); if(confirm(`Beli ${c} Koin seharga Rp ${p}?`)) { state.coins += c; saveState(); updateUI(); showToast('Koin ditambahkan!', 'success'); } };
   });
+  
   document.getElementById('btnWithdraw').onclick = () => {
     if(state.coins < 1000) return; if(confirm(`Tarik ${state.coins} Koin ke Rupiah?`)) { state.coins = 0; saveState(); updateUI(); showToast('Withdraw diproses!', 'success'); }
   };
 
-  // ===== UPLOAD & CAMERA =====
+  // ===== PENGIKLAN: RUANG IKLAN =====
+  document.getElementById('btnAds').onclick = () => { updateUI(); document.getElementById('adsModal').classList.remove('hidden'); };
+  document.getElementById('closeAds').onclick = () => document.getElementById('adsModal').classList.add('hidden');
+
+  document.querySelectorAll('.topup-item').forEach(el => {
+    el.onclick = () => { const a = parseInt(el.dataset.amount); if(confirm(`Isi saldo dompet iklan sebesar Rp ${a.toLocaleString('id-ID')}?`)) { state.adBalance += a; saveState(); updateUI(); showToast('Saldo Iklan bertambah!', 'success'); } };
+  });
+
+  let pendingAdFile = null;
+  document.getElementById('adVideoFile').onchange = (e) => { if(e.target.files[0]) pendingAdFile = e.target.files[0]; };
+
+  document.getElementById('btnSubmitAd').onclick = async () => {
+    const brand = document.getElementById('adBrandName').value.trim();
+    if(!pendingAdFile) { showToast('Pilih video iklan dulu!', 'error'); return; }
+    if(!brand) { showToast('Isi nama brand!', 'error'); return; }
+    if(state.adBalance < 20000) { showToast('Saldo Iklan tidak cukup (Min Rp 20.000)', 'error'); return; }
+    
+    const adId = 'ad_' + Date.now();
+    await saveVideoDB(adId, pendingAdFile);
+    
+    state.adBalance -= 20000;
+    state.activeAd = { brand: brand, id: adId }; // Simpan iklan aktif
+    saveState(); updateUI();
+    
+    showToast('🎉 Iklan berhasil ditayangkan!', 'success');
+    document.getElementById('adsModal').classList.add('hidden');
+    document.getElementById('adBrandName').value = '';
+    document.getElementById('adVideoFile').value = '';
+    pendingAdFile = null;
+  };
+
+  // ===== UPLOAD & CAMERA KREATOR =====
   let pendingFile = null, streamRef = null, mediaRecorder, chunks = [], facingMode = 'user';
   let textState = { x: 50, y: 50, size: 24, rot: 0 };
   let selectedMusicUrl = "", selectedMusicTitle = "Suara Asli";
@@ -378,7 +451,6 @@
   const songList = [
     { t: 'DJ Remix Viral', u: 'https://cdn.pixabay.com/audio/2022/03/15/audio_c8c8a73467.mp3', g: 'EDM' },
     { t: 'Aesthetic Bass', u: 'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3', g: 'Chill' },
-    { t: 'Upbeat Pop', u: 'https://cdn.pixabay.com/audio/2021/11/25/audio_91b32e02f9.mp3', g: 'Pop' },
   ];
 
   async function startCamera() {
@@ -426,7 +498,7 @@
   document.getElementById('btnTxtRot').onclick = (e) => { e.stopPropagation(); textState.rot+=45; updateTxtPos(); };
   document.getElementById('previewVideo').onclick = () => iText.classList.remove('active');
 
-  // Music Catalog
+  // Music
   document.getElementById('btnOpenMusic').onclick = () => { document.getElementById('pageMusic').classList.remove('hidden'); renderMusic(); };
   document.getElementById('closeMusic').onclick = () => document.getElementById('pageMusic').classList.add('hidden');
   function renderMusic() {
@@ -440,24 +512,26 @@
     if(!pendingFile) return; document.getElementById('btnSubmitUpload').textContent = '⏳ Menyimpan...';
     const id = Date.now();
     const overlayData = document.getElementById('inputText').value.trim() ? { text: document.getElementById('inputText').value.trim(), x: textState.x, y: textState.y, size: textState.size, rot: textState.rot, color: document.getElementById('selectColor').value, font: document.getElementById('selectFont').value } : null;
+    const isMonetize = document.getElementById('uploadMonetize').value === 'yes';
+    
     await saveVideoDB(id, pendingFile);
-    state.userVideos.unshift({ id, username: document.getElementById('uploadUsername').value.trim(), caption: document.getElementById('uploadCaption').value.trim(), src: null, likes: 0, music: selectedMusicUrl, overlayData });
+    state.userVideos.unshift({ id, username: document.getElementById('uploadUsername').value.trim(), caption: document.getElementById('uploadCaption').value.trim(), src: null, likes: 0, music: selectedMusicUrl, overlayData, monetize: isMonetize });
     saveState(); showToast('Berhasil publish!', 'success'); document.getElementById('uploadModal').classList.add('hidden'); renderFeed();
   };
 
   // ===== KOMENTAR & SHARE =====
   let commentTargetId = null;
-  function openComments(id) { commentTargetId = id; renderComments(id); document.getElementById('commentSheet').classList.add('show'); }
+  function openComments(id) { commentTargetId = id; renderComments(id); document.getElementById('commentSheet').style.transform = 'translateY(0)'; }
   function renderComments(id) {
     const cmts = state.comments[id] || []; document.getElementById('commentCount').textContent = cmts.length;
-    document.getElementById('commentList').innerHTML = cmts.length ? cmts.map(c => `<div class="comment-item"><div class="comment-avatar">${c.user.charAt(1).toUpperCase()}</div><div class="comment-body"><div class="c-user">${c.user}</div><div class="c-text">${c.text}</div></div></div>`).join('') : `<p style="color:#666; text-align:center;">Belum ada komentar</p>`;
+    document.getElementById('commentList').innerHTML = cmts.length ? cmts.map(c => `<div style="display:flex; gap:12px;"><div style="width:36px;height:36px;border-radius:50%;background:#ff0050;display:flex;justify-content:center;align-items:center;font-weight:bold;">${c.user.charAt(1).toUpperCase()}</div><div><div style="font-weight:bold;font-size:0.8rem;color:#ccc;">${c.user}</div><div style="font-size:0.9rem;">${c.text}</div></div></div>`).join('') : `<p style="color:#666; text-align:center;">Belum ada komentar</p>`;
     document.getElementById('commentList').scrollTop = 9999;
   }
-  document.getElementById('closeComment').onclick = () => document.getElementById('commentSheet').classList.remove('show');
+  document.getElementById('closeComment').onclick = () => document.getElementById('commentSheet').style.transform = 'translateY(100%)';
   document.getElementById('sendComment').onclick = () => { const v = document.getElementById('commentInput').value.trim(); if(!v || !commentTargetId) return; if(!state.comments[commentTargetId]) state.comments[commentTargetId] = []; state.comments[commentTargetId].push({user:state.profile.username, text:v}); saveState(); document.getElementById('commentInput').value = ''; renderComments(commentTargetId); };
 
   function shareVideo(v) {
-    if(navigator.share) navigator.share({ title:'VidStream', text:`Tonton ${v.username}`, url: window.location.href });
+    if(navigator.share) navigator.share({ title:'MyFlix', text:`Tonton ${v.username}`, url: window.location.href });
     else { navigator.clipboard.writeText(window.location.href); showToast('Link disalin!', 'success'); }
   }
   function sendTip(v) {
@@ -465,6 +539,44 @@
     if(!a) return; const n = parseInt(a); if(isNaN(n) || n < 10) { showToast('Minimal 10 koin', 'error'); return; }
     if(n > state.coins) { showToast('Saldo kurang', 'error'); return; }
     state.coins -= n; saveState(); updateUI(); showToast(`Berhasil kirim ${n} koin!`, 'success');
+  }
+
+  // ===== AD LOGIC (IKLAN PRE-ROLL) =====
+  async function playAd(videoEl, adContainer, skipBtn) {
+    let adSrc = defaultAd.src;
+    let adBrand = defaultAd.brand;
+
+    // Cek jika ada iklan dari pengiklan asli
+    if(state.activeAd && state.activeAd.id) {
+      const blob = await getVideoDB(state.activeAd.id);
+      if(blob) { adSrc = URL.createObjectURL(blob); adBrand = state.activeAd.brand; }
+    }
+
+    const adVideo = adContainer.querySelector('video');
+    adVideo.src = adSrc;
+    adContainer.querySelector('.ad-brand').textContent = `Iklan: ${adBrand}`;
+    adContainer.classList.remove('hidden');
+    adVideo.muted = false;
+    adVideo.play().catch(()=>{ adVideo.muted = true; adVideo.play(); });
+
+    let timeLeft = 5; // Paksa nonton 5 detik
+    skipBtn.textContent = `Lewati Iklan (${timeLeft}s)`;
+    skipBtn.disabled = true;
+
+    const timer = setInterval(() => {
+      timeLeft--;
+      skipBtn.textContent = `Lewati Iklan (${timeLeft}s)`;
+      if(timeLeft <= 0) { clearInterval(timer); skipBtn.textContent = 'Lewati Iklan ▶'; skipBtn.disabled = false; }
+    }, 1000);
+
+    skipBtn.onclick = () => {
+      if(skipBtn.disabled) return;
+      clearInterval(timer);
+      adVideo.pause();
+      adContainer.classList.add('hidden');
+      adVideo.src = '';
+      videoEl.play();
+    };
   }
 
   // ===== RENDER FEED =====
@@ -475,8 +587,16 @@
       const isLiked = state.likedVideos[v.id];
       let overlayHTML = v.overlayData ? `<div class="video-text-overlay" style="left:${v.overlayData.x}%; top:${v.overlayData.y}%; transform:translate(-50%,-50%) rotate(${v.overlayData.rot}deg); font-size:${v.overlayData.size}px; color:${v.overlayData.color}; font-family:${v.overlayData.font};">${v.overlayData.text}</div>` : '';
       
+      // AD OVERLAY ELEMENT
       card.innerHTML = `
-        <video loop muted playsinline preload="metadata"></video>
+        <div class="ad-overlay hidden">
+          <video playsinline></video>
+          <div class="ad-label">Iklan</div>
+          <div style="position:absolute; top:120px; left:20px; background:rgba(0,0,0,0.5); padding:4px 10px; border-radius:8px; font-size:0.8rem;" class="ad-brand"></div>
+          <button class="ad-skip">Lewati Iklan</button>
+        </div>
+
+        <video class="main-video" loop muted playsinline preload="metadata"></video>
         ${v.music ? `<audio class="bg-music" src="${v.music}" loop></audio>` : ''}
         <button class="mute-btn">🔇</button>
         ${overlayHTML}
@@ -488,6 +608,7 @@
             <button class="follow-btn ${state.followedUsers[v.username] ? 'followed' : ''}" data-u="${v.username}">${state.followedUsers[v.username] ? '✓ Following' : '+ Follow'}</button>
           </div>
           <div class="caption">${v.caption}</div>
+          ${v.monetize ? '<div class="badge-ad">💰 MONETIZED</div>' : ''}
         </div>
         <div class="side-actions">
           <button class="action-btn like-btn" style="${isLiked ? 'filter:drop-shadow(0 0 6px #ff0050)' : ''}">${isLiked ? '❤️' : '🤍'}<span>${formatNum(v.likes + (isLiked?1:0))}</span></button>
@@ -497,7 +618,7 @@
         </div>
       `;
       
-      const vid = card.querySelector('video');
+      const vid = card.querySelector('.main-video');
       if(v.src) vid.src = v.src; else { try { const b = await getVideoDB(v.id); if(b) vid.src = URL.createObjectURL(b); } catch(e){} }
 
       // Listeners
@@ -508,7 +629,26 @@
       card.querySelector('.tip-btn').onclick = (e) => { e.stopPropagation(); sendTip(v); };
       card.querySelector('.follow-btn').onclick = (e) => { e.stopPropagation(); const u = v.username; if(state.followedUsers[u]) delete state.followedUsers[u]; else state.followedUsers[u] = true; saveState(); renderFeed(); };
       
-      vid.onclick = () => { const ind = card.querySelector('.play-indicator'); if(vid.paused) { vid.play(); ind.textContent = '▶'; } else { vid.pause(); ind.textContent = '⏸'; } ind.classList.add('show'); setTimeout(() => ind.classList.remove('show'), 400); };
+      // LOGIKA KLIK: JIKA MONETIZE, TAMPILKAN IKLAN DULU
+      vid.onclick = async () => { 
+        if(vid.paused) {
+          if(v.monetize) {
+            const adContainer = card.querySelector('.ad-overlay');
+            const skipBtn = card.querySelector('.ad-skip');
+            await playAd(vid, adContainer, skipBtn);
+            
+            // Reward koin untuk kreator setelah iklan selesai (Simulasi)
+            state.coins += 1;
+            saveState(); updateUI();
+          } else {
+            vid.play();
+          }
+          const ind = card.querySelector('.play-indicator'); ind.textContent = '▶'; ind.classList.add('show'); setTimeout(() => ind.classList.remove('show'), 400);
+        } else {
+          vid.pause();
+          const ind = card.querySelector('.play-indicator'); ind.textContent = '⏸'; ind.classList.add('show'); setTimeout(() => ind.classList.remove('show'), 400);
+        }
+      };
       vid.ontimeupdate = () => { if(vid.duration) card.querySelector('.progress-fill').style.width = (vid.currentTime/vid.duration*100)+'%'; };
       
       feed.appendChild(card);
@@ -518,17 +658,16 @@
 
   function observeFeed() {
     const obs = new IntersectionObserver(entries => {
-      entries.forEach(en => { const vid = en.target.querySelector('video'); const bg = en.target.querySelector('.bg-music'); if(en.isIntersecting && en.intersectionRatio > 0.6) { vid.play().catch(()=>{}); if(bg) bg.play().catch(()=>{}); } else { vid.pause(); vid.currentTime = 0; if(bg) { bg.pause(); bg.currentTime = 0; } } });
+      entries.forEach(en => { const vid = en.target.querySelector('.main-video'); const bg = en.target.querySelector('.bg-music'); if(en.isIntersecting && en.intersectionRatio > 0.6) { vid.play().catch(()=>{}); if(bg) bg.play().catch(()=>{}); } else { vid.pause(); vid.currentTime = 0; if(bg) { bg.pause(); bg.currentTime = 0; } } });
     }, { threshold: [0, 0.6, 1] });
     document.querySelectorAll('.video-card').forEach(c => obs.observe(c));
   }
 
   // ===== NAVIGASI & INIT =====
-  document.getElementById('btnFeed').onclick = () => { document.getElementById('feedView').classList.remove('hidden'); document.getElementById('gridView').classList.add('hidden'); document.getElementById('btnFeed').classList.add('active'); document.getElementById('btnGrid').classList.remove('active'); };
-  document.getElementById('btnGrid').onclick = () => { document.getElementById('gridView').classList.remove('hidden'); document.getElementById('feedView').classList.add('hidden'); document.getElementById('btnGrid').classList.add('active'); document.getElementById('btnFeed').classList.remove('active'); };
-  
+  document.getElementById('btnFeed').onclick = () => { document.getElementById('btnFeed').classList.add('active'); };
   document.getElementById('btnLive').onclick = () => document.getElementById('liveModal').classList.remove('hidden');
   document.getElementById('closeLive').onclick = () => document.getElementById('liveModal').classList.add('hidden');
+  document.getElementById('btnSendLiveChat').onclick = () => { const i = document.getElementById('liveChatInput'); if(i.value.trim()) { document.getElementById('liveChatBox').innerHTML += `<div>${state.profile.username}: ${i.value}</div>`; i.value = ''; } };
 
   (async () => {
     const s = localStorage.getItem(STORAGE_KEY); if(s) state = { ...state, ...JSON.parse(s) };
