@@ -46,7 +46,7 @@
   .nav-btn.coin-btn { background:linear-gradient(135deg,#f7b733,#fc4a1a); border:none; font-weight:bold; border-radius:20px; width:auto; padding:6px 10px; font-size:0.75rem; gap:4px; color:#fff; }
   .nav-btn.ads-btn { background:#0050ff; border-color:#0050ff; }
 
-  /* FEED & MODAL (Sama seperti sebelumnya) */
+  /* FEED & MODAL */
   .feed-container { height:100vh; overflow-y:scroll; scroll-snap-type:y mandatory; scrollbar-width:none; }
   .feed-container::-webkit-scrollbar { display:none; }
   .video-card { position:relative; height:100vh; width:100%; scroll-snap-align:start; display:flex; justify-content:center; align-items:center; background:#000; }
@@ -67,6 +67,7 @@
   .play-indicator.show { opacity:0.8; }
   .progress-bar { position:absolute; bottom:0; left:0; right:0; height:3px; background:rgba(255,255,255,0.2); }
   .progress-fill { height:100%; background:#ff0050; width:0%; }
+  
   .modal { position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:200; display:flex; justify-content:center; align-items:center; padding:16px; }
   .modal-content { position:relative; width:100%; max-width:520px; background:#1a1a1a; border-radius:16px; overflow:hidden; max-height:90vh; display:flex; flex-direction:column; }
   .close-btn { position:absolute; top:12px; right:12px; z-index:10; background:rgba(255,255,255,0.1); border:none; color:#fff; width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:1rem; }
@@ -187,7 +188,7 @@
       </div>
     </div>
 
-    <!-- MODAL LAINNYA (Monet, Ads, Upload, Comment) -->
+    <!-- MODAL LAINNYA -->
     <div id="monetModal" class="modal hidden"><div class="modal-content"><button class="close-btn" id="closeMonet">✕</button><div class="balance-card"><div style="font-size:0.9rem;">Saldo Koin Kreator</div><h2>🪙 <span id="coinBalance">0</span></h2><div>≈ Rp <span id="coinRupiah">0</span></div></div><h3 style="padding:0 20px; margin-bottom:10px;">Beli Koin</h3><div class="price-list"><div class="price-item" data-coins="100" data-price="10000"><span>🪙 100 Koin</span><span>Rp 10.000</span></div><div class="price-item" data-coins="500" data-price="45000"><span>🪙 500 Koin</span><span>Rp 45.000</span></div></div><button id="btnWithdraw" class="btn-primary" style="background:#00c853;" disabled>💸 Tarik Uang (Min 1000 Koin)</button></div></div>
     <div id="adsModal" class="modal hidden"><div class="modal-content"><button class="close-btn" id="closeAds">✕</button><div class="balance-card ad-balance"><div style="font-size:0.9rem;">Saldo Dompet Iklan</div><h2>💳 Rp <span id="adBalance">0</span></h2></div><h3 style="padding:0 20px; margin-bottom:10px;">Isi Ulang Saldo Iklan</h3><div class="price-list"><div class="price-item topup-item" data-amount="50000"><span>💵 Isi Saldo Rp 50.000</span><span>Top Up</span></div></div><h3 style="padding:0 20px; margin-bottom:10px;">Pasang Iklan Video</h3><div class="form-group"><label>Video Iklan</label><input type="file" id="adVideoFile" accept="video/*" style="padding:8px;" /></div><div class="form-group"><label>Nama Brand</label><input type="text" id="adBrandName" placeholder="Brand Anda" /></div><button class="btn-primary" id="btnSubmitAd" style="width:100%; margin:0 0 20px;">📢 Tayangkan Iklan (Rp 20.000)</button></div></div>
     <div id="uploadModal" class="modal hidden"><div class="modal-content"><button class="close-btn" id="closeUpload">✕</button><div id="pageSelect" class="upload-body"><div style="display:flex; gap:8px; margin-bottom:16px;"><button id="tabCam" class="nav-btn active" style="flex:1; border-radius:8px; padding:10px;">🎥 Kamera</button><button id="tabGal" class="nav-btn" style="flex:1; border-radius:8px; padding:10px;">📁 Galeri</button></div><div id="sectionCam" style="flex:1;"><div class="camera-container"><video id="liveCamera" autoplay playsinline muted></video><button class="flip-cam-btn" id="btnFlipCam">🔄</button><button class="record-btn" id="btnRecord"><div class="inner"></div></button></div></div><div id="sectionGal" class="hidden" style="flex:1; display:flex; align-items:center; justify-content:center;"><div id="dropzone" style="border:2px dashed #444; border-radius:12px; padding:40px; text-align:center; cursor:pointer; width:100%;"><div style="font-size:3rem; margin-bottom:10px;">📁</div><p>Pilih Video</p><input type="file" id="fileInput" accept="video/*" hidden /></div></div></div><div id="pageEditor" class="upload-body hidden"><div class="preview-wrapper"><video id="previewVideo" controls playsinline></video><div id="interactiveText" class="interactive-text hidden" style="top:50%; left:50%; font-size:24px; color:#fff;">Ketik Teks<div class="controls"><button id="btnTxtMin">➖</button><button id="btnTxtPlus">➕</button><button id="btnTxtRot">🔄</button></div></div></div><div style="background:#222; padding:12px; border-radius:8px; margin-bottom:12px;"><label>✨ Teks Video</label><input type="text" id="inputText" placeholder="Ketik teks..." style="margin-bottom:8px;" /><div style="display:flex; gap:8px;"><select id="selectFont" style="flex:1;"><option value="inherit">Default</option><option value="Impact">Impact</option></select><select id="selectColor" style="flex:1;"><option value="#ffffff">Putih</option><option value="#ff0050">Merah</option></select></div></div><button id="btnOpenMusic" class="btn-primary" style="width:100%; margin:0 0 12px; background:#333;">🎵 Lagu: <span id="txtSelectedMusic">Suara Asli</span></button><div class="form-group" style="padding:0;"><label>Username</label><input type="text" id="uploadUsername" /></div><div class="form-group" style="padding:0;"><label>Caption</label><input type="text" id="uploadCaption" /></div><div class="form-group" style="padding:10px; background:#222; border-radius:8px; margin-bottom:16px;"><label style="color:#00c853; font-weight:bold;">💰 Monetisasi Video Ini?</label><select id="uploadMonetize" style="margin-top:6px;"><option value="yes">Ya (Dapat Koin per View)</option><option value="no">Tidak</option></select></div><button class="btn-primary" id="btnSubmitUpload" style="width:100%; margin:0;" disabled>🚀 Publikasikan</button></div><div id="pageMusic" class="music-catalog-view hidden"><div class="music-catalog-header"><h3>🎵 Katalog Lagu</h3><button id="closeMusic" style="background:none;border:none;color:#fff;font-size:1.2rem;">✕</button></div><div class="music-list" id="musicList"></div></div></div></div>
@@ -204,14 +205,17 @@
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-    // 2. MASUKKAN CONFIG FIREBASE KAMU DI SINI (GANTI DENGAN MILIKMU)
+    // =========================================================
+    // ⚠️ 2. CONFIG FIREBASE (SUDAH DIISI OTOMATIS)
+    // =========================================================
     const firebaseConfig = {
-      apiKey: "MASUKKAN_API_KEY_KAMU",
+      apiKey: "AIzaSyDilKHyfY3GXstC4PyS5JRrqFEnJc1DD10",
       authDomain: "cod-app-476f6.firebaseapp.com",
+      databaseURL: "https://cod-app-476f6-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "cod-app-476f6",
       storageBucket: "cod-app-476f6.firebasestorage.app",
       messagingSenderId: "208539583359",
-      appId: "MASUKKAN_APP_ID_KAMU",
+      appId: "1:208539583359:web:b53d123ab4e784509c104a",
       measurementId: "G-PT4857CK4C"
     };
 
@@ -221,16 +225,18 @@
     const db = getFirestore(app);
 
     // --- STATE APLIKASI ---
-    const STORAGE_KEY = 'myflix_v2';
     let state = { 
       coins: 0, adBalance: 0, userVideos: [], comments: {}, likedVideos: {}, followedUsers: {}, 
       profile: { name: "Pengguna", username: "@user", avatar: "https://ui-avatars.com/api/?name=User&background=random" }
     };
 
+    // --- FUNGSI TOAST (PAKAI ALERT AGAR PESAN ERROR KELIHATAN) ---
     function showToast(m, t='info') { 
+      if(t === 'error') { alert("PESAN ERROR:\n\n" + m); }
+      
       const el = document.getElementById('toast'); el.textContent = m; 
       el.style.background = t==='error'?'#ff0050':t==='success'?'#00c853':'#333'; 
-      el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 2500); 
+      el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 3000); 
     }
 
     // --- LOGIKA FIREBASE AUTH ---
@@ -301,7 +307,6 @@
         document.getElementById('mainApp').classList.remove('hidden');
         
         updateUI();
-        renderFeed();
       } else {
         document.getElementById('authLoading').classList.add('hidden');
         document.getElementById('authScreen').classList.remove('hidden');
@@ -353,13 +358,7 @@
       document.getElementById('adBalance').textContent = (state.profile.adBalance || 0).toLocaleString('id-ID');
     }
 
-    // --- LOGIKA APLIKASI LAINNYA (Placeholder Sederhana) ---
-    // (Bisa kamu copy dari kode sebelumnya untuk fungsi upload, render feed, dll)
-    function renderFeed() {
-      // Fungsi render feed dari kode sebelumnya...
-    }
-
-    // Init Awal
+    // --- INITIAL UI ---
     updateUI();
 
   </script>
