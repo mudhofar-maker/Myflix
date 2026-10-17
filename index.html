@@ -9,7 +9,7 @@
   body { background:#000; color:#fff; overflow-x:hidden; }
   .hidden { display:none !important; }
 
-  /* ===== NAVBAR ===== */
+  /* ===== NAVBAR (ICON BERWARNA) ===== */
   .navbar {
     position:fixed; top:0; left:0; right:0; z-index:100;
     display:flex; justify-content:space-between; align-items:center;
@@ -24,19 +24,30 @@
   }
   .nav-buttons { display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
   .nav-btn {
-    background:rgba(255,255,255,0.15); border:none; color:#fff;
+    background:#2a2a2a; border:1px solid #444; color:#fff;
     padding:8px; border-radius:50%; font-size:1rem;
     cursor:pointer; transition:0.2s; display:flex;
     justify-content:center; align-items:center;
     width:36px; height:36px;
   }
-  .nav-btn.active { background:#ff0050; box-shadow:0 0 10px rgba(255,0,80,0.5); }
+  /* Warna Ikon Header */
+  .nav-btn.feed-icon { color:#ff0050; }
+  .nav-btn.grid-icon { color:#f7b733; }
+  .nav-btn.live-icon { color:#ff0000; background:#3a0000; border-color:#ff0000; }
+  .nav-btn.upload-icon { color:#00c853; }
+  
+  /* Tombol Aktif */
+  .nav-btn.active {
+    background:linear-gradient(135deg,#ff8a00,#ff0050); 
+    color:#fff; border-color:#ff8a00;
+    box-shadow:0 0 10px rgba(255,138,0,0.5);
+  }
   .nav-btn.coin-btn {
     background:linear-gradient(135deg,#f7b733,#fc4a1a);
-    font-weight:bold; border-radius:20px; width:auto; padding:8px 10px;
-    font-size:0.8rem; gap:4px;
+    border:none; font-weight:bold; border-radius:20px; 
+    width:auto; padding:8px 12px; font-size:0.85rem; gap:4px;
+    color:#fff;
   }
-  .nav-btn.live-btn { background:linear-gradient(135deg,#ff0050,#ff0000); }
 
   /* ===== FEED (TIKTOK) ===== */
   .feed-container {
@@ -62,6 +73,17 @@
   .filter-bw { filter: grayscale(1) contrast(1.3); }
   .filter-vivid { filter: saturate(1.5) contrast(1.1); }
   .filter-warm { filter: sepia(0.4) saturate(1.3) hue-rotate(-10deg); }
+
+  /* OVERLAY TEXT VIDEO */
+  .video-text-overlay {
+    position:absolute; left:50%; transform:translateX(-50%);
+    z-index:2; text-align:center; width:90%;
+    font-weight:bold; text-shadow:0 2px 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.8);
+    pointer-events:none;
+  }
+  .video-text-overlay.pos-top { top:15%; }
+  .video-text-overlay.pos-middle { top:45%; transform:translate(-50%,-50%); }
+  .video-text-overlay.pos-bottom { bottom:25%; }
 
   .video-info {
     position:absolute; bottom:80px; left:16px; right:80px;
@@ -339,6 +361,15 @@
   .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
     outline:none; border-color:#ff0050;
   }
+  
+  /* Overlay Text Settings */
+  .overlay-settings {
+    display:flex; gap:10px; margin-bottom:10px;
+  }
+  .overlay-settings select, .overlay-settings input {
+    flex:1; padding:8px; font-size:0.8rem;
+  }
+
   .btn-primary {
     width:100%; padding:12px; background:linear-gradient(90deg,#ff0050,#ff8a00);
     border:none; color:#fff; border-radius:8px;
@@ -437,10 +468,10 @@
   <header class="navbar">
     <div class="logo">🎬 VidStream<br>Pro</div>
     <div class="nav-buttons">
-      <button id="btnFeed" class="nav-btn active" title="Feed">📱</button>
-      <button id="btnGrid" class="nav-btn" title="Browse">🍿</button>
-      <button id="btnLive" class="nav-btn live-btn" title="Live Bareng">🔴</button>
-      <button id="btnUpload" class="nav-btn" title="Upload Video">⬆️</button>
+      <button id="btnFeed" class="nav-btn feed-icon active" title="Feed">📱</button>
+      <button id="btnGrid" class="nav-btn grid-icon" title="Browse">🍿</button>
+      <button id="btnLive" class="nav-btn live-icon" title="Live Bareng">🔴</button>
+      <button id="btnUpload" class="nav-btn upload-icon" title="Upload Video">⬆️</button>
       <button id="btnMonet" class="nav-btn coin-btn" title="Monetisasi">💰 <span id="navBalance">0</span></button>
     </div>
   </header>
@@ -457,11 +488,9 @@
     <div class="modal-content" style="max-width:450px; height:80vh; display:flex; flex-direction:column;">
       <button id="closeLive" class="close-btn">✕</button>
       <div class="live-body">
-        <!-- Setup Mode -->
         <div id="liveSetup">
           <h3>🔴 Live Bareng Teman</h3>
           <p class="sub">Buat ruangan baru atau gabung dengan kode undangan.</p>
-          
           <div class="room-setup">
             <button id="btnCreateRoom" class="btn-live">➕ Buat Ruangan Baru</button>
             <div style="text-align:center; color:#666; margin:8px 0;">— ATAU —</div>
@@ -470,17 +499,14 @@
           </div>
         </div>
 
-        <!-- Active Mode -->
         <div id="liveActive" class="live-active-area hidden">
           <div class="live-header-info">
             <div><span class="live-badge">● LIVE</span> <strong id="roomIdDisplay">ROOM</strong></div>
             <button id="btnLeaveRoom" style="background:none; border:none; color:#ff0050; cursor:pointer; font-weight:bold; font-size:0.8rem;">Keluar</button>
           </div>
-          
           <div class="live-chat-box" id="liveChatBox">
             <div class="chat-msg system">Selamat datang di ruangan! Bagikan kode undangan ke temanmu.</div>
           </div>
-          
           <div class="live-input-row">
             <input type="text" id="liveChatInput" placeholder="Ketik pesan..." />
             <button id="btnSendLiveChat">Kirim</button>
@@ -534,6 +560,25 @@
         <div class="form-group">
           <label>Caption / Deskripsi <span style="color:#ff0050">*</span></label>
           <textarea id="uploadCaption" rows="2" placeholder="Tulis caption menarik... #hashtag"></textarea>
+        </div>
+
+        <!-- FITUR TEXT OVERLAY BARU -->
+        <div class="form-group" style="background:#1a1a1a; padding:12px; border-radius:8px; border:1px solid #333;">
+          <label style="color:#00c853; margin-bottom:8px; font-weight:bold;">✨ Teks di Video (Opsional)</label>
+          <input type="text" id="uploadOverlayText" placeholder="Ketik teks yang muncul di video..." style="margin-bottom:10px;" />
+          <div class="overlay-settings">
+            <select id="uploadOverlayPos">
+              <option value="pos-top">Atas</option>
+              <option value="pos-middle">Tengah</option>
+              <option value="pos-bottom" selected>Bawah</option>
+            </select>
+            <select id="uploadOverlayColor">
+              <option value="#ffffff">Putih</option>
+              <option value="#ff0050">Merah Muda</option>
+              <option value="#f7b733">Kuning</option>
+              <option value="#00c853">Hijau</option>
+            </select>
+          </div>
         </div>
 
         <div class="form-group">
@@ -610,7 +655,7 @@
   <div id="toast" class="toast"></div>
 
 <script>
-  const STORAGE_KEY = 'vidstream_v7';
+  const STORAGE_KEY = 'vidstream_v8';
   const COIN_TO_RP = 100;
   const AD_DURATION = 3;
   const REWARD_PER_VIEW = 1;
@@ -664,9 +709,9 @@
   }
 
   const defaultVideos = [
-    { id:1, username:"@nature_vibes", caption:"Sunset di pantai 🏖️ #nature", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes:1240, monetized:true, music:"", filter:"filter-vivid" },
-    { id:2, username:"@funny_cat", caption:"Kucing lucu 😹 #cat", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", likes:892, monetized:true, music:"", filter:"filter-cinematic" },
-    { id:3, username:"@travel_indo", caption:"Pesona Indonesia 🇮🇩 #travel", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", likes:3401, monetized:true, music:"", filter:"" },
+    { id:1, username:"@nature_vibes", caption:"Sunset di pantai 🏖️ #nature", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes:1240, monetized:true, music:"", filter:"filter-vivid", overlayText:"", overlayPos:"pos-bottom", overlayColor:"#ffffff" },
+    { id:2, username:"@funny_cat", caption:"Kucing lucu 😹 #cat", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", likes:892, monetized:true, music:"", filter:"filter-cinematic", overlayText:"Cute Cat!", overlayPos:"pos-top", overlayColor:"#f7b733" },
+    { id:3, username:"@travel_indo", caption:"Pesona Indonesia 🇮🇩 #travel", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", likes:3401, monetized:true, music:"", filter:"", overlayText:"", overlayPos:"pos-bottom", overlayColor:"#ffffff" },
   ];
 
   function getAllVideos() { return [...state.userVideos, ...defaultVideos]; }
@@ -771,7 +816,7 @@
   }
 
   // ==========================================
-  // FITUR LIVE ROOM (BroadcastChannel)
+  // FITUR LIVE ROOM
   // ==========================================
   btnLive.addEventListener('click', () => {
     liveModal.classList.remove('hidden');
@@ -784,11 +829,7 @@
     return Math.random().toString(36).substring(2, 8).toUpperCase();
   }
 
-  btnCreateRoom.addEventListener('click', () => {
-    const code = generateRoomCode();
-    joinRoom(code, true);
-  });
-
+  btnCreateRoom.addEventListener('click', () => { joinRoom(generateRoomCode(), true); });
   btnJoinRoom.addEventListener('click', () => {
     const code = inputJoinCode.value.trim().toUpperCase();
     if (!code) { showToast('Masukkan kode undangan', 'error'); return; }
@@ -797,86 +838,57 @@
 
   function joinRoom(code, isHost) {
     if (liveChannel) liveChannel.close();
-    
     currentRoomCode = code;
     liveChannel = new BroadcastChannel('vidstream_room_' + code);
     
     liveChannel.onmessage = (event) => {
       const data = event.data;
-      if (data.type === 'chat') {
-        addChatMessage(data.user, data.text);
-      } else if (data.type === 'system') {
-        addChatMessage('SYSTEM', data.text, true);
-      } else if (data.type === 'video-sync') {
-        // Jika sinkronisasi video antar device (opsional di demo ini)
-      }
+      if (data.type === 'chat') addChatMessage(data.user, data.text);
+      else if (data.type === 'system') addChatMessage('SYSTEM', data.text, true);
     };
 
     liveSetup.classList.add('hidden');
     liveActive.classList.remove('hidden');
     roomIdDisplay.textContent = code;
     liveChatBox.innerHTML = '';
-    
     addChatMessage('SYSTEM', `Kamu masuk ke ruangan ${code} sebagai ${isHost ? 'Host' : 'Tamu'}.`, true);
-    
-    // Broadcast join message
     liveChannel.postMessage({ type: 'system', text: `${myUsername} baru saja bergabung!` });
     
-    // Salin Link Undangan
     const shareLink = `${window.location.origin}${window.location.pathname}?room=${code}`;
-    if (navigator.share) {
-      navigator.share({ title: 'Gabung Live Bareng!', text: 'Ayo gabung di ruanganku!', url: shareLink }).catch(()=>{});
-    } else {
-      navigator.clipboard.writeText(shareLink);
-      showToast('🔗 Link undangan disalin!', 'success');
-    }
+    if (navigator.share) navigator.share({ title: 'Gabung Live Bareng!', url: shareLink }).catch(()=>{});
+    else { navigator.clipboard.writeText(shareLink); showToast('🔗 Link undangan disalin!', 'success'); }
   }
 
   function leaveRoom() {
     if (liveChannel) {
       liveChannel.postMessage({ type: 'system', text: `${myUsername} keluar dari ruangan.` });
-      liveChannel.close();
-      liveChannel = null;
+      liveChannel.close(); liveChannel = null;
     }
     currentRoomCode = null;
   }
 
   btnLeaveRoom.addEventListener('click', () => {
-    leaveRoom();
-    liveSetup.classList.remove('hidden');
-    liveActive.classList.add('hidden');
+    leaveRoom(); liveSetup.classList.remove('hidden'); liveActive.classList.add('hidden');
   });
 
   function addChatMessage(user, text, isSystem = false) {
     const div = document.createElement('div');
-    if (isSystem) {
-      div.className = 'chat-msg system';
-      div.textContent = text;
-    } else {
-      div.className = 'chat-msg';
-      div.innerHTML = `<span class="chat-user">${user}:</span> ${text}`;
-    }
-    liveChatBox.appendChild(div);
-    liveChatBox.scrollTop = liveChatBox.scrollHeight;
+    if (isSystem) { div.className = 'chat-msg system'; div.textContent = text; } 
+    else { div.className = 'chat-msg'; div.innerHTML = `<span class="chat-user">${user}:</span> ${text}`; }
+    liveChatBox.appendChild(div); liveChatBox.scrollTop = liveChatBox.scrollHeight;
   }
 
   function sendLiveChatMessage() {
     const text = liveChatInput.value.trim();
     if (!text || !liveChannel) return;
-    
-    // Tampilkan di layar sendiri
     addChatMessage(myUsername, text);
-    
-    // Kirim ke teman
     liveChannel.postMessage({ type: 'chat', user: myUsername, text: text });
-    
     liveChatInput.value = '';
   }
 
   btnSendLiveChat.addEventListener('click', sendLiveChatMessage);
   liveChatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendLiveChatMessage(); });
 
-  // Cek URL jika ada parameter ?room=
   function checkRoomURL() {
     const urlParams = new URLSearchParams(window.location.search);
     const roomCode = urlParams.get('room');
@@ -898,38 +910,27 @@
   function renderComments(videoId) {
     const comments = state.comments[videoId] || [];
     commentCount.textContent = comments.length;
-    
     if (comments.length === 0) {
-      commentList.innerHTML = `<p style="text-align:center;color:#666;font-size:0.85rem;margin-top:20px;">Belum ada komentar. Jadilah yang pertama!</p>`;
+      commentList.innerHTML = `<p style="text-align:center;color:#666;font-size:0.85rem;margin-top:20px;">Belum ada komentar.</p>`;
       return;
     }
     commentList.innerHTML = comments.map(c => `
       <div class="comment-item">
         <div class="comment-avatar">${c.user.charAt(1).toUpperCase()}</div>
-        <div class="comment-body">
-          <div class="c-user">${c.user}</div>
-          <div class="c-text">${c.text}</div>
-        </div>
+        <div class="comment-body"><div class="c-user">${c.user}</div><div class="c-text">${c.text}</div></div>
       </div>
     `).join('');
     commentList.scrollTop = commentList.scrollHeight;
   }
 
-  closeComment.addEventListener('click', () => {
-    commentSheet.classList.remove('show');
-    currentVideoIdForComment = null;
-  });
+  closeComment.addEventListener('click', () => { commentSheet.classList.remove('show'); currentVideoIdForComment = null; });
 
   sendComment.addEventListener('click', () => {
     const text = commentInput.value.trim();
     if (!text || !currentVideoIdForComment) return;
-
     if (!state.comments[currentVideoIdForComment]) state.comments[currentVideoIdForComment] = [];
     state.comments[currentVideoIdForComment].push({ user: myUsername, text: text });
-
-    saveState();
-    commentInput.value = '';
-    renderComments(currentVideoIdForComment);
+    saveState(); commentInput.value = ''; renderComments(currentVideoIdForComment);
     
     const card = feedView.querySelector(`.video-card[data-id="${currentVideoIdForComment}"]`);
     if (card) {
@@ -960,14 +961,17 @@
       const isFollowed = state.followedUsers[v.username];
       const commentTotal = (state.comments[v.id] || []).length + Math.floor(Math.random()*20) + 5;
       
-      let musicHTML = '';
-      if (v.music) {
-        musicHTML = `
-          <div class="music-info">
-            <span style="font-size:1rem;">🎵</span>
-            <div class="marquee"><span>Musik Viral (Bebas Royalti) • VidStream Pro</span></div>
-          </div>
-        `;
+      let musicHTML = v.music ? `
+        <div class="music-info">
+          <span style="font-size:1rem;">🎵</span>
+          <div class="marquee"><span>Musik Viral (Bebas Royalti) • VidStream Pro</span></div>
+        </div>
+      ` : '';
+
+      // Render Overlay Text
+      let overlayHTML = '';
+      if (v.overlayText) {
+        overlayHTML = `<div class="video-text-overlay ${v.overlayPos}" style="color:${v.overlayColor}; font-size:1.5rem;">${v.overlayText}</div>`;
       }
 
       const filterClass = v.filter ? v.filter : '';
@@ -976,6 +980,7 @@
         <video loop muted playsinline preload="metadata" class="${filterClass}"></video>
         ${v.music ? `<audio class="bg-music" src="${v.music}" loop></audio>` : ''}
         <button class="mute-btn">🔇</button>
+        ${overlayHTML}
         <div class="play-indicator">▶</div>
         <div class="progress-bar"><div class="progress-fill"></div></div>
         <div class="video-info">
@@ -1034,14 +1039,10 @@
         e.stopPropagation();
         const user = followBtn.dataset.user;
         if (state.followedUsers[user]) {
-          delete state.followedUsers[user];
-          followBtn.classList.remove('followed');
-          followBtn.textContent = '+ Follow';
+          delete state.followedUsers[user]; followBtn.classList.remove('followed'); followBtn.textContent = '+ Follow';
           showToast(`Berhenti mengikuti ${user}`, 'info');
         } else {
-          state.followedUsers[user] = true;
-          followBtn.classList.add('followed');
-          followBtn.textContent = '✓ Following';
+          state.followedUsers[user] = true; followBtn.classList.add('followed'); followBtn.textContent = '✓ Following';
           showToast(`Mengikuti ${user}`, 'success');
         }
         saveState();
@@ -1052,17 +1053,11 @@
       likeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         if (state.likedVideos[v.id]) {
-          delete state.likedVideos[v.id];
-          likeBtn.style.filter = 'none';
-          likeBtn.firstChild.textContent = '🤍';
-          const span = likeBtn.querySelector('span');
-          span.textContent = formatNum(v.likes);
+          delete state.likedVideos[v.id]; likeBtn.style.filter = 'none'; likeBtn.firstChild.textContent = '🤍';
+          likeBtn.querySelector('span').textContent = formatNum(v.likes);
         } else {
-          state.likedVideos[v.id] = true;
-          likeBtn.style.filter = 'drop-shadow(0 0 6px #ff0050)';
-          likeBtn.firstChild.textContent = '❤️';
-          const span = likeBtn.querySelector('span');
-          span.textContent = formatNum(v.likes + 1);
+          state.likedVideos[v.id] = true; likeBtn.style.filter = 'drop-shadow(0 0 6px #ff0050)'; likeBtn.firstChild.textContent = '❤️';
+          likeBtn.querySelector('span').textContent = formatNum(v.likes + 1);
         }
         saveState();
       });
@@ -1131,16 +1126,12 @@
 
       const interval = setInterval(() => {
         remaining--; timerEl.textContent = remaining;
-        if (remaining <= 0) {
-          clearInterval(interval);
-          skipBtn.disabled = false; skipBtn.textContent = '▶ Lanjut Tonton';
-        }
+        if (remaining <= 0) { clearInterval(interval); skipBtn.disabled = false; skipBtn.textContent = '▶ Lanjut Tonton'; }
       }, 1000);
 
       skipBtn.onclick = () => {
         if (skipBtn.disabled) return;
-        clearInterval(interval);
-        overlay.classList.add('hidden');
+        clearInterval(interval); overlay.classList.add('hidden');
         sessionStorage.setItem('ad_shown_' + videoId, '1');
         video.play(); resolve();
       };
@@ -1148,20 +1139,11 @@
   }
 
   async function handleShare(v) {
-    const shareData = {
-      title: 'VidStream Pro',
-      text: `Tonton video keren dari ${v.username}: "${v.caption}"`,
-      url: window.location.href
-    };
+    const shareData = { title: 'VidStream Pro', text: `Tonton video keren dari ${v.username}: "${v.caption}"`, url: window.location.href };
     try {
       if (navigator.share) { await navigator.share(shareData); } 
-      else {
-        await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`);
-        showToast('🔗 Link berhasil disalin!', 'success');
-      }
-    } catch (err) {
-      if (err.name !== 'AbortError') showToast('Gagal membagikan', 'error');
-    }
+      else { await navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`); showToast('🔗 Link berhasil disalin!', 'success'); }
+    } catch (err) { if (err.name !== 'AbortError') showToast('Gagal membagikan', 'error'); }
   }
 
   function handleTip(videoData) {
@@ -1206,9 +1188,11 @@
       item.className = 'grid-item'; item.dataset.index = i; item.dataset.id = v.id;
       
       const filterClass = v.filter ? v.filter : '';
-      
+      let overlayHTML = v.overlayText ? `<div class="video-text-overlay ${v.overlayPos}" style="color:${v.overlayColor}; font-size:1rem;">${v.overlayText}</div>` : '';
+
       item.innerHTML = `
         <video muted preload="metadata" playsinline class="${filterClass}"></video>
+        ${overlayHTML}
         ${v.monetized ? '<div class="grid-badge">💰</div>' : ''}
         <div class="play-icon">▶️</div><div class="grid-title">${v.caption}</div>
       `;
@@ -1238,7 +1222,7 @@
   closeModal.addEventListener('click', () => { modalVideo.pause(); modalVideo.src = ''; playerModal.classList.add('hidden'); });
 
   // ==========================================
-  // UPLOAD LOGIC
+  // UPLOAD LOGIC (WITH TEXT OVERLAY)
   // ==========================================
   btnUpload.addEventListener('click', () => { uploadModal.classList.remove('hidden'); resetUploadForm(); });
   closeUpload.addEventListener('click', () => { uploadModal.classList.add('hidden'); if (pendingFile) URL.revokeObjectURL(previewVideo.src); resetUploadForm(); });
@@ -1250,6 +1234,9 @@
     document.getElementById('uploadUsername').value = '';
     document.getElementById('uploadMusic').value = '';
     document.getElementById('uploadFilter').value = '';
+    document.getElementById('uploadOverlayText').value = '';
+    document.getElementById('uploadOverlayPos').value = 'pos-bottom';
+    document.getElementById('uploadOverlayColor').value = '#ffffff';
     document.getElementById('uploadMonet').value = 'yes';
     btnSubmitUpload.disabled = true;
     btnSubmitUpload.textContent = '🚀 Publikasikan';
@@ -1293,10 +1280,19 @@
       const music = document.getElementById('uploadMusic').value;
       const filter = document.getElementById('uploadFilter').value;
       const monetized = document.getElementById('uploadMonet').value === 'yes';
+      
+      // Ambil Data Overlay
+      const overlayText = document.getElementById('uploadOverlayText').value.trim();
+      const overlayPos = document.getElementById('uploadOverlayPos').value;
+      const overlayColor = document.getElementById('uploadOverlayColor').value;
+
       const newId = Date.now();
 
       await saveVideoToDB(newId, pendingFile);
-      state.userVideos.unshift({ id: newId, username, caption, src: null, likes: 0, monetized, music, filter, uploadedAt: Date.now() });
+      state.userVideos.unshift({ 
+        id: newId, username, caption, src: null, likes: 0, monetized, music, filter,
+        overlayText, overlayPos, overlayColor, uploadedAt: Date.now() 
+      });
       saveState();
       
       showToast('🎉 Video berhasil disimpan!', 'success');
@@ -1348,7 +1344,7 @@
   (async () => {
     loadState(); await initDB();
     await renderFeed(); await renderGrid(); updateBalanceUI();
-    checkRoomURL(); // Cek jika user membuka link undangan
+    checkRoomURL();
   })();
 </script>
 </body>
