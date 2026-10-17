@@ -53,26 +53,37 @@
     position:absolute; bottom:80px; left:16px; right:80px;
     z-index:2; text-shadow:0 2px 8px rgba(0,0,0,0.8);
   }
-  .video-info .username { font-weight:bold; font-size:1rem; margin-bottom:6px; }
-  .video-info .caption { font-size:0.85rem; opacity:0.9; line-height:1.3; }
+  .video-info .username { font-weight:bold; font-size:1.05rem; margin-bottom:6px; }
+  .video-info .caption { font-size:0.9rem; opacity:0.9; line-height:1.3; }
   .video-info .badge-monet {
     display:inline-block; font-size:0.65rem; background:#00c853;
-    padding:2px 8px; border-radius:10px; margin-top:6px;
+    padding:2px 8px; border-radius:10px; margin-top:8px;
     font-weight:bold; letter-spacing:0.5px;
   }
 
   .side-actions {
-    position:absolute; right:12px; bottom:100px;
-    display:flex; flex-direction:column; gap:16px; z-index:2;
+    position:absolute; right:12px; bottom:90px;
+    display:flex; flex-direction:column; gap:20px; z-index:2;
   }
   .action-btn {
     background:none; border:none; color:#fff; font-size:1.6rem;
     cursor:pointer; display:flex; flex-direction:column;
     align-items:center; gap:2px; transition:transform 0.15s;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
   }
   .action-btn:active { transform:scale(0.85); }
-  .action-btn span { font-size:0.68rem; margin-top:2px; }
-  .action-btn.tip-btn { color:#f7b733; font-weight:bold; }
+  .action-btn span { font-size:0.7rem; margin-top:2px; font-weight:600; }
+  .action-btn.tip-btn { color:#f7b733; }
+  
+  /* Tombol Mute */
+  .mute-btn {
+    position:absolute; top:70px; right:16px; z-index:3;
+    background:rgba(0,0,0,0.5); border:none; color:#fff;
+    width:36px; height:36px; border-radius:50%;
+    cursor:pointer; font-size:1.2rem;
+    display:flex; justify-content:center; align-items:center;
+    backdrop-filter:blur(4px);
+  }
 
   .play-indicator {
     position:absolute; top:50%; left:50%;
@@ -281,7 +292,6 @@
 </head>
 <body>
 
-  <!-- NAVBAR -->
   <header class="navbar">
     <div class="logo">🎬 VidStream Pro</div>
     <div class="nav-buttons">
@@ -292,16 +302,13 @@
     </div>
   </header>
 
-  <!-- FEED VIEW -->
   <main id="feedView" class="feed-container"></main>
 
-  <!-- GRID VIEW -->
   <main id="gridView" class="grid-container hidden">
     <h2 class="section-title">🔥 Trending Now</h2>
     <div id="gridList" class="grid-list"></div>
   </main>
 
-  <!-- ===== MODAL PLAYER GRID ===== -->
   <div id="playerModal" class="modal hidden">
     <div class="modal-content">
       <button id="closeModal" class="close-btn">✕</button>
@@ -310,32 +317,29 @@
     </div>
   </div>
 
-  <!-- ===== MODAL UPLOAD ===== -->
   <div id="uploadModal" class="modal hidden">
     <div class="modal-content">
       <button id="closeUpload" class="close-btn">✕</button>
       <div class="upload-body">
         <h3>⬆️ Upload Video</h3>
-
         <div id="dropzone" class="dropzone">
           <div class="icon">📹</div>
           <p><strong>Tap atau drag video di sini</strong></p>
           <p style="margin-top:4px;">MP4 / WebM / MOV</p>
         </div>
         <input type="file" id="fileInput" accept="video/*" hidden />
-
         <video id="previewVideo" class="preview-thumb hidden" controls></video>
-
+        
         <div class="form-group">
-          <label>Username / Channel</label>
-          <input type="text" id="uploadUsername" placeholder="@username_kamu" value="@user_baru" />
+          <label>Username / Channel <span style="color:#ff0050">*</span></label>
+          <input type="text" id="uploadUsername" placeholder="Contoh: @budi_kreator" />
         </div>
-
+        
         <div class="form-group">
-          <label>Caption / Deskripsi</label>
+          <label>Caption / Deskripsi <span style="color:#ff0050">*</span></label>
           <textarea id="uploadCaption" rows="3" placeholder="Tulis caption menarik... #hashtag"></textarea>
         </div>
-
+        
         <div class="form-group">
           <label>💰 Aktifkan Monetisasi?</label>
           <select id="uploadMonet">
@@ -343,7 +347,7 @@
             <option value="no">Tidak — Video biasa</option>
           </select>
         </div>
-
+        
         <button id="btnSubmitUpload" class="btn-primary" disabled>🚀 Publikasikan</button>
         <p style="font-size:0.7rem;color:#666;text-align:center;margin-top:10px;">
           Video disimpan aman di penyimpanan browser (IndexedDB).
@@ -352,67 +356,31 @@
     </div>
   </div>
 
-  <!-- ===== MODAL MONETISASI ===== -->
   <div id="monetModal" class="modal hidden">
     <div class="modal-content">
       <button id="closeMonet" class="close-btn">✕</button>
       <div class="monet-body">
         <h3>💰 Dashboard Monetisasi</h3>
         <p class="sub">Kelola koin & penghasilan kamu di VidStream Pro</p>
-
         <div class="balance-card">
           <div class="label">Saldo Koin Kamu</div>
           <div class="amount">🪙 <span id="coinBalance">0</span></div>
           <div class="rp">≈ Rp <span id="coinRupiah">0</span></div>
         </div>
-
         <div class="stat-grid">
-          <div class="stat-box">
-            <div class="num" id="statViews">0</div>
-            <div class="lbl">👀 Views</div>
-          </div>
-          <div class="stat-box">
-            <div class="num" id="statEarnings">0</div>
-            <div class="lbl">💵 Earnings</div>
-          </div>
-          <div class="stat-box">
-            <div class="num" id="statVideos">0</div>
-            <div class="lbl">🎬 Video Upload</div>
-          </div>
-          <div class="stat-box">
-            <div class="num" id="statTips">0</div>
-            <div class="lbl">🎁 Tips Diterima</div>
-          </div>
+          <div class="stat-box"><div class="num" id="statViews">0</div><div class="lbl">👀 Views</div></div>
+          <div class="stat-box"><div class="num" id="statEarnings">0</div><div class="lbl">💵 Earnings</div></div>
+          <div class="stat-box"><div class="num" id="statVideos">0</div><div class="lbl">🎬 Video Upload</div></div>
+          <div class="stat-box"><div class="num" id="statTips">0</div><div class="lbl">🎁 Tips Diterima</div></div>
         </div>
-
         <div class="section-hdr">💳 Beli Koin</div>
         <div class="price-list">
-          <div class="price-item" data-coins="100" data-price="10000">
-            <span class="coins">🪙 100 Koin</span>
-            <span class="harga">Rp 10.000</span>
-          </div>
-          <div class="price-item" data-coins="500" data-price="45000">
-            <span class="coins">🪙 500 Koin</span>
-            <span class="harga">Rp 45.000</span>
-          </div>
-          <div class="price-item" data-coins="1200" data-price="100000">
-            <span class="coins">🪙 1.200 Koin <small style="color:#00c853;">+200 bonus</small></span>
-            <span class="harga">Rp 100.000</span>
-          </div>
-          <div class="price-item" data-coins="3000" data-price="250000">
-            <span class="coins">🪙 3.000 Koin <small style="color:#00c853;">+800 bonus</small></span>
-            <span class="harga">Rp 250.000</span>
-          </div>
+          <div class="price-item" data-coins="100" data-price="10000"><span class="coins">🪙 100 Koin</span><span class="harga">Rp 10.000</span></div>
+          <div class="price-item" data-coins="500" data-price="45000"><span class="coins">🪙 500 Koin</span><span class="harga">Rp 45.000</span></div>
+          <div class="price-item" data-coins="1200" data-price="100000"><span class="coins">🪙 1.200 Koin <small style="color:#00c853;">+200 bonus</small></span><span class="harga">Rp 100.000</span></div>
         </div>
-
         <div class="section-hdr">💸 Tarik Penghasilan</div>
-        <p style="font-size:0.75rem;color:#aaa;margin-bottom:8px;">
-          Minimum 1000 koin (≈ Rp 100.000) untuk withdraw.
-        </p>
-        <button id="btnWithdraw" class="withdraw-btn" disabled>
-          💸 Tarik ke Rekening
-        </button>
-
+        <button id="btnWithdraw" class="withdraw-btn" disabled>💸 Tarik ke Rekening</button>
         <div class="section-hdr" style="margin-top:20px;">📋 Riwayat Transaksi</div>
         <div class="tx-list" id="txList"></div>
       </div>
@@ -422,21 +390,13 @@
   <div id="toast" class="toast"></div>
 
 <script>
-  // ============================================================
-  // ===== STATE & STORAGE (LocalStorage untuk teks) ============
-  // ============================================================
-  const STORAGE_KEY = 'vidstream_v2';
+  const STORAGE_KEY = 'vidstream_v3';
   const COIN_TO_RP = 100;
   const AD_DURATION = 3;
   const REWARD_PER_VIEW = 1;
 
   let state = {
-    coins: 0,
-    earnings: 0,
-    tipsReceived: 0,
-    views: 0,
-    transactions: [],
-    userVideos: [], // Metadata video disimpan di sini (tanpa file video)
+    coins: 0, earnings: 0, tipsReceived: 0, views: 0, transactions: [], userVideos: [],
   };
 
   function loadState() {
@@ -446,14 +406,10 @@
     } catch (e) { console.warn(e); }
   }
   function saveState() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (e) { console.warn(e); }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { console.warn(e); }
   }
 
-  // ============================================================
-  // ===== INDEXEDDB UNTUK FILE VIDEO ===========================
-  // ============================================================
+  // INDEXEDDB
   const DB_NAME = 'vidstream_db';
   const DB_STORE = 'videos';
   let db;
@@ -463,64 +419,36 @@
       const req = indexedDB.open(DB_NAME, 1);
       req.onupgradeneeded = e => {
         const d = e.target.result;
-        if (!d.objectStoreNames.contains(DB_STORE)) {
-          d.createObjectStore(DB_STORE, { keyPath: 'id' });
-        }
+        if (!d.objectStoreNames.contains(DB_STORE)) d.createObjectStore(DB_STORE, { keyPath: 'id' });
       };
       req.onsuccess = e => { db = e.target.result; resolve(); };
       req.onerror = e => reject(e);
     });
   }
-
   function saveVideoToDB(id, blob) {
     return new Promise((resolve, reject) => {
       const tx = db.transaction(DB_STORE, 'readwrite');
-      const store = tx.objectStore(DB_STORE);
-      const req = store.put({ id, blob });
-      req.onsuccess = () => resolve();
-      req.onerror = e => reject(e);
+      tx.objectStore(DB_STORE).put({ id, blob }).onsuccess = () => resolve();
+      tx.onerror = e => reject(e);
     });
   }
-
   function getVideoFromDB(id) {
     return new Promise((resolve, reject) => {
       const tx = db.transaction(DB_STORE, 'readonly');
-      const store = tx.objectStore(DB_STORE);
-      const req = store.get(id);
+      const req = tx.objectStore(DB_STORE).get(id);
       req.onsuccess = e => resolve(e.target.result ? e.target.result.blob : null);
       req.onerror = e => reject(e);
     });
   }
 
-  function deleteVideoFromDB(id) {
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(DB_STORE, 'readwrite');
-      const store = tx.objectStore(DB_STORE);
-      const req = store.delete(id);
-      req.onsuccess = () => resolve();
-      req.onerror = e => reject(e);
-    });
-  }
-
-  // ============================================================
-  // ===== DATA DEFAULT VIDEO ====================================
-  // ============================================================
   const defaultVideos = [
     { id:1, username:"@nature_vibes", caption:"Sunset di pantai 🏖️ #nature", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes:1240, monetized:true },
     { id:2, username:"@funny_cat", caption:"Kucing lucu 😹 #cat", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4", likes:892, monetized:true },
     { id:3, username:"@travel_indo", caption:"Pesona Indonesia 🇮🇩 #travel", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4", likes:3401, monetized:true },
-    { id:4, username:"@music_daily", caption:"Beat drop 🎵 #music", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4", likes:2100, monetized:false },
-    { id:5, username:"@dance_move", caption:"Dance viral 💃 #dance", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4", likes:5670, monetized:true },
-    { id:6, username:"@food_lover", caption:"Resep simple 🍜 #food", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4", likes:780, monetized:false },
   ];
 
-  function getAllVideos() {
-    return [...state.userVideos, ...defaultVideos];
-  }
+  function getAllVideos() { return [...state.userVideos, ...defaultVideos]; }
 
-  // ============================================================
-  // ===== ELEMENT ===============================================
-  // ============================================================
   const feedView = document.getElementById('feedView');
   const gridView = document.getElementById('gridView');
   const gridList = document.getElementById('gridList');
@@ -529,19 +457,16 @@
   const btnUpload = document.getElementById('btnUpload');
   const btnMonet = document.getElementById('btnMonet');
   const navBalance = document.getElementById('navBalance');
-
   const playerModal = document.getElementById('playerModal');
   const modalVideo = document.getElementById('modalVideo');
   const modalTitle = document.getElementById('modalTitle');
   const closeModal = document.getElementById('closeModal');
-
   const uploadModal = document.getElementById('uploadModal');
   const closeUpload = document.getElementById('closeUpload');
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('fileInput');
   const previewVideo = document.getElementById('previewVideo');
   const btnSubmitUpload = document.getElementById('btnSubmitUpload');
-
   const monetModal = document.getElementById('monetModal');
   const closeMonet = document.getElementById('closeMonet');
   const coinBalance = document.getElementById('coinBalance');
@@ -552,30 +477,22 @@
   const statTips = document.getElementById('statTips');
   const btnWithdraw = document.getElementById('btnWithdraw');
   const txList = document.getElementById('txList');
-
   const toast = document.getElementById('toast');
 
   let pendingFile = null;
 
-  // ============================================================
-  // ===== UTIL ==================================================
-  // ============================================================
   function formatNum(n) {
     if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
     if (n >= 1000) return (n/1000).toFixed(1) + 'K';
     return n;
   }
-
   function showToast(msg, type='info') {
     toast.textContent = msg;
-    toast.style.background = type === 'success' ? '#00c853'
-                          : type === 'error' ? '#ff0050'
-                          : '#333';
+    toast.style.background = type === 'success' ? '#00c853' : type === 'error' ? '#ff0050' : '#333';
     toast.classList.add('show');
     clearTimeout(toast._t);
     toast._t = setTimeout(() => toast.classList.remove('show'), 2500);
   }
-
   function updateBalanceUI() {
     navBalance.textContent = state.coins;
     coinBalance.textContent = state.coins;
@@ -587,35 +504,24 @@
     btnWithdraw.disabled = state.coins < 1000;
     renderTransactions();
   }
-
   function renderTransactions() {
     if (state.transactions.length === 0) {
       txList.innerHTML = `<p style="font-size:0.75rem;color:#666;text-align:center;padding:20px 0;">Belum ada transaksi</p>`;
       return;
     }
     txList.innerHTML = state.transactions.slice(0, 10).map(tx => `
-      <div class="tx-item">
-        <span>${tx.label}</span>
-        <span class="${tx.amount > 0 ? 'tx-plus' : 'tx-minus'}">
-          ${tx.amount > 0 ? '+' : ''}${tx.amount} 🪙
-        </span>
-      </div>
+      <div class="tx-item"><span>${tx.label}</span><span class="${tx.amount > 0 ? 'tx-plus' : 'tx-minus'}">${tx.amount > 0 ? '+' : ''}${tx.amount} 🪙</span></div>
     `).join('');
   }
-
   function addTransaction(label, amount) {
     state.transactions.unshift({ label, amount, time: Date.now() });
     if (state.transactions.length > 50) state.transactions.pop();
-    saveState();
-    updateBalanceUI();
+    saveState(); updateBalanceUI();
   }
 
-  // ============================================================
-  // ===== RENDER FEED ===========================================
-  // ============================================================
   async function renderFeed() {
     const all = getAllVideos();
-    feedView.innerHTML = ''; // Clear dulu
+    feedView.innerHTML = '';
 
     for (let i = 0; i < all.length; i++) {
       const v = all[i];
@@ -624,9 +530,9 @@
       card.dataset.index = i;
       card.dataset.id = v.id;
 
-      // Placeholder dulu (karena video mungkin perlu di-load dari IndexedDB)
       card.innerHTML = `
         <video loop muted playsinline preload="metadata"></video>
+        <button class="mute-btn">🔇</button>
         <div class="play-indicator">▶</div>
         <div class="progress-bar"><div class="progress-fill"></div></div>
         <div class="video-info">
@@ -649,28 +555,25 @@
       `;
 
       const videoEl = card.querySelector('video');
+      const muteBtn = card.querySelector('.mute-btn');
       
-      // Ambil video source
-      if (v.src) {
-        videoEl.src = v.src;
-      } else {
-        // Load dari IndexedDB
+      if (v.src) { videoEl.src = v.src; } 
+      else {
         try {
           const blob = await getVideoFromDB(v.id);
-          if (blob) {
-            videoEl.src = URL.createObjectURL(blob);
-          } else {
-            videoEl.src = ''; // File hilang
-            videoEl.style.background = '#222';
-          }
-        } catch (e) {
-          console.warn('Gagal load video', e);
-        }
+          if (blob) videoEl.src = URL.createObjectURL(blob);
+        } catch (e) { console.warn('Gagal load video', e); }
       }
+
+      // Logika tombol Mute
+      muteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        videoEl.muted = !videoEl.muted;
+        muteBtn.textContent = videoEl.muted ? '🔇' : '🔊';
+      });
 
       feedView.appendChild(card);
     }
-
     setupFeedInteractions();
     observeFeed();
   }
@@ -690,38 +593,28 @@
         if (video.paused) {
           if (videoData && videoData.monetized) {
             const adShown = sessionStorage.getItem('ad_shown_' + videoId);
-            if (!adShown) {
-              await showAd(adOverlay, videoId, video);
-              return;
-            }
+            if (!adShown) { await showAd(adOverlay, videoId, video); return; }
           }
           video.play();
-          indicator.textContent = '▶';
-          indicator.classList.add('show');
+          indicator.textContent = '▶'; indicator.classList.add('show');
           setTimeout(() => indicator.classList.remove('show'), 400);
           
           const viewKey = 'view_rewarded_' + videoId;
           if (videoData && videoData.monetized && !sessionStorage.getItem(viewKey)) {
             sessionStorage.setItem(viewKey, '1');
-            state.coins += REWARD_PER_VIEW;
-            state.earnings += REWARD_PER_VIEW;
-            state.views++;
-            saveState();
-            updateBalanceUI();
+            state.coins += REWARD_PER_VIEW; state.earnings += REWARD_PER_VIEW; state.views++;
+            saveState(); updateBalanceUI();
             addTransaction('Reward view video', REWARD_PER_VIEW);
           }
         } else {
           video.pause();
-          indicator.textContent = '⏸';
-          indicator.classList.add('show');
+          indicator.textContent = '⏸'; indicator.classList.add('show');
           setTimeout(() => indicator.classList.remove('show'), 400);
         }
       });
 
       video.addEventListener('timeupdate', () => {
-        if (video.duration) {
-          progressFill.style.width = (video.currentTime / video.duration * 100) + '%';
-        }
+        if (video.duration) progressFill.style.width = (video.currentTime / video.duration * 100) + '%';
       });
 
       let liked = false;
@@ -733,29 +626,24 @@
       });
 
       tipBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        handleTip(videoData);
+        e.stopPropagation(); handleTip(videoData);
       });
     });
   }
 
   function showAd(overlay, videoId, video) {
     return new Promise(resolve => {
-      overlay.classList.remove('hidden');
-      video.pause();
+      overlay.classList.remove('hidden'); video.pause();
       const timerEl = overlay.querySelector('.ad-timer strong');
       const skipBtn = overlay.querySelector('.ad-skip-btn');
       let remaining = AD_DURATION;
-      timerEl.textContent = remaining;
-      skipBtn.disabled = true;
+      timerEl.textContent = remaining; skipBtn.disabled = true;
 
       const interval = setInterval(() => {
-        remaining--;
-        timerEl.textContent = remaining;
+        remaining--; timerEl.textContent = remaining;
         if (remaining <= 0) {
           clearInterval(interval);
-          skipBtn.disabled = false;
-          skipBtn.textContent = '▶ Lanjut Tonton';
+          skipBtn.disabled = false; skipBtn.textContent = '▶ Lanjut Tonton';
         }
       }, 1000);
 
@@ -764,8 +652,7 @@
         clearInterval(interval);
         overlay.classList.add('hidden');
         sessionStorage.setItem('ad_shown_' + videoId, '1');
-        video.play();
-        resolve();
+        video.play(); resolve();
       };
     });
   }
@@ -775,16 +662,9 @@
     const amount = prompt(`🎁 Kirim tips ke ${videoData.username}\n\nMasukkan jumlah koin (min 10):`, '10');
     if (amount === null) return;
     const n = parseInt(amount);
-    if (isNaN(n) || n < 10) {
-      showToast('Minimal 10 koin', 'error');
-      return;
-    }
-    if (n > state.coins) {
-      showToast('Koin tidak cukup! Beli dulu di menu 💰', 'error');
-      return;
-    }
-    state.coins -= n;
-    state.tipsReceived += n;
+    if (isNaN(n) || n < 10) { showToast('Minimal 10 koin', 'error'); return; }
+    if (n > state.coins) { showToast('Koin tidak cukup!', 'error'); return; }
+    state.coins -= n; state.tipsReceived += n;
     addTransaction(`Tips ke ${videoData.username}`, -n);
     showToast(`🎁 Berhasil kirim ${n} koin ke ${videoData.username}!`, 'success');
   }
@@ -797,50 +677,33 @@
           if (!entry.target.querySelector('.ad-overlay').classList.contains('hidden')) return;
           video.play().catch(() => {});
         } else {
-          video.pause();
-          video.currentTime = 0;
+          video.pause(); video.currentTime = 0;
         }
       });
     }, { threshold: [0, 0.6, 1] });
-
     feedView.querySelectorAll('.video-card').forEach(c => observer.observe(c));
   }
 
-  // ============================================================
-  // ===== RENDER GRID ===========================================
-  // ============================================================
   async function renderGrid() {
     const all = getAllVideos();
     gridList.innerHTML = '';
-
     for (let i = 0; i < all.length; i++) {
       const v = all[i];
       const item = document.createElement('div');
-      item.className = 'grid-item';
-      item.dataset.index = i;
-      item.dataset.id = v.id;
-
+      item.className = 'grid-item'; item.dataset.index = i; item.dataset.id = v.id;
       item.innerHTML = `
         <video muted preload="metadata" playsinline></video>
         ${v.monetized ? '<div class="grid-badge">💰</div>' : ''}
-        <div class="play-icon">▶️</div>
-        <div class="grid-title">${v.caption}</div>
+        <div class="play-icon">▶️</div><div class="grid-title">${v.caption}</div>
       `;
-
       const videoEl = item.querySelector('video');
-      if (v.src) {
-        videoEl.src = v.src;
-      } else {
-        try {
-          const blob = await getVideoFromDB(v.id);
-          if (blob) videoEl.src = URL.createObjectURL(blob);
-        } catch (e) { console.warn(e); }
+      if (v.src) { videoEl.src = v.src; } 
+      else {
+        try { const blob = await getVideoFromDB(v.id); if (blob) videoEl.src = URL.createObjectURL(blob); } catch (e) {}
       }
-
       item.addEventListener('mouseenter', () => { videoEl.currentTime = 0; videoEl.play().catch(()=>{}); });
       item.addEventListener('mouseleave', () => videoEl.pause());
       item.addEventListener('click', () => openPlayer(parseInt(item.dataset.id)));
-      
       gridList.appendChild(item);
     }
   }
@@ -848,44 +711,22 @@
   async function openPlayer(id) {
     const v = getAllVideos().find(x => x.id === id);
     if (!v) return;
-    
-    if (v.src) {
-      modalVideo.src = v.src;
-    } else {
-      try {
-        const blob = await getVideoFromDB(v.id);
-        if (blob) modalVideo.src = URL.createObjectURL(blob);
-      } catch (e) {}
-    }
-    
+    if (v.src) { modalVideo.src = v.src; } 
+    else { try { const blob = await getVideoFromDB(v.id); if (blob) modalVideo.src = URL.createObjectURL(blob); } catch (e) {} }
     modalTitle.textContent = `${v.username} — ${v.caption}`;
     playerModal.classList.remove('hidden');
     modalVideo.play().catch(()=>{});
   }
+  closeModal.addEventListener('click', () => { modalVideo.pause(); modalVideo.src = ''; playerModal.classList.add('hidden'); });
+
+  // UPLOAD LOGIC
+  btnUpload.addEventListener('click', () => { uploadModal.classList.remove('hidden'); resetUploadForm(); });
+  closeUpload.addEventListener('click', () => { uploadModal.classList.add('hidden'); if (pendingFile) URL.revokeObjectURL(previewVideo.src); resetUploadForm(); });
   
-  closeModal.addEventListener('click', () => {
-    modalVideo.pause(); modalVideo.src = ''; playerModal.classList.add('hidden');
-  });
-
-  // ============================================================
-  // ===== UPLOAD ================================================
-  // ============================================================
-  btnUpload.addEventListener('click', () => {
-    uploadModal.classList.remove('hidden');
-    resetUploadForm();
-  });
-  closeUpload.addEventListener('click', () => {
-    uploadModal.classList.add('hidden');
-    if (pendingFile) URL.revokeObjectURL(previewVideo.src);
-    resetUploadForm();
-  });
-
   function resetUploadForm() {
-    pendingFile = null;
-    previewVideo.classList.add('hidden');
-    previewVideo.src = '';
+    pendingFile = null; previewVideo.classList.add('hidden'); previewVideo.src = '';
     document.getElementById('uploadCaption').value = '';
-    document.getElementById('uploadUsername').value = '@user_baru';
+    document.getElementById('uploadUsername').value = '';
     document.getElementById('uploadMonet').value = 'yes';
     btnSubmitUpload.disabled = true;
     btnSubmitUpload.textContent = '🚀 Publikasikan';
@@ -894,132 +735,85 @@
   dropzone.addEventListener('click', () => fileInput.click());
   dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
   dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-  dropzone.addEventListener('drop', e => {
-    e.preventDefault(); dropzone.classList.remove('dragover');
-    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
-  });
-  fileInput.addEventListener('change', e => {
-    if (e.target.files[0]) handleFile(e.target.files[0]);
-  });
+  dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('dragover'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+  fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+  // Validasi Input Wajib
+  function validateForm() {
+    const user = document.getElementById('uploadUsername').value.trim();
+    const caption = document.getElementById('uploadCaption').value.trim();
+    btnSubmitUpload.disabled = !(pendingFile && user && caption);
+  }
+  document.getElementById('uploadUsername').addEventListener('input', validateForm);
+  document.getElementById('uploadCaption').addEventListener('input', validateForm);
 
   function handleFile(file) {
-    if (!file.type.startsWith('video/')) {
-      showToast('File harus video!', 'error'); return;
-    }
+    if (!file.type.startsWith('video/')) { showToast('File harus video!', 'error'); return; }
     pendingFile = file;
     previewVideo.src = URL.createObjectURL(file);
     previewVideo.classList.remove('hidden');
-    btnSubmitUpload.disabled = false;
+    validateForm();
     showToast('✅ Video siap dipublikasikan!', 'success');
   }
 
   btnSubmitUpload.addEventListener('click', async () => {
     if (!pendingFile) return;
-    btnSubmitUpload.disabled = true;
-    btnSubmitUpload.textContent = '⏳ Menyimpan video...';
-
+    btnSubmitUpload.disabled = true; btnSubmitUpload.textContent = '⏳ Menyimpan...';
     try {
-      const username = document.getElementById('uploadUsername').value.trim() || '@user_baru';
-      const caption = document.getElementById('uploadCaption').value.trim() || 'Video baru';
+      const username = document.getElementById('uploadUsername').value.trim();
+      const caption = document.getElementById('uploadCaption').value.trim();
       const monetized = document.getElementById('uploadMonet').value === 'yes';
       const newId = Date.now();
 
-      // Simpan file fisik ke IndexedDB
       await saveVideoToDB(newId, pendingFile);
-
-      // Simpan metadata ke State (LocalStorage)
-      const newVideo = {
-        id: newId,
-        username,
-        caption,
-        src: null, // Tidak ada URL, karena pakai IndexedDB
-        likes: 0,
-        monetized,
-        uploadedAt: Date.now(),
-      };
-
-      state.userVideos.unshift(newVideo);
+      state.userVideos.unshift({ id: newId, username, caption, src: null, likes: 0, monetized, uploadedAt: Date.now() });
       saveState();
       
       showToast('🎉 Video berhasil disimpan!', 'success');
-
-      // Re-render
-      await renderFeed();
-      await renderGrid();
-      updateBalanceUI();
-
-      uploadModal.classList.add('hidden');
-      resetUploadForm();
-      btnFeed.click();
-      
+      await renderFeed(); await renderGrid(); updateBalanceUI();
+      uploadModal.classList.add('hidden'); resetUploadForm(); btnFeed.click();
     } catch (err) {
-      console.error(err);
       showToast('Gagal menyimpan: ' + err.message, 'error');
-      btnSubmitUpload.textContent = '🚀 Publikasikan';
-      btnSubmitUpload.disabled = false;
+      btnSubmitUpload.textContent = '🚀 Publikasikan'; btnSubmitUpload.disabled = false;
     }
   });
 
-  // ============================================================
-  // ===== MONETISASI ============================================
-  // ============================================================
-  btnMonet.addEventListener('click', () => {
-    updateBalanceUI();
-    monetModal.classList.remove('hidden');
-  });
+  // MONETISASI
+  btnMonet.addEventListener('click', () => { updateBalanceUI(); monetModal.classList.remove('hidden'); });
   closeMonet.addEventListener('click', () => monetModal.classList.add('hidden'));
 
   document.querySelectorAll('.price-item').forEach(item => {
     item.addEventListener('click', () => {
-      const coins = parseInt(item.dataset.coins);
-      const price = parseInt(item.dataset.price);
-      const confirmBuy = confirm(`Beli ${coins} koin seharga Rp ${price.toLocaleString('id-ID')}?\n\n(Demo: pembayaran disimulasikan)`);
-      if (!confirmBuy) return;
-      state.coins += coins;
-      addTransaction(`Beli ${coins} koin (Rp ${price.toLocaleString('id-ID')})`, coins);
+      const coins = parseInt(item.dataset.coins); const price = parseInt(item.dataset.price);
+      if (!confirm(`Beli ${coins} koin seharga Rp ${price.toLocaleString('id-ID')}?`)) return;
+      state.coins += coins; addTransaction(`Beli ${coins} koin`, coins);
       showToast(`✅ Berhasil! +${coins} koin ditambahkan`, 'success');
     });
   });
 
   btnWithdraw.addEventListener('click', () => {
-    if (state.coins < 1000) {
-      showToast('Minimal 1000 koin untuk withdraw', 'error'); return;
-    }
-    const rupiah = state.coins * COIN_TO_RP;
-    const ok = confirm(`Tarik ${state.coins} koin (≈ Rp ${rupiah.toLocaleString('id-ID')}) ke rekening?\n\n(Demo: simulasi withdraw)`);
-    if (!ok) return;
-    addTransaction(`Withdraw Rp ${rupiah.toLocaleString('id-ID')}`, -state.coins);
-    state.coins = 0;
-    saveState();
-    updateBalanceUI();
-    showToast('💸 Withdraw berhasil diproses!', 'success');
+    if (state.coins < 1000) return;
+    if (!confirm(`Tarik ${state.coins} koin (≈ Rp ${(state.coins * COIN_TO_RP).toLocaleString('id-ID')})?`)) return;
+    addTransaction(`Withdraw`, -state.coins); state.coins = 0; saveState(); updateBalanceUI();
+    showToast('💸 Withdraw diproses!', 'success');
   });
 
-  // ============================================================
-  // ===== SWITCH VIEW ===========================================
-  // ============================================================
+  // SWITCH VIEW
   btnFeed.addEventListener('click', () => {
-    feedView.classList.remove('hidden');
-    gridView.classList.add('hidden');
+    feedView.classList.remove('hidden'); gridView.classList.add('hidden');
     btnFeed.classList.add('active'); btnGrid.classList.remove('active');
     gridList.querySelectorAll('video').forEach(v => v.pause());
   });
   btnGrid.addEventListener('click', () => {
-    gridView.classList.remove('hidden');
-    feedView.classList.add('hidden');
+    gridView.classList.remove('hidden'); feedView.classList.add('hidden');
     btnGrid.classList.add('active'); btnFeed.classList.remove('active');
     feedView.querySelectorAll('video').forEach(v => v.pause());
   });
 
-  // ============================================================
-  // ===== INIT ==================================================
-  // ============================================================
+  // INIT
   (async () => {
-    loadState();
-    await initDB(); // Inisialisasi IndexedDB dulu
-    await renderFeed();
-    await renderGrid();
-    updateBalanceUI();
+    loadState(); await initDB();
+    await renderFeed(); await renderGrid(); updateBalanceUI();
   })();
 </script>
 </body>
