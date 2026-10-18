@@ -3,38 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>MyFlix — Ultimate Creator (Local Version)</title>
+<title>MyFlix — Timestamp Camera</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; }
   body { background:#000; color:#fff; overflow-x:hidden; }
   .hidden { display:none !important; }
 
-  /* ===== AUTH SCREEN ===== */
-  .auth-screen {
-    position:fixed; inset:0; background:#000; z-index:1000;
-    display:flex; flex-direction:column; justify-content:center; align-items:center;
-    padding:20px; background:linear-gradient(135deg, #000 0%, #1a0005 100%);
-  }
-  .auth-logo { font-size:2.5rem; font-weight:900; margin-bottom:8px; letter-spacing:2px; }
-  .auth-logo span { color:#ff0050; }
-  .auth-tagline { color:#aaa; font-size:0.9rem; margin-bottom:30px; }
-  .auth-box { background:#1a1a1a; border:1px solid #333; padding:24px; border-radius:16px; width:100%; max-width:400px; }
-  .auth-tabs { display:flex; margin-bottom:20px; background:#000; border-radius:8px; overflow:hidden; }
-  .auth-tab { flex:1; padding:10px; text-align:center; cursor:pointer; color:#aaa; font-weight:bold; font-size:0.9rem; }
-  .auth-tab.active { background:#ff0050; color:#fff; }
-  .auth-input-group { margin-bottom:14px; }
-  .auth-input-group label { display:block; font-size:0.8rem; color:#aaa; margin-bottom:6px; }
-  .auth-input-group input { width:100%; padding:12px; background:#000; border:1px solid #444; border-radius:8px; color:#fff; font-size:1rem; outline:none; }
-  .auth-input-group input:focus { border-color:#ff0050; }
-  .auth-btn { width:100%; padding:14px; background:linear-gradient(90deg,#ff0050,#ff8a00); border:none; color:#fff; border-radius:8px; font-weight:bold; font-size:1rem; cursor:pointer; margin-top:10px; }
-
-  /* ===== NAVBAR ===== */
-  .navbar {
-    position:fixed; top:0; left:0; right:0; z-index:100;
-    display:flex; justify-content:space-between; align-items:center;
-    padding:10px 12px; background:linear-gradient(180deg,rgba(0,0,0,0.95),transparent);
-    backdrop-filter:blur(10px);
-  }
+  /* NAVBAR */
+  .navbar { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:linear-gradient(180deg,rgba(0,0,0,0.95),transparent); backdrop-filter:blur(10px); }
   .nav-left { display:flex; align-items:center; gap:8px; }
   .profile-nav-btn { width:34px; height:34px; border-radius:50%; background:#333; border:2px solid #ff0050; cursor:pointer; overflow:hidden; display:flex; justify-content:center; align-items:center; z-index:999; }
   .profile-nav-btn img { width:100%; height:100%; object-fit:cover; }
@@ -44,30 +20,35 @@
   .nav-btn { background:#2a2a2a; border:1px solid #444; color:#fff; padding:6px; border-radius:50%; font-size:0.95rem; cursor:pointer; display:flex; justify-content:center; align-items:center; width:32px; height:32px; transition:0.2s; }
   .nav-btn.active { background:linear-gradient(135deg,#ff8a00,#ff0050); border-color:#ff8a00; }
   .nav-btn.coin-btn { background:linear-gradient(135deg,#f7b733,#fc4a1a); border:none; font-weight:bold; border-radius:20px; width:auto; padding:6px 10px; font-size:0.75rem; gap:4px; color:#fff; }
-  .nav-btn.ads-btn { background:#0050ff; border-color:#0050ff; }
 
-  /* ===== FEED ===== */
+  /* FEED */
   .feed-container { height:100vh; overflow-y:scroll; scroll-snap-type:y mandatory; scrollbar-width:none; }
   .feed-container::-webkit-scrollbar { display:none; }
   .video-card { position:relative; height:100vh; width:100%; scroll-snap-align:start; display:flex; justify-content:center; align-items:center; background:#000; }
   .video-card video { width:100%; height:100%; object-fit:cover; }
   .video-text-overlay { position:absolute; z-index:2; text-align:center; font-weight:bold; text-shadow:0 2px 8px rgba(0,0,0,0.9); pointer-events:none; white-space:nowrap; }
+  
+  /* TIMESTAMP BADGE DI FEED */
+  .feed-timestamp { position:absolute; top:70px; left:16px; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:8px; font-size:0.7rem; color:#ccc; z-index:3; display:flex; align-items:center; gap:4px; }
+
   .video-info { position:absolute; bottom:80px; left:16px; right:80px; z-index:2; text-shadow:0 2px 8px rgba(0,0,0,0.8); }
   .user-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
   .video-info .username { font-weight:bold; font-size:1rem; }
   .follow-btn { background:transparent; border:1px solid #fff; color:#fff; padding:4px 10px; border-radius:12px; font-size:0.7rem; font-weight:bold; cursor:pointer; }
   .follow-btn.followed { background:#fff; color:#000; }
   .video-info .caption { font-size:0.85rem; opacity:0.9; line-height:1.3; }
+  
   .side-actions { position:absolute; right:12px; bottom:80px; display:flex; flex-direction:column; gap:14px; z-index:2; }
   .action-btn { background:none; border:none; color:#fff; font-size:1.3rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
   .action-btn span { font-size:0.65rem; font-weight:600; }
+  
   .mute-btn { position:absolute; top:60px; right:16px; z-index:3; background:rgba(0,0,0,0.5); border:none; color:#fff; width:36px; height:36px; border-radius:50%; font-size:1.2rem; display:flex; justify-content:center; align-items:center; }
   .play-indicator { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:4rem; opacity:0; pointer-events:none; transition:opacity 0.3s; }
   .play-indicator.show { opacity:0.8; }
   .progress-bar { position:absolute; bottom:0; left:0; right:0; height:3px; background:rgba(255,255,255,0.2); }
   .progress-fill { height:100%; background:#ff0050; width:0%; }
 
-  /* ===== MODAL ===== */
+  /* MODAL */
   .modal { position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:200; display:flex; justify-content:center; align-items:center; padding:16px; }
   .modal-content { position:relative; width:100%; max-width:520px; background:#1a1a1a; border-radius:16px; overflow:hidden; max-height:90vh; display:flex; flex-direction:column; }
   .close-btn { position:absolute; top:12px; right:12px; z-index:10; background:rgba(255,255,255,0.1); border:none; color:#fff; width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:1rem; }
@@ -79,22 +60,31 @@
   .avatar-edit-label { position:absolute; bottom:0; right:0; background:#ff0050; width:28px; height:28px; border-radius:50%; display:flex; justify-content:center; align-items:center; cursor:pointer; }
   .form-group { padding:0 20px; margin-bottom:16px; }
   .form-group label { display:block; font-size:0.8rem; color:#aaa; margin-bottom:6px; }
-  .form-group input, .form-group select { width:100%; padding:12px; background:#222; border:1px solid #444; border-radius:8px; color:#fff; font-size:1rem; outline:none; }
+  .form-group input { width:100%; padding:12px; background:#222; border:1px solid #444; border-radius:8px; color:#fff; font-size:1rem; outline:none; }
   .btn-primary { width:calc(100% - 40px); margin:0 20px 20px; padding:14px; background:linear-gradient(90deg,#ff0050,#ff8a00); border:none; color:#fff; border-radius:8px; font-weight:bold; font-size:1rem; cursor:pointer; }
   .btn-primary:disabled { opacity:0.5; }
 
-  /* KAMERA & GALERI */
+  /* UPLOAD & KAMERA */
   .upload-body { padding:20px; overflow-y:auto; display:flex; flex-direction:column; height:100%; }
   .tab-selector { display:flex; margin-bottom:16px; background:#222; border-radius:8px; overflow:hidden; }
   .tab-btn { flex:1; padding:10px; background:transparent; border:none; color:#aaa; cursor:pointer; font-weight:bold; transition:0.2s; }
   .tab-btn.active { background:#333; color:#fff; border-bottom:2px solid #ff0050; }
   .camera-container { position:relative; width:100%; aspect-ratio:9/16; background:#000; border-radius:12px; overflow:hidden; margin-bottom:16px; }
   .camera-container video { width:100%; height:100%; object-fit:cover; }
+  
+  /* WATERMARK TIMESTAMP DI KAMERA */
+  .camera-watermark {
+    position:absolute; bottom:100px; left:20px; color:#fff; font-family:monospace;
+    font-size:1.2rem; font-weight:bold; text-shadow: 0 0 4px #000, 0 0 4px #000;
+    z-index:10; pointer-events:none; background:rgba(0,0,0,0.4); padding:4px 8px; border-radius:6px;
+  }
+
   .record-btn { position:absolute; bottom:20px; left:50%; transform:translateX(-50%); width:60px; height:60px; border-radius:50%; background:rgba(255,255,255,0.3); border:4px solid #fff; cursor:pointer; display:flex; justify-content:center; align-items:center; }
   .record-btn.recording { background:rgba(255,0,80,0.5); border-color:#ff0050; }
   .record-btn .inner { width:46px; height:46px; border-radius:50%; background:#ff0050; transition:0.2s; }
   .record-btn.recording .inner { border-radius:8px; width:24px; height:24px; background:#fff; }
   .flip-cam-btn { position:absolute; top:16px; right:16px; background:rgba(0,0,0,0.6); border:none; color:#fff; width:44px; height:44px; border-radius:50%; cursor:pointer; font-size:1.5rem; display:flex; justify-content:center; align-items:center; }
+  
   .preview-wrapper { position:relative; width:100%; margin-bottom:16px; border-radius:12px; overflow:hidden; background:#000; display:flex; justify-content:center; }
   .preview-wrapper video { width:100%; max-height:300px; object-fit:contain; }
   .interactive-text { position:absolute; z-index:10; cursor:move; padding:4px; border:1px dashed transparent; user-select:none; touch-action:none; white-space:nowrap; font-weight:bold; text-shadow:0 2px 8px rgba(0,0,0,0.9); }
@@ -115,31 +105,7 @@
 </head>
 <body>
 
-  <!-- AUTH SCREEN (Hanya simulasi lokal) -->
-  <div id="authScreen" class="auth-screen">
-    <div class="auth-logo">MY<span>FLIX</span></div>
-    <div class="auth-tagline">Platform Video & Monetisasi Masa Depan</div>
-    <div class="auth-box">
-      <div class="auth-tabs">
-        <div class="auth-tab active" id="tabLogin">Masuk</div>
-        <div class="auth-tab" id="tabRegister">Daftar</div>
-      </div>
-      <div id="loginForm">
-        <div class="auth-input-group"><label>Email</label><input type="email" id="loginEmail" placeholder="email@contoh.com" /></div>
-        <div class="auth-input-group"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••" /></div>
-        <button class="auth-btn" id="btnLogin">Masuk ke MyFlix</button>
-      </div>
-      <div id="registerForm" class="hidden">
-        <div class="auth-input-group"><label>Nama Lengkap</label><input type="text" id="regName" placeholder="Budi Santoso" /></div>
-        <div class="auth-input-group"><label>Email</label><input type="email" id="regEmail" placeholder="email@contoh.com" /></div>
-        <div class="auth-input-group"><label>Password (Min 6 karakter)</label><input type="password" id="regPassword" placeholder="••••••••" /></div>
-        <button class="auth-btn" id="btnRegister" style="background:linear-gradient(90deg,#00c853,#00bfff);">Buat Akun Baru</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- APLIKASI UTAMA -->
-  <div id="mainApp" class="hidden">
+  <div id="mainApp">
     <header class="navbar">
       <div class="nav-left">
         <div class="profile-nav-btn" id="btnProfile"><img id="navAvatar" src="" /></div>
@@ -166,6 +132,9 @@
           <div id="sectionCam" style="flex:1;">
             <div class="camera-container">
               <video id="liveCamera" autoplay playsinline muted></video>
+              <!-- WATERMARK JAM DI KAMERA -->
+              <div class="camera-watermark" id="cameraWatermark">00:00:00</div>
+              
               <button class="flip-cam-btn" id="btnFlipCam">🔄</button>
               <button class="record-btn" id="btnRecord"><div class="inner"></div></button>
             </div>
@@ -252,12 +221,16 @@
 
   <script>
     // ==========================================
-    // STATE LOKAL (TANPA FIREBASE)
+    // KONFIGURASI CLOUDINARY
     // ==========================================
-    const STORAGE_KEY = 'myflix_local_v1';
+    const CLOUDINARY_CLOUD_NAME = "MASUKKAN_CLOUD_NAME_KAMU"; 
+    const CLOUDINARY_UPLOAD_PRESET = "MASUKKAN_UPLOAD_PRESET_KAMU"; 
+
+    // STATE LOKAL
+    const STORAGE_KEY = 'myflix_timestamp_v1';
     let state = { 
       coins: 0, userVideos: [], comments: {}, likedVideos: {}, followedUsers: {}, 
-      profile: { name: "Pengguna", username: "@user", avatar: "https://ui-avatars.com/api/?name=User&background=random" }
+      profile: { name: "Mudo", username: "@mudo", avatar: "https://ui-avatars.com/api/?name=Mudo&background=random" }
     };
     
     function loadState() { const s = localStorage.getItem(STORAGE_KEY); if (s) state = { ...state, ...JSON.parse(s) }; }
@@ -268,39 +241,24 @@
     }
 
     // ==========================================
-    // AUTH SIMULASI
+    // LOGIKA TIMESTAMP (JAM DIGITAL)
     // ==========================================
-    document.getElementById('tabLogin').onclick = () => { document.getElementById('tabLogin').classList.add('active'); document.getElementById('tabRegister').classList.remove('active'); document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('registerForm').classList.add('hidden'); };
-    document.getElementById('tabRegister').onclick = () => { document.getElementById('tabRegister').classList.add('active'); document.getElementById('tabLogin').classList.remove('active'); document.getElementById('registerForm').classList.remove('hidden'); document.getElementById('loginForm').classList.add('hidden'); };
-
-    document.getElementById('btnLogin').onclick = () => {
-      const email = document.getElementById('loginEmail').value;
-      const pass = document.getElementById('loginPassword').value;
-      if(!email || !pass) { showToast('Isi email dan password!', 'error'); return; }
-      document.getElementById('authScreen').classList.add('hidden');
-      document.getElementById('mainApp').classList.remove('hidden');
-      updateUI(); renderFeed();
-    };
-
-    document.getElementById('btnRegister').onclick = () => {
-      const name = document.getElementById('regName').value;
-      const email = document.getElementById('regEmail').value;
-      const pass = document.getElementById('regPassword').value;
-      if(!name || !email || pass.length < 6) { showToast('Data tidak valid! Password min 6 karakter.', 'error'); return; }
+    function updateTimestamp() {
+      const now = new Date();
+      // Format: DD/MM/YYYY HH:MM:SS
+      const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\./g, ':');
+      const fullStamp = `${dateStr} ${timeStr}`;
       
-      state.profile = { name: name, username: "@" + name.toLowerCase().replace(/\s/g, ''), avatar: `https://ui-avatars.com/api/?name=${name}&background=random` };
-      saveState(); updateUI();
+      const watermarkEl = document.getElementById('cameraWatermark');
+      if (watermarkEl) watermarkEl.textContent = fullStamp;
       
-      showToast('Akun berhasil dibuat!', 'success');
-      document.getElementById('authScreen').classList.add('hidden');
-      document.getElementById('mainApp').classList.remove('hidden');
-      renderFeed();
-    };
-
-    document.getElementById('btnLogout').onclick = () => { if(confirm('Keluar akun?')) location.reload(); };
+      return fullStamp;
+    }
+    setInterval(updateTimestamp, 1000); // Update tiap detik
 
     // ==========================================
-    // UPLOAD & KAMERA
+    // LOGIKA KAMERA
     // ==========================================
     let streamRef = null, mediaRecorder, chunks = [], facingMode = 'user', pendingFile = null;
     let textState = { x: 50, y: 50, size: 24, rot: 0 };
@@ -367,38 +325,74 @@
     document.getElementById('btnTxtRot').onclick = (e) => { e.stopPropagation(); textState.rot+=45; updateTxtPos(); };
     document.getElementById('previewVideo').onclick = () => iText.classList.remove('active');
 
-    // IndexedDB untuk Simpan Video
-    const DB_NAME = 'myflix_db', DB_STORE = 'videos'; let dbLocal;
-    function initDB() { return new Promise((res) => { const req = indexedDB.open(DB_NAME, 1); req.onupgradeneeded = e => { if(!e.target.result.objectStoreNames.contains(DB_STORE)) e.target.result.createObjectStore(DB_STORE, {keyPath:'id'}); }; req.onsuccess = e => { dbLocal = e.target.result; res(); }; }); }
-    function saveVideoDB(id, blob) { return new Promise(res => { const tx = dbLocal.transaction(DB_STORE, 'readwrite'); tx.objectStore(DB_STORE).put({id, blob}).onsuccess = () => res(); }); }
-    function getVideoDB(id) { return new Promise(res => { const tx = dbLocal.transaction(DB_STORE, 'readonly'); tx.objectStore(DB_STORE).get(id).onsuccess = e => res(e.target.result ? e.target.result.blob : null); }); }
+    // ==========================================
+    // FUNGSI UPLOAD KE CLOUDINARY
+    // ==========================================
+    async function uploadToCloudinary(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`;
 
+      const response = await fetch(url, { method: 'POST', body: formData });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error.message || 'Gagal upload ke Cloudinary');
+      }
+      const data = await response.json();
+      return data.secure_url;
+    }
+
+    // ==========================================
+    // PROSES PUBLIKASI (SIMPAN WAKTU)
+    // ==========================================
     document.getElementById('btnSubmitUpload').onclick = async () => {
       if(!pendingFile) return; 
+      
       const btn = document.getElementById('btnSubmitUpload');
-      btn.textContent = '⏳ Menyimpan...'; btn.disabled = true; 
+      btn.textContent = '⏳ Mengunggah...'; 
+      btn.disabled = true; 
       
       try {
+        // Ambil Waktu Persis Saat Publish
+        const uploadTime = new Date().toLocaleString('id-ID', { 
+          day: '2-digit', month: 'long', year: 'numeric', 
+          hour: '2-digit', minute: '2-digit' 
+        });
+
+        const videoUrl = await uploadToCloudinary(pendingFile);
+
         const id = Date.now();
         const overlayData = document.getElementById('inputText').value.trim() ? { text: document.getElementById('inputText').value.trim(), x: textState.x, y: textState.y, size: textState.size, rot: textState.rot, color: document.getElementById('selectColor').value, font: document.getElementById('selectFont').value } : null;
         
-        await saveVideoDB(id, pendingFile);
+        // SIMPAN: Termasuk `uploadTime` dan `location` (bisa diisi nanti)
         state.userVideos.unshift({ 
-          id, username: document.getElementById('uploadUsername').value.trim(), caption: document.getElementById('uploadCaption').value.trim(), 
-          src: null, likes: 0, overlayData
+          id, 
+          username: document.getElementById('uploadUsername').value.trim(), 
+          caption: document.getElementById('uploadCaption').value.trim(), 
+          src: videoUrl, 
+          likes: 0, 
+          overlayData,
+          uploadTime: uploadTime,
+          location: "Indonesia" // Bisa diubah dengan GPS API nanti
         });
-        saveState(); 
         
+        saveState(); 
         showToast('🎉 Video berhasil dipublikasikan!', 'success'); 
         document.getElementById('uploadModal').classList.add('hidden'); 
-        btn.textContent = '🚀 Publikasikan'; btn.disabled = false;
-        pendingFile = null; document.getElementById('uploadCaption').value = '';
+        btn.textContent = '🚀 Publikasikan'; 
+        btn.disabled = false;
+        pendingFile = null; 
+        document.getElementById('uploadCaption').value = '';
         
         renderFeed();
         document.getElementById('feedView').scrollTo({ top: 0, behavior: 'smooth' });
+        
       } catch (error) {
-        showToast('Gagal: ' + error.message, 'error');
-        btn.textContent = '🚀 Publikasikan'; btn.disabled = false;
+        console.error(error);
+        showToast('Gagal upload: ' + error.message, 'error');
+        btn.textContent = '🚀 Publikasikan'; 
+        btn.disabled = false;
       }
     };
 
@@ -406,7 +400,7 @@
     // RENDER FEED & SOSIAL
     // ==========================================
     const defaultVideos = [
-      { id:101, username:"@nature_vibes", caption:"Sunset di pantai 🏖️", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes:1240 },
+      { id:101, username:"@nature_vibes", caption:"Sunset di pantai 🏖️", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes:1240, uploadTime: "12/08/2024 10:00" },
     ];
     function getAllVideos() { return [...state.userVideos, ...defaultVideos]; }
 
@@ -417,9 +411,13 @@
         const isLiked = state.likedVideos[v.id];
         let overlayHTML = v.overlayData ? `<div class="video-text-overlay" style="left:${v.overlayData.x}%; top:${v.overlayData.y}%; transform:translate(-50%,-50%) rotate(${v.overlayData.rot}deg); font-size:${v.overlayData.size}px; color:${v.overlayData.color}; font-family:${v.overlayData.font};">${v.overlayData.text}</div>` : '';
         
+        // TAMPILKAN TIMESTAMP DI FEED
+        let timestampHTML = v.uploadTime ? `<div class="feed-timestamp">🕒 ${v.uploadTime} • ${v.location || 'Unknown'}</div>` : '';
+
         card.innerHTML = `
           <video class="main-video" loop muted playsinline preload="metadata"></video>
           <button class="mute-btn">🔇</button>
+          ${timestampHTML}
           ${overlayHTML}
           <div class="play-indicator">▶</div>
           <div class="progress-bar"><div class="progress-fill"></div></div>
@@ -437,7 +435,7 @@
         `;
         
         const vid = card.querySelector('.main-video');
-        if(v.src) vid.src = v.src; else { try { const b = await getVideoDB(v.id); if(b) vid.src = URL.createObjectURL(b); } catch(e){} }
+        vid.src = v.src;
 
         card.querySelector('.mute-btn').onclick = (e) => { e.stopPropagation(); vid.muted = !vid.muted; e.target.textContent = vid.muted ? '🔇' : '🔊'; };
         card.querySelector('.like-btn').onclick = (e) => { e.stopPropagation(); if(state.likedVideos[v.id]) delete state.likedVideos[v.id]; else state.likedVideos[v.id] = true; saveState(); renderFeed(); };
@@ -458,6 +456,7 @@
       document.querySelectorAll('.video-card').forEach(c => obs.observe(c));
     }
 
+    // SOSIAL & PROFIL (Sama seperti sebelumnya)
     let commentTargetId = null;
     function openComments(id) { commentTargetId = id; renderComments(id); document.getElementById('commentSheet').style.transform = 'translateY(0)'; }
     function renderComments(id) {
@@ -467,13 +466,11 @@
     }
     document.getElementById('closeComment').onclick = () => document.getElementById('commentSheet').style.transform = 'translateY(100%)';
     document.getElementById('sendComment').onclick = () => { const v = document.getElementById('commentInput').value.trim(); if(!v || !commentTargetId) return; if(!state.comments[commentTargetId]) state.comments[commentTargetId] = []; state.comments[commentTargetId].push({user:state.profile.username, text:v}); saveState(); document.getElementById('commentInput').value = ''; renderComments(commentTargetId); };
-
-    // PROFIL & LAINNYA
+    
     document.getElementById('btnMonet').onclick = () => { updateUI(); document.getElementById('monetModal').classList.remove('hidden'); };
     document.getElementById('closeMonet').onclick = () => document.getElementById('monetModal').classList.add('hidden');
     document.getElementById('btnProfile').onclick = () => document.getElementById('profileModal').classList.remove('hidden');
     document.getElementById('closeProfile').onclick = () => document.getElementById('profileModal').classList.add('hidden');
-
     document.getElementById('btnSaveProfile').onclick = () => {
       state.profile.name = document.getElementById('inputDisplayName').value.trim();
       state.profile.username = document.getElementById('inputUsername').value.trim();
@@ -483,6 +480,7 @@
       const f = e.target.files[0]; 
       if(f) { const r = new FileReader(); r.onload = (ev) => { state.profile.avatar = ev.target.result; saveState(); updateUI(); showToast('Foto profil diganti!', 'success'); }; r.readAsDataURL(f); }
     };
+    document.getElementById('btnLogout').onclick = () => { if(confirm('Keluar akun?')) location.reload(); };
 
     document.querySelectorAll('.price-item').forEach(item => {
       item.onclick = () => {
@@ -505,11 +503,7 @@
 
     // INIT
     (async () => {
-      loadState(); await initDB(); updateUI();
-      // Simulasi: Langsung masuk tanpa auth (karena versi lokal)
-      document.getElementById('authScreen').classList.add('hidden');
-      document.getElementById('mainApp').classList.remove('hidden');
-      renderFeed();
+      loadState(); updateUI(); updateTimestamp(); renderFeed();
     })();
   </script>
 </body>
