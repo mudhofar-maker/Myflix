@@ -9,7 +9,7 @@
   body { background:#000; color:#fff; overflow-x:hidden; }
   .hidden { display:none !important; }
 
-  /* AUTH SCREEN */
+  /* ===== AUTHENTICATION SCREEN ===== */
   .auth-screen {
     position:fixed; inset:0; background:#000; z-index:1000;
     display:flex; flex-direction:column; justify-content:center; align-items:center;
@@ -18,17 +18,30 @@
   .auth-logo { font-size:2.5rem; font-weight:900; margin-bottom:8px; letter-spacing:2px; }
   .auth-logo span { color:#ff0050; }
   .auth-tagline { color:#aaa; font-size:0.9rem; margin-bottom:30px; }
-  .auth-box { background:#1a1a1a; border:1px solid #333; padding:24px; border-radius:16px; width:100%; max-width:400px; }
+  .auth-box {
+    background:#1a1a1a; border:1px solid #333; padding:24px;
+    border-radius:16px; width:100%; max-width:400px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.5);
+  }
   .auth-tabs { display:flex; margin-bottom:20px; background:#000; border-radius:8px; overflow:hidden; }
   .auth-tab { flex:1; padding:10px; text-align:center; cursor:pointer; color:#aaa; font-weight:bold; font-size:0.9rem; }
   .auth-tab.active { background:#ff0050; color:#fff; }
+  
   .auth-input-group { margin-bottom:14px; }
   .auth-input-group label { display:block; font-size:0.8rem; color:#aaa; margin-bottom:6px; }
-  .auth-input-group input { width:100%; padding:12px; background:#000; border:1px solid #444; border-radius:8px; color:#fff; font-size:1rem; outline:none; }
+  .auth-input-group input { 
+    width:100%; padding:12px; background:#000; border:1px solid #444; 
+    border-radius:8px; color:#fff; font-size:1rem; outline:none;
+  }
   .auth-input-group input:focus { border-color:#ff0050; }
-  .auth-btn { width:100%; padding:14px; background:linear-gradient(90deg,#ff0050,#ff8a00); border:none; color:#fff; border-radius:8px; font-weight:bold; font-size:1rem; cursor:pointer; margin-top:10px; }
+  
+  .auth-btn {
+    width:100%; padding:14px; background:linear-gradient(90deg,#ff0050,#ff8a00);
+    border:none; color:#fff; border-radius:8px; font-weight:bold; font-size:1rem;
+    cursor:pointer; margin-top:10px;
+  }
 
-  /* NAVBAR */
+  /* ===== NAVBAR ===== */
   .navbar {
     position:fixed; top:0; left:0; right:0; z-index:100;
     display:flex; justify-content:space-between; align-items:center;
@@ -36,42 +49,95 @@
     backdrop-filter:blur(10px);
   }
   .nav-left { display:flex; align-items:center; gap:8px; }
-  .profile-nav-btn { width:34px; height:34px; border-radius:50%; background:#333; border:2px solid #ff0050; cursor:pointer; overflow:hidden; display:flex; justify-content:center; align-items:center; z-index:999; }
+  .profile-nav-btn {
+    width:34px; height:34px; border-radius:50%;
+    background:#333; border:2px solid #ff0050; cursor:pointer; overflow:hidden;
+    display:flex; justify-content:center; align-items:center;
+  }
   .profile-nav-btn img { width:100%; height:100%; object-fit:cover; }
   .brand-logo { font-size:1.1rem; font-weight:900; letter-spacing:0.5px; white-space:nowrap; }
   .brand-logo span { color:#ff0050; }
+
   .nav-right { display:flex; gap:6px; align-items:center; }
-  .nav-btn { background:#2a2a2a; border:1px solid #444; color:#fff; padding:6px; border-radius:50%; font-size:0.95rem; cursor:pointer; display:flex; justify-content:center; align-items:center; width:32px; height:32px; transition:0.2s; }
+  .nav-btn {
+    background:#2a2a2a; border:1px solid #444; color:#fff;
+    padding:6px; border-radius:50%; font-size:0.95rem; cursor:pointer; 
+    display:flex; justify-content:center; align-items:center; 
+    width:32px; height:32px; transition:0.2s;
+  }
   .nav-btn.active { background:linear-gradient(135deg,#ff8a00,#ff0050); border-color:#ff8a00; }
-  .nav-btn.coin-btn { background:linear-gradient(135deg,#f7b733,#fc4a1a); border:none; font-weight:bold; border-radius:20px; width:auto; padding:6px 10px; font-size:0.75rem; gap:4px; color:#fff; }
+  .nav-btn.coin-btn {
+    background:linear-gradient(135deg,#f7b733,#fc4a1a); border:none; font-weight:bold; 
+    border-radius:20px; width:auto; padding:6px 10px; font-size:0.75rem; gap:4px; color:#fff;
+  }
   .nav-btn.ads-btn { background:#0050ff; border-color:#0050ff; }
 
-  /* FEED & MODAL */
+  /* ===== FEED ===== */
   .feed-container { height:100vh; overflow-y:scroll; scroll-snap-type:y mandatory; scrollbar-width:none; }
   .feed-container::-webkit-scrollbar { display:none; }
-  .video-card { position:relative; height:100vh; width:100%; scroll-snap-align:start; display:flex; justify-content:center; align-items:center; background:#000; }
+  .video-card {
+    position:relative; height:100vh; width:100%;
+    scroll-snap-align:start; display:flex; justify-content:center; align-items:center; background:#000;
+  }
   .video-card video { width:100%; height:100%; object-fit:cover; }
-  .video-text-overlay { position:absolute; z-index:2; text-align:center; font-weight:bold; text-shadow:0 2px 8px rgba(0,0,0,0.9); pointer-events:none; white-space:nowrap; }
+  
+  .video-text-overlay {
+    position:absolute; z-index:2; text-align:center; font-weight:bold;
+    text-shadow:0 2px 8px rgba(0,0,0,0.9); pointer-events:none; white-space:nowrap;
+  }
+
   .video-info { position:absolute; bottom:80px; left:16px; right:80px; z-index:2; text-shadow:0 2px 8px rgba(0,0,0,0.8); }
   .user-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
   .video-info .username { font-weight:bold; font-size:1rem; }
-  .follow-btn { background:transparent; border:1px solid #fff; color:#fff; padding:4px 10px; border-radius:12px; font-size:0.7rem; font-weight:bold; cursor:pointer; }
+  .follow-btn {
+    background:transparent; border:1px solid #fff; color:#fff;
+    padding:4px 10px; border-radius:12px; font-size:0.7rem; font-weight:bold; cursor:pointer;
+  }
   .follow-btn.followed { background:#fff; color:#000; }
   .video-info .caption { font-size:0.85rem; opacity:0.9; line-height:1.3; }
-  .badge-ad { display:inline-block; font-size:0.65rem; background:#0050ff; color:#fff; padding:2px 8px; border-radius:10px; margin-top:6px; font-weight:bold; }
-  .side-actions { position:absolute; right:12px; bottom:80px; display:flex; flex-direction:column; gap:14px; z-index:2; }
-  .action-btn { background:none; border:none; color:#fff; font-size:1.3rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+  
+  .music-info {
+    display:flex; align-items:center; gap:6px; font-size:0.75rem; margin-top:8px; color:#fff;
+    background:rgba(0,0,0,0.6); padding:4px 10px; border-radius:12px; width:fit-content; border:1px solid rgba(255,255,255,0.2);
+  }
+  .marquee { width:150px; overflow:hidden; white-space:nowrap; }
+  .marquee span { display:inline-block; padding-left:100%; animation: marquee 8s linear infinite; }
+  @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+
+  .side-actions {
+    position:absolute; right:12px; bottom:80px;
+    display:flex; flex-direction:column; gap:14px; z-index:2;
+  }
+  .action-btn {
+    background:none; border:none; color:#fff; font-size:1.3rem;
+    cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5); transition: transform 0.15s;
+  }
+  .action-btn:active { transform:scale(0.85); }
   .action-btn span { font-size:0.65rem; font-weight:600; }
-  .mute-btn { position:absolute; top:60px; right:16px; z-index:3; background:rgba(0,0,0,0.5); border:none; color:#fff; width:36px; height:36px; border-radius:50%; font-size:1.2rem; display:flex; justify-content:center; align-items:center; }
-  .play-indicator { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:4rem; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+  .action-btn.tip-btn { color:#f7b733; }
+  .action-btn.share-btn { color:#00bfff; }
+
+  .mute-btn {
+    position:absolute; top:60px; right:16px; z-index:3;
+    background:rgba(0,0,0,0.5); border:none; color:#fff;
+    width:36px; height:36px; border-radius:50%; font-size:1.2rem;
+    display:flex; justify-content:center; align-items:center;
+  }
+  .play-indicator {
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    font-size:4rem; opacity:0; pointer-events:none; transition:opacity 0.3s;
+  }
   .play-indicator.show { opacity:0.8; }
   .progress-bar { position:absolute; bottom:0; left:0; right:0; height:3px; background:rgba(255,255,255,0.2); }
   .progress-fill { height:100%; background:#ff0050; width:0%; }
-  
+
+  /* ===== MODAL UMUM ===== */
   .modal { position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:200; display:flex; justify-content:center; align-items:center; padding:16px; }
   .modal-content { position:relative; width:100%; max-width:520px; background:#1a1a1a; border-radius:16px; overflow:hidden; max-height:90vh; display:flex; flex-direction:column; }
   .close-btn { position:absolute; top:12px; right:12px; z-index:10; background:rgba(255,255,255,0.1); border:none; color:#fff; width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:1rem; }
-  
+
+  /* PROFIL & SETTINGS */
   .profile-header { text-align:center; padding:30px 20px 20px; border-bottom:1px solid #333; }
   .avatar-preview { width:80px; height:80px; border-radius:50%; background:#333; margin:0 auto 12px; overflow:hidden; border:3px solid #ff0050; position:relative; }
   .avatar-preview img { width:100%; height:100%; object-fit:cover; }
@@ -81,12 +147,17 @@
   .form-group input, .form-group select, .form-group textarea { width:100%; padding:12px; background:#222; border:1px solid #444; border-radius:8px; color:#fff; font-size:1rem; outline:none; }
   .btn-primary { width:calc(100% - 40px); margin:0 20px 20px; padding:14px; background:linear-gradient(90deg,#ff0050,#ff8a00); border:none; color:#fff; border-radius:8px; font-weight:bold; font-size:1rem; cursor:pointer; }
   .btn-primary:disabled { opacity:0.5; }
+
+  /* MONETISASI & ADS */
   .balance-card { background:linear-gradient(135deg,#f7b733,#fc4a1a); border-radius:16px; padding:24px; margin:20px; text-align:center; }
   .balance-card h2 { font-size:2.5rem; margin:8px 0; }
   .balance-card.ad-balance { background:linear-gradient(135deg,#0050ff,#00bfff); }
+  
   .price-list { padding:0 20px; display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
   .price-item { display:flex; justify-content:space-between; background:#222; padding:14px; border-radius:12px; cursor:pointer; border:1px solid #444; }
   .price-item:active { background:#333; border-color:#f7b733; }
+
+  /* UPLOAD & CAMERA */
   .upload-body { padding:20px; overflow-y:auto; display:flex; flex-direction:column; height:100%; }
   .camera-container { position:relative; width:100%; aspect-ratio:9/16; background:#000; border-radius:12px; overflow:hidden; margin-bottom:16px; }
   .camera-container video { width:100%; height:100%; object-fit:cover; }
@@ -95,6 +166,8 @@
   .record-btn .inner { width:46px; height:46px; border-radius:50%; background:#ff0050; transition:0.2s; }
   .record-btn.recording .inner { border-radius:8px; width:24px; height:24px; background:#fff; }
   .flip-cam-btn { position:absolute; top:16px; right:16px; background:rgba(0,0,0,0.6); border:none; color:#fff; width:44px; height:44px; border-radius:50%; cursor:pointer; font-size:1.5rem; display:flex; justify-content:center; align-items:center; }
+
+  /* EDITOR */
   .preview-wrapper { position:relative; width:100%; margin-bottom:16px; border-radius:12px; overflow:hidden; background:#000; display:flex; justify-content:center; }
   .preview-wrapper video { width:100%; max-height:300px; object-fit:contain; }
   .interactive-text { position:absolute; z-index:10; cursor:move; padding:4px; border:1px dashed transparent; user-select:none; touch-action:none; white-space:nowrap; font-weight:bold; text-shadow:0 2px 8px rgba(0,0,0,0.9); }
@@ -102,6 +175,8 @@
   .interactive-text .controls { position:absolute; bottom:-30px; left:50%; transform:translateX(-50%); display:flex; gap:6px; background:#222; padding:4px 8px; border-radius:12px; opacity:0; transition:0.2s; }
   .interactive-text.active .controls { opacity:1; pointer-events:auto; }
   .interactive-text .controls button { background:none; border:none; color:#fff; cursor:pointer; font-size:1rem; }
+
+  /* MUSIC KATALOG */
   .music-catalog-view { position:absolute; inset:0; background:#1a1a1a; z-index:10; display:flex; flex-direction:column; }
   .music-catalog-header { display:flex; justify-content:space-between; align-items:center; padding:16px; border-bottom:1px solid #333; }
   .music-list { flex:1; overflow-y:auto; padding:12px; }
@@ -111,10 +186,13 @@
   .song-info { flex:1; }
   .song-title { font-weight:bold; font-size:0.9rem; }
   .song-meta { font-size:0.75rem; color:#aaa; }
+
+  /* AD OVERLAY */
   .ad-overlay { position:absolute; inset:0; background:#000; z-index:50; display:flex; justify-content:center; align-items:center; }
   .ad-overlay video { width:100%; height:100%; object-fit:contain; }
   .ad-skip { position:absolute; bottom:30px; right:20px; background:rgba(0,0,0,0.7); color:#fff; padding:10px 20px; border-radius:20px; border:1px solid #fff; cursor:pointer; font-weight:bold; }
   .ad-label { position:absolute; top:70px; left:20px; background:#0050ff; padding:4px 10px; border-radius:4px; font-weight:bold; font-size:0.8rem; }
+
   .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px); background:#333; color:#fff; padding:12px 20px; border-radius:24px; z-index:500; opacity:0; transition:0.3s; pointer-events:none; text-align:center; }
   .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
@@ -168,7 +246,7 @@
 
     <main id="feedView" class="feed-container"></main>
 
-    <!-- PROFILE & SETTINGS MODAL -->
+    <!-- PROFILE MODAL -->
     <div id="profileModal" class="modal hidden">
       <div class="modal-content">
         <button class="close-btn" id="closeProfile">✕</button>
@@ -181,13 +259,10 @@
           <h3 id="profileNameDisplay">Memuat...</h3>
           <p style="color:#aaa;" id="profileUsernameDisplay">@username</p>
         </div>
-        
-        <h4 style="padding:20px 20px 10px; color:#00c853;">⚙️ Pengaturan Akun</h4>
-        <div class="form-group"><label>Nama Lengkap</label><input type="text" id="inputDisplayName" /></div>
+        <div class="form-group" style="margin-top:20px;"><label>Nama</label><input type="text" id="inputDisplayName" /></div>
         <div class="form-group"><label>Username</label><input type="text" id="inputUsername" /></div>
-        
-        <button class="btn-primary" id="btnSaveProfile" style="margin-bottom:10px;">Simpan Pengaturan</button>
-        <button class="btn-primary" id="btnLogout" style="background:#333; margin-top:0;">🚪 Keluar Akun (Logout)</button>
+        <button class="btn-primary" id="btnSaveProfile">Simpan Profil</button>
+        <button class="btn-primary" id="btnLogout" style="background:#333; margin-top:-10px;">Keluar Akun</button>
       </div>
     </div>
 
@@ -201,37 +276,22 @@
     <div id="toast" class="toast"></div>
   </div>
 
-  <!-- ==================== FIREBASE SDK & LOGIC ==================== -->
-  <script type="module">
-    // 1. IMPORT FIREBASE
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-    // 2. CONFIG FIREBASE KAMU
-    const firebaseConfig = {
-      apiKey: "AIzaSyDilKHyfY3GXstC4PyS5JRrqFEnJc1DD10",
-      authDomain: "cod-app-476f6.firebaseapp.com",
-      databaseURL: "https://cod-app-476f6-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "cod-app-476f6",
-      storageBucket: "cod-app-476f6.firebasestorage.app",
-      messagingSenderId: "208539583359",
-      appId: "1:208539583359:web:b53d123ab4e784509c104a",
-      measurementId: "G-PT4857CK4C"
-    };
-
-    // 3. INISIALISASI
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    // --- STATE APLIKASI ---
+  <script>
+    // ==========================================
+    // STATE & STORAGE (LOKAL - TANPA FIREBASE)
+    // ==========================================
+    const STORAGE_KEY = 'myflix_local_v1';
     let state = { 
       coins: 0, adBalance: 0, userVideos: [], comments: {}, likedVideos: {}, followedUsers: {}, 
       profile: { name: "Pengguna", username: "@user", avatar: "https://ui-avatars.com/api/?name=User&background=random" }
     };
 
-    // --- FUNGSI TOAST ---
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) state = { ...state, ...JSON.parse(saved) };
+    }
+    function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    
     function showToast(m, t='info') { 
       if(t === 'error') { alert("PESAN ERROR:\n\n" + m); }
       const el = document.getElementById('toast'); el.textContent = m; 
@@ -239,7 +299,9 @@
       el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 3000); 
     }
 
-    // --- LOGIKA FIREBASE AUTH ---
+    // ==========================================
+    // AUTHENTICATION LOKAL
+    // ==========================================
     document.getElementById('tabLogin').onclick = () => {
       document.getElementById('tabLogin').classList.add('active'); document.getElementById('tabRegister').classList.remove('active');
       document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('registerForm').classList.add('hidden');
@@ -249,100 +311,45 @@
       document.getElementById('registerForm').classList.remove('hidden'); document.getElementById('loginForm').classList.add('hidden');
     };
 
-    document.getElementById('btnLogin').onclick = async () => {
+    document.getElementById('btnLogin').onclick = () => {
       const email = document.getElementById('loginEmail').value;
       const pass = document.getElementById('loginPassword').value;
       if(!email || !pass) { showToast('Isi email dan password!', 'error'); return; }
-
-      document.getElementById('authLoading').classList.remove('hidden');
-      try {
-        await signInWithEmailAndPassword(auth, email, pass);
-      } catch (error) {
-        document.getElementById('authLoading').classList.add('hidden');
-        showToast("Login Gagal: " + error.message, 'error');
-      }
+      
+      // Simulasi Login
+      showToast('Login Berhasil!', 'success');
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+      updateUI();
+      renderFeed();
     };
 
-    document.getElementById('btnRegister').onclick = async () => {
+    document.getElementById('btnRegister').onclick = () => {
       const name = document.getElementById('regName').value;
       const email = document.getElementById('regEmail').value;
       const pass = document.getElementById('regPassword').value;
       if(!name || !email || pass.length < 6) { showToast('Data tidak valid! Password min 6 karakter.', 'error'); return; }
-
-      document.getElementById('authLoading').classList.remove('hidden');
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-        const user = userCredential.user;
-        
-        await setDoc(doc(db, "users", user.uid), {
-          name: name,
-          email: email,
-          username: "@" + name.toLowerCase().replace(/\s/g, ''),
-          avatar: `https://ui-avatars.com/api/?name=${name}&background=random`,
-          coins: 0,
-          adBalance: 0,
-          createdAt: new Date()
-        });
-
-        showToast('Akun berhasil dibuat!', 'success');
-      } catch (error) {
-        document.getElementById('authLoading').classList.add('hidden');
-        showToast("Daftar Gagal: " + error.message, 'error');
-      }
+      
+      // Simulasi Daftar
+      state.profile = { name: name, username: "@" + name.toLowerCase().replace(/\s/g, ''), avatar: `https://ui-avatars.com/api/?name=${name}&background=random` };
+      saveState(); updateUI();
+      
+      showToast('Akun berhasil dibuat!', 'success');
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+      renderFeed();
     };
-
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          state.profile = docSnap.data();
-        } else {
-          state.profile = { name: "User", username: "@user", avatar: "https://ui-avatars.com/api/?name=User&background=random" };
-        }
-        
-        document.getElementById('authLoading').classList.add('hidden');
-        document.getElementById('authScreen').classList.add('hidden');
-        document.getElementById('mainApp').classList.remove('hidden');
-        
-        updateUI();
-        renderFeed(); // RENDER FEED SETELAH LOGIN
-      } else {
-        document.getElementById('authLoading').classList.add('hidden');
-        document.getElementById('authScreen').classList.remove('hidden');
-        document.getElementById('mainApp').classList.add('hidden');
-      }
-    });
 
     document.getElementById('btnLogout').onclick = () => {
-      if(confirm('Yakin ingin keluar?')) {
-        signOut(auth).then(() => { location.reload(); });
-      }
+      if(confirm('Yakin ingin keluar?')) { location.reload(); }
     };
 
-    document.getElementById('btnSaveProfile').onclick = async () => {
-      const user = auth.currentUser;
-      if(!user) return;
-      
-      const newName = document.getElementById('inputDisplayName').value.trim();
-      const newUsername = document.getElementById('inputUsername').value.trim();
-      
-      state.profile.name = newName;
-      state.profile.username = newUsername;
-
-      try {
-        await updateDoc(doc(db, "users", user.uid), {
-          name: newName,
-          username: newUsername,
-          avatar: state.profile.avatar
-        });
-        showToast('Pengaturan disimpan!', 'success');
-        updateUI(); // Update UI saja, tanpa re-render feed
-        document.getElementById('profileModal').classList.add('hidden');
-      } catch (error) {
-        showToast('Gagal menyimpan profil', 'error');
-      }
+    document.getElementById('btnSaveProfile').onclick = () => {
+      state.profile.name = document.getElementById('inputDisplayName').value.trim();
+      state.profile.username = document.getElementById('inputUsername').value.trim();
+      saveState(); updateUI();
+      showToast('Pengaturan disimpan!', 'success');
+      document.getElementById('profileModal').classList.add('hidden');
     };
 
     function updateUI() {
@@ -353,28 +360,21 @@
       document.getElementById('inputDisplayName').value = state.profile.name;
       document.getElementById('inputUsername').value = state.profile.username;
       
-      document.getElementById('navBalance').textContent = state.profile.coins || 0;
-      document.getElementById('coinBalance').textContent = state.profile.coins || 0;
-      document.getElementById('coinRupiah').textContent = ((state.profile.coins || 0) * 100).toLocaleString('id-ID');
-      document.getElementById('adBalance').textContent = (state.profile.adBalance || 0).toLocaleString('id-ID');
+      document.getElementById('navBalance').textContent = state.coins || 0;
+      document.getElementById('coinBalance').textContent = state.coins || 0;
+      document.getElementById('coinRupiah').textContent = ((state.coins || 0) * 100).toLocaleString('id-ID');
+      document.getElementById('adBalance').textContent = (state.adBalance || 0).toLocaleString('id-ID');
     }
 
     // --- UPLOAD AVATAR ---
-    document.getElementById('avatarUpload').onchange = async (e) => {
+    document.getElementById('avatarUpload').onchange = (e) => {
       const f = e.target.files[0]; 
       if(f) { 
         const r = new FileReader(); 
-        r.onload = async (ev) => { 
-          const newAvatar = ev.target.result;
-          state.profile.avatar = newAvatar; 
-          updateUI();
-          
-          // Simpan ke Firebase
-          const user = auth.currentUser;
-          if (user) {
-            await updateDoc(doc(db, "users", user.uid), { avatar: newAvatar });
-            showToast('Foto profil berhasil diganti!', 'success');
-          }
+        r.onload = (ev) => { 
+          state.profile.avatar = ev.target.result; 
+          saveState(); updateUI();
+          showToast('Foto profil berhasil diganti!', 'success');
         }; 
         r.readAsDataURL(f); 
       }
@@ -459,7 +459,7 @@
       const isMonetize = document.getElementById('uploadMonetize').value === 'yes';
       await saveVideoDB(id, pendingFile);
       state.userVideos.unshift({ id, username: document.getElementById('uploadUsername').value.trim(), caption: document.getElementById('uploadCaption').value.trim(), src: null, likes: 0, music: selectedMusicUrl, overlayData, monetize: isMonetize });
-      showToast('Berhasil publish!', 'success'); document.getElementById('uploadModal').classList.add('hidden'); renderFeed();
+      saveState(); showToast('Berhasil publish!', 'success'); document.getElementById('uploadModal').classList.add('hidden'); renderFeed();
     };
 
     // ==========================================
@@ -473,9 +473,9 @@
       document.getElementById('commentList').scrollTop = 9999;
     }
     document.getElementById('closeComment').onclick = () => document.getElementById('commentSheet').style.transform = 'translateY(100%)';
-    document.getElementById('sendComment').onclick = () => { const v = document.getElementById('commentInput').value.trim(); if(!v || !commentTargetId) return; if(!state.comments[commentTargetId]) state.comments[commentTargetId] = []; state.comments[commentTargetId].push({user:state.profile.username, text:v}); document.getElementById('commentInput').value = ''; renderComments(commentTargetId); };
+    document.getElementById('sendComment').onclick = () => { const v = document.getElementById('commentInput').value.trim(); if(!v || !commentTargetId) return; if(!state.comments[commentTargetId]) state.comments[commentTargetId] = []; state.comments[commentTargetId].push({user:state.profile.username, text:v}); saveState(); document.getElementById('commentInput').value = ''; renderComments(commentTargetId); };
     function shareVideo(v) { if(navigator.share) navigator.share({ title:'MyFlix', text:`Tonton ${v.username}`, url: window.location.href }); else { navigator.clipboard.writeText(window.location.href); showToast('Link disalin!', 'success'); } }
-    function sendTip(v) { const a = prompt(`Kirim tips ke ${v.username}\nSaldo: ${state.coins} Koin\nMasukkan jumlah (min 10):`, '10'); if(!a) return; const n = parseInt(a); if(isNaN(n) || n < 10 || n > state.coins) { showToast('Jumlah koin tidak valid / Saldo kurang', 'error'); return; } state.coins -= n; updateUI(); showToast(`Berhasil kirim ${n} koin!`, 'success'); }
+    function sendTip(v) { const a = prompt(`Kirim tips ke ${v.username}\nSaldo: ${state.coins} Koin\nMasukkan jumlah (min 10):`, '10'); if(!a) return; const n = parseInt(a); if(isNaN(n) || n < 10 || n > state.coins) { showToast('Jumlah koin tidak valid / Saldo kurang', 'error'); return; } state.coins -= n; saveState(); updateUI(); showToast(`Berhasil kirim ${n} koin!`, 'success'); }
 
     // ==========================================
     // IKLAN PRE-ROLL & RENDER FEED
@@ -526,11 +526,11 @@
         if(v.src) vid.src = v.src; else { try { const b = await getVideoDB(v.id); if(b) vid.src = URL.createObjectURL(b); } catch(e){} }
 
         card.querySelector('.mute-btn').onclick = (e) => { e.stopPropagation(); vid.muted = !vid.muted; if(card.querySelector('.bg-music')) card.querySelector('.bg-music').muted = vid.muted; e.target.textContent = vid.muted ? '🔇' : '🔊'; };
-        card.querySelector('.like-btn').onclick = (e) => { e.stopPropagation(); if(state.likedVideos[v.id]) delete state.likedVideos[v.id]; else state.likedVideos[v.id] = true; renderFeed(); };
+        card.querySelector('.like-btn').onclick = (e) => { e.stopPropagation(); if(state.likedVideos[v.id]) delete state.likedVideos[v.id]; else state.likedVideos[v.id] = true; saveState(); renderFeed(); };
         card.querySelector('.comment-btn').onclick = (e) => { e.stopPropagation(); openComments(v.id); };
         card.querySelector('.share-btn').onclick = (e) => { e.stopPropagation(); shareVideo(v); };
         card.querySelector('.tip-btn').onclick = (e) => { e.stopPropagation(); sendTip(v); };
-        card.querySelector('.follow-btn').onclick = (e) => { e.stopPropagation(); const u = v.username; if(state.followedUsers[u]) delete state.followedUsers[u]; else state.followedUsers[u] = true; renderFeed(); };
+        card.querySelector('.follow-btn').onclick = (e) => { e.stopPropagation(); const u = v.username; if(state.followedUsers[u]) delete state.followedUsers[u]; else state.followedUsers[u] = true; saveState(); renderFeed(); };
         
         vid.onclick = async () => { 
           if(vid.paused) {
@@ -556,10 +556,41 @@
 
     document.getElementById('btnFeed').onclick = () => { document.getElementById('btnFeed').classList.add('active'); };
 
+    // ==========================================
+    // MONETISASI LOKAL
+    // ==========================================
+    document.getElementById('btnMonet').onclick = () => { updateUI(); document.getElementById('monetModal').classList.remove('hidden'); };
+    document.getElementById('closeMonet').onclick = () => document.getElementById('monetModal').classList.add('hidden');
+    document.getElementById('btnAds').onclick = () => { updateUI(); document.getElementById('adsModal').classList.remove('hidden'); };
+    document.getElementById('closeAds').onclick = () => document.getElementById('adsModal').classList.add('hidden');
+    document.getElementById('btnProfile').onclick = () => { document.getElementById('profileModal').classList.remove('hidden'); };
+    document.getElementById('closeProfile').onclick = () => document.getElementById('profileModal').classList.add('hidden');
+
+    document.querySelectorAll('.price-item').forEach(item => {
+      item.onclick = () => {
+        const coins = parseInt(item.dataset.coins || 0); const price = parseInt(item.dataset.price || 0);
+        if(coins) {
+          if(confirm(`Beli ${coins} koin seharga Rp ${price.toLocaleString('id-ID')}?`)) {
+            state.coins += coins; saveState(); updateUI(); showToast(`✅ Berhasil! +${coins} koin`, 'success');
+          }
+        }
+      };
+    });
+    document.querySelectorAll('.topup-item').forEach(item => {
+      item.onclick = () => {
+        const amount = parseInt(item.dataset.amount || 0);
+        if(confirm(`Isi saldo Rp ${amount.toLocaleString('id-ID')}?`)) {
+          state.adBalance += amount; saveState(); updateUI(); showToast('✅ Saldo Iklan ditambahkan!', 'success');
+        }
+      };
+    });
+
     // INIT
     (async () => {
-      await initDB();
-      updateUI();
+      loadState(); updateUI(); renderFeed();
+      // Simulasi: Langsung masuk ke aplikasi untuk testing tanpa login (Bisa dihapus jika mau tes auth)
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
     })();
   </script>
 </body>
