@@ -3,13 +3,32 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>MyFlix — Ultimate Creator</title>
+<title>MyFlix — Ultimate Creator (Local Version)</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; }
   body { background:#000; color:#fff; overflow-x:hidden; }
   .hidden { display:none !important; }
 
-  /* NAVBAR */
+  /* ===== AUTH SCREEN ===== */
+  .auth-screen {
+    position:fixed; inset:0; background:#000; z-index:1000;
+    display:flex; flex-direction:column; justify-content:center; align-items:center;
+    padding:20px; background:linear-gradient(135deg, #000 0%, #1a0005 100%);
+  }
+  .auth-logo { font-size:2.5rem; font-weight:900; margin-bottom:8px; letter-spacing:2px; }
+  .auth-logo span { color:#ff0050; }
+  .auth-tagline { color:#aaa; font-size:0.9rem; margin-bottom:30px; }
+  .auth-box { background:#1a1a1a; border:1px solid #333; padding:24px; border-radius:16px; width:100%; max-width:400px; }
+  .auth-tabs { display:flex; margin-bottom:20px; background:#000; border-radius:8px; overflow:hidden; }
+  .auth-tab { flex:1; padding:10px; text-align:center; cursor:pointer; color:#aaa; font-weight:bold; font-size:0.9rem; }
+  .auth-tab.active { background:#ff0050; color:#fff; }
+  .auth-input-group { margin-bottom:14px; }
+  .auth-input-group label { display:block; font-size:0.8rem; color:#aaa; margin-bottom:6px; }
+  .auth-input-group input { width:100%; padding:12px; background:#000; border:1px solid #444; border-radius:8px; color:#fff; font-size:1rem; outline:none; }
+  .auth-input-group input:focus { border-color:#ff0050; }
+  .auth-btn { width:100%; padding:14px; background:linear-gradient(90deg,#ff0050,#ff8a00); border:none; color:#fff; border-radius:8px; font-weight:bold; font-size:1rem; cursor:pointer; margin-top:10px; }
+
+  /* ===== NAVBAR ===== */
   .navbar {
     position:fixed; top:0; left:0; right:0; z-index:100;
     display:flex; justify-content:space-between; align-items:center;
@@ -17,44 +36,38 @@
     backdrop-filter:blur(10px);
   }
   .nav-left { display:flex; align-items:center; gap:8px; }
-  .profile-nav-btn { width:34px; height:34px; border-radius:50%; background:#333; border:2px solid #ff0050; cursor:pointer; overflow:hidden; display:flex; justify-content:center; align-items:center; }
+  .profile-nav-btn { width:34px; height:34px; border-radius:50%; background:#333; border:2px solid #ff0050; cursor:pointer; overflow:hidden; display:flex; justify-content:center; align-items:center; z-index:999; }
   .profile-nav-btn img { width:100%; height:100%; object-fit:cover; }
   .brand-logo { font-size:1.1rem; font-weight:900; letter-spacing:0.5px; white-space:nowrap; }
   .brand-logo span { color:#ff0050; }
-
   .nav-right { display:flex; gap:6px; align-items:center; }
   .nav-btn { background:#2a2a2a; border:1px solid #444; color:#fff; padding:6px; border-radius:50%; font-size:0.95rem; cursor:pointer; display:flex; justify-content:center; align-items:center; width:32px; height:32px; transition:0.2s; }
   .nav-btn.active { background:linear-gradient(135deg,#ff8a00,#ff0050); border-color:#ff8a00; }
   .nav-btn.coin-btn { background:linear-gradient(135deg,#f7b733,#fc4a1a); border:none; font-weight:bold; border-radius:20px; width:auto; padding:6px 10px; font-size:0.75rem; gap:4px; color:#fff; }
   .nav-btn.ads-btn { background:#0050ff; border-color:#0050ff; }
 
-  /* FEED */
+  /* ===== FEED ===== */
   .feed-container { height:100vh; overflow-y:scroll; scroll-snap-type:y mandatory; scrollbar-width:none; }
   .feed-container::-webkit-scrollbar { display:none; }
   .video-card { position:relative; height:100vh; width:100%; scroll-snap-align:start; display:flex; justify-content:center; align-items:center; background:#000; }
   .video-card video { width:100%; height:100%; object-fit:cover; }
-  
   .video-text-overlay { position:absolute; z-index:2; text-align:center; font-weight:bold; text-shadow:0 2px 8px rgba(0,0,0,0.9); pointer-events:none; white-space:nowrap; }
-
   .video-info { position:absolute; bottom:80px; left:16px; right:80px; z-index:2; text-shadow:0 2px 8px rgba(0,0,0,0.8); }
   .user-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
   .video-info .username { font-weight:bold; font-size:1rem; }
   .follow-btn { background:transparent; border:1px solid #fff; color:#fff; padding:4px 10px; border-radius:12px; font-size:0.7rem; font-weight:bold; cursor:pointer; }
   .follow-btn.followed { background:#fff; color:#000; }
   .video-info .caption { font-size:0.85rem; opacity:0.9; line-height:1.3; }
-  
   .side-actions { position:absolute; right:12px; bottom:80px; display:flex; flex-direction:column; gap:14px; z-index:2; }
-  .action-btn { background:none; border:none; color:#fff; font-size:1.3rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); transition: transform 0.15s; }
-  .action-btn:active { transform:scale(0.85); }
+  .action-btn { background:none; border:none; color:#fff; font-size:1.3rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
   .action-btn span { font-size:0.65rem; font-weight:600; }
-
   .mute-btn { position:absolute; top:60px; right:16px; z-index:3; background:rgba(0,0,0,0.5); border:none; color:#fff; width:36px; height:36px; border-radius:50%; font-size:1.2rem; display:flex; justify-content:center; align-items:center; }
   .play-indicator { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:4rem; opacity:0; pointer-events:none; transition:opacity 0.3s; }
   .play-indicator.show { opacity:0.8; }
   .progress-bar { position:absolute; bottom:0; left:0; right:0; height:3px; background:rgba(255,255,255,0.2); }
   .progress-fill { height:100%; background:#ff0050; width:0%; }
 
-  /* MODAL */
+  /* ===== MODAL ===== */
   .modal { position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:200; display:flex; justify-content:center; align-items:center; padding:16px; }
   .modal-content { position:relative; width:100%; max-width:520px; background:#1a1a1a; border-radius:16px; overflow:hidden; max-height:90vh; display:flex; flex-direction:column; }
   .close-btn { position:absolute; top:12px; right:12px; z-index:10; background:rgba(255,255,255,0.1); border:none; color:#fff; width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:1rem; }
@@ -66,16 +79,15 @@
   .avatar-edit-label { position:absolute; bottom:0; right:0; background:#ff0050; width:28px; height:28px; border-radius:50%; display:flex; justify-content:center; align-items:center; cursor:pointer; }
   .form-group { padding:0 20px; margin-bottom:16px; }
   .form-group label { display:block; font-size:0.8rem; color:#aaa; margin-bottom:6px; }
-  .form-group input { width:100%; padding:12px; background:#222; border:1px solid #444; border-radius:8px; color:#fff; font-size:1rem; outline:none; }
+  .form-group input, .form-group select { width:100%; padding:12px; background:#222; border:1px solid #444; border-radius:8px; color:#fff; font-size:1rem; outline:none; }
   .btn-primary { width:calc(100% - 40px); margin:0 20px 20px; padding:14px; background:linear-gradient(90deg,#ff0050,#ff8a00); border:none; color:#fff; border-radius:8px; font-weight:bold; font-size:1rem; cursor:pointer; }
   .btn-primary:disabled { opacity:0.5; }
 
-  /* UPLOAD & KAMERA */
+  /* KAMERA & GALERI */
   .upload-body { padding:20px; overflow-y:auto; display:flex; flex-direction:column; height:100%; }
   .tab-selector { display:flex; margin-bottom:16px; background:#222; border-radius:8px; overflow:hidden; }
   .tab-btn { flex:1; padding:10px; background:transparent; border:none; color:#aaa; cursor:pointer; font-weight:bold; transition:0.2s; }
   .tab-btn.active { background:#333; color:#fff; border-bottom:2px solid #ff0050; }
-
   .camera-container { position:relative; width:100%; aspect-ratio:9/16; background:#000; border-radius:12px; overflow:hidden; margin-bottom:16px; }
   .camera-container video { width:100%; height:100%; object-fit:cover; }
   .record-btn { position:absolute; bottom:20px; left:50%; transform:translateX(-50%); width:60px; height:60px; border-radius:50%; background:rgba(255,255,255,0.3); border:4px solid #fff; cursor:pointer; display:flex; justify-content:center; align-items:center; }
@@ -83,8 +95,6 @@
   .record-btn .inner { width:46px; height:46px; border-radius:50%; background:#ff0050; transition:0.2s; }
   .record-btn.recording .inner { border-radius:8px; width:24px; height:24px; background:#fff; }
   .flip-cam-btn { position:absolute; top:16px; right:16px; background:rgba(0,0,0,0.6); border:none; color:#fff; width:44px; height:44px; border-radius:50%; cursor:pointer; font-size:1.5rem; display:flex; justify-content:center; align-items:center; }
-
-  /* EDITOR */
   .preview-wrapper { position:relative; width:100%; margin-bottom:16px; border-radius:12px; overflow:hidden; background:#000; display:flex; justify-content:center; }
   .preview-wrapper video { width:100%; max-height:300px; object-fit:contain; }
   .interactive-text { position:absolute; z-index:10; cursor:move; padding:4px; border:1px dashed transparent; user-select:none; touch-action:none; white-space:nowrap; font-weight:bold; text-shadow:0 2px 8px rgba(0,0,0,0.9); }
@@ -93,126 +103,163 @@
   .interactive-text.active .controls { opacity:1; pointer-events:auto; }
   .interactive-text .controls button { background:none; border:none; color:#fff; cursor:pointer; font-size:1rem; }
 
+  /* MONETISASI */
+  .balance-card { background:linear-gradient(135deg,#f7b733,#fc4a1a); border-radius:16px; padding:24px; margin:20px; text-align:center; }
+  .balance-card h2 { font-size:2.5rem; margin:8px 0; }
+  .price-list { padding:0 20px; display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+  .price-item { display:flex; justify-content:space-between; background:#222; padding:14px; border-radius:12px; cursor:pointer; border:1px solid #444; }
+
   .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px); background:#333; color:#fff; padding:12px 20px; border-radius:24px; z-index:500; opacity:0; transition:0.3s; pointer-events:none; text-align:center; }
   .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 
-  <!-- NAVBAR -->
-  <header class="navbar">
-    <div class="nav-left">
-      <div class="profile-nav-btn" id="btnProfile"><img id="navAvatar" src="" /></div>
-      <div class="brand-logo">MY<span>FLIX</span></div>
-    </div>
-    <div class="nav-right">
-      <button id="btnFeed" class="nav-btn active">📱</button>
-      <button id="btnUpload" class="nav-btn">🎥</button>
-      <button id="btnMonet" class="nav-btn coin-btn">💰 <span id="navBalance">0</span></button>
-    </div>
-  </header>
-
-  <main id="feedView" class="feed-container"></main>
-
-  <!-- UPLOAD MODAL -->
-  <div id="uploadModal" class="modal hidden">
-    <div class="modal-content">
-      <button class="close-btn" id="closeUpload">✕</button>
-      
-      <!-- PAGE 1: SELECT -->
-      <div id="pageSelect" class="upload-body">
-        <div class="tab-selector">
-          <button class="tab-btn active" id="tabCam">🎥 Kamera</button>
-          <button class="tab-btn" id="tabGal">📁 Galeri</button>
-        </div>
-        
-        <div id="sectionCam" style="flex:1;">
-          <div class="camera-container">
-            <video id="liveCamera" autoplay playsinline muted></video>
-            <button class="flip-cam-btn" id="btnFlipCam">🔄</button>
-            <button class="record-btn" id="btnRecord"><div class="inner"></div></button>
-          </div>
-        </div>
-
-        <div id="sectionGal" class="hidden" style="flex:1; display:flex; align-items:center; justify-content:center;">
-          <div id="dropzone" style="border:2px dashed #444; border-radius:12px; padding:40px; text-align:center; cursor:pointer; width:100%;">
-            <div style="font-size:3rem; margin-bottom:10px;">📁</div>
-            <p>Pilih Video dari Galeri</p>
-            <input type="file" id="fileInput" accept="video/*" hidden />
-          </div>
-        </div>
+  <!-- AUTH SCREEN (Hanya simulasi lokal) -->
+  <div id="authScreen" class="auth-screen">
+    <div class="auth-logo">MY<span>FLIX</span></div>
+    <div class="auth-tagline">Platform Video & Monetisasi Masa Depan</div>
+    <div class="auth-box">
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tabLogin">Masuk</div>
+        <div class="auth-tab" id="tabRegister">Daftar</div>
       </div>
+      <div id="loginForm">
+        <div class="auth-input-group"><label>Email</label><input type="email" id="loginEmail" placeholder="email@contoh.com" /></div>
+        <div class="auth-input-group"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••" /></div>
+        <button class="auth-btn" id="btnLogin">Masuk ke MyFlix</button>
+      </div>
+      <div id="registerForm" class="hidden">
+        <div class="auth-input-group"><label>Nama Lengkap</label><input type="text" id="regName" placeholder="Budi Santoso" /></div>
+        <div class="auth-input-group"><label>Email</label><input type="email" id="regEmail" placeholder="email@contoh.com" /></div>
+        <div class="auth-input-group"><label>Password (Min 6 karakter)</label><input type="password" id="regPassword" placeholder="••••••••" /></div>
+        <button class="auth-btn" id="btnRegister" style="background:linear-gradient(90deg,#00c853,#00bfff);">Buat Akun Baru</button>
+      </div>
+    </div>
+  </div>
 
-      <!-- PAGE 2: EDITOR -->
-      <div id="pageEditor" class="upload-body hidden">
-        <div class="preview-wrapper">
-          <video id="previewVideo" controls playsinline></video>
-          <div id="interactiveText" class="interactive-text hidden" style="top:50%; left:50%; font-size:24px; color:#fff;">Ketik Teks
-            <div class="controls">
-              <button id="btnTxtMin">➖</button><button id="btnTxtPlus">➕</button><button id="btnTxtRot">🔄</button>
+  <!-- APLIKASI UTAMA -->
+  <div id="mainApp" class="hidden">
+    <header class="navbar">
+      <div class="nav-left">
+        <div class="profile-nav-btn" id="btnProfile"><img id="navAvatar" src="" /></div>
+        <div class="brand-logo">MY<span>FLIX</span></div>
+      </div>
+      <div class="nav-right">
+        <button id="btnFeed" class="nav-btn active">📱</button>
+        <button id="btnUpload" class="nav-btn">🎥</button>
+        <button id="btnMonet" class="nav-btn coin-btn">💰 <span id="navBalance">0</span></button>
+      </div>
+    </header>
+
+    <main id="feedView" class="feed-container"></main>
+
+    <!-- UPLOAD & KAMERA MODAL -->
+    <div id="uploadModal" class="modal hidden">
+      <div class="modal-content">
+        <button class="close-btn" id="closeUpload">✕</button>
+        <div id="pageSelect" class="upload-body">
+          <div class="tab-selector">
+            <button class="tab-btn active" id="tabCam">🎥 Kamera</button>
+            <button class="tab-btn" id="tabGal">📁 Galeri</button>
+          </div>
+          <div id="sectionCam" style="flex:1;">
+            <div class="camera-container">
+              <video id="liveCamera" autoplay playsinline muted></video>
+              <button class="flip-cam-btn" id="btnFlipCam">🔄</button>
+              <button class="record-btn" id="btnRecord"><div class="inner"></div></button>
+            </div>
+          </div>
+          <div id="sectionGal" class="hidden" style="flex:1; display:flex; align-items:center; justify-content:center;">
+            <div id="dropzone" style="border:2px dashed #444; border-radius:12px; padding:40px; text-align:center; cursor:pointer; width:100%;">
+              <div style="font-size:3rem; margin-bottom:10px;">📁</div>
+              <p>Pilih Video dari Galeri</p>
+              <input type="file" id="fileInput" accept="video/*" hidden />
             </div>
           </div>
         </div>
 
-        <div style="background:#222; padding:12px; border-radius:8px; margin-bottom:16px;">
-          <label>✨ Teks Video</label>
-          <input type="text" id="inputText" placeholder="Ketik teks..." style="margin-bottom:8px;" />
-          <div style="display:flex; gap:8px;">
-            <select id="selectFont" style="flex:1;"><option value="inherit">Default</option><option value="Impact">Impact</option></select>
-            <select id="selectColor" style="flex:1;"><option value="#ffffff">Putih</option><option value="#ff0050">Merah</option></select>
+        <div id="pageEditor" class="upload-body hidden">
+          <div class="preview-wrapper">
+            <video id="previewVideo" controls playsinline></video>
+            <div id="interactiveText" class="interactive-text hidden" style="top:50%; left:50%; font-size:24px; color:#fff;">Ketik Teks
+              <div class="controls">
+                <button id="btnTxtMin">➖</button><button id="btnTxtPlus">➕</button><button id="btnTxtRot">🔄</button>
+              </div>
+            </div>
           </div>
+          <div style="background:#222; padding:12px; border-radius:8px; margin-bottom:16px;">
+            <label>✨ Teks Video</label>
+            <input type="text" id="inputText" placeholder="Ketik teks..." style="margin-bottom:8px;" />
+            <div style="display:flex; gap:8px;">
+              <select id="selectFont" style="flex:1;"><option value="inherit">Default</option><option value="Impact">Impact</option></select>
+              <select id="selectColor" style="flex:1;"><option value="#ffffff">Putih</option><option value="#ff0050">Merah</option></select>
+            </div>
+          </div>
+          <div class="form-group" style="padding:0;"><label>Username</label><input type="text" id="uploadUsername" /></div>
+          <div class="form-group" style="padding:0;"><label>Caption</label><input type="text" id="uploadCaption" placeholder="Tulis caption..." /></div>
+          <button class="btn-primary" id="btnSubmitUpload" style="width:100%; margin:0;" disabled>🚀 Publikasikan</button>
         </div>
-
-        <div class="form-group" style="padding:0;">
-          <label>Username</label>
-          <input type="text" id="uploadUsername" />
-        </div>
-        <div class="form-group" style="padding:0;">
-          <label>Caption</label>
-          <input type="text" id="uploadCaption" placeholder="Tulis caption..." />
-        </div>
-
-        <button class="btn-primary" id="btnSubmitUpload" style="width:100%; margin:0;" disabled>🚀 Publikasikan</button>
       </div>
     </div>
-  </div>
 
-  <!-- PROFILE MODAL -->
-  <div id="profileModal" class="modal hidden">
-    <div class="modal-content">
-      <button class="close-btn" id="closeProfile">✕</button>
-      <div class="profile-header">
-        <div class="avatar-preview">
-          <img id="profilePreview" src="" />
-          <label class="avatar-edit-label" for="avatarUpload">✎</label>
-          <input type="file" id="avatarUpload" accept="image/*" hidden />
+    <!-- PROFIL MODAL -->
+    <div id="profileModal" class="modal hidden">
+      <div class="modal-content">
+        <button class="close-btn" id="closeProfile">✕</button>
+        <div class="profile-header">
+          <div class="avatar-preview">
+            <img id="profilePreview" src="" />
+            <label class="avatar-edit-label" for="avatarUpload">✎</label>
+            <input type="file" id="avatarUpload" accept="image/*" hidden />
+          </div>
+          <h3 id="profileNameDisplay">Memuat...</h3>
+          <p style="color:#aaa;" id="profileUsernameDisplay">@username</p>
         </div>
-        <h3 id="profileNameDisplay">Memuat...</h3>
-        <p style="color:#aaa;" id="profileUsernameDisplay">@username</p>
+        <div class="form-group" style="margin-top:20px;"><label>Nama</label><input type="text" id="inputDisplayName" /></div>
+        <div class="form-group"><label>Username</label><input type="text" id="inputUsername" /></div>
+        <button class="btn-primary" id="btnSaveProfile">Simpan Profil</button>
+        <button class="btn-primary" id="btnLogout" style="background:#333; margin-top:-10px;">Keluar Akun</button>
       </div>
-      <div class="form-group" style="margin-top:20px;"><label>Nama</label><input type="text" id="inputDisplayName" /></div>
-      <div class="form-group"><label>Username</label><input type="text" id="inputUsername" /></div>
-      <button class="btn-primary" id="btnSaveProfile">Simpan Profil</button>
-      <button class="btn-primary" id="btnLogout" style="background:#333; margin-top:-10px;">Keluar Akun</button>
     </div>
-  </div>
 
-  <!-- COMMENT SHEET -->
-  <div id="commentSheet" style="position:fixed; bottom:0; left:0; right:0; background:#1a1a1a; border-radius:16px 16px 0 0; z-index:300; height:60vh; display:flex; flex-direction:column; transform:translateY(100%); transition:transform 0.3s ease;">
-    <div style="display:flex; justify-content:space-between; padding:16px; border-bottom:1px solid #333;"><h3><span id="commentCount">0</span> Komentar</h3><button id="closeComment" style="background:none;border:none;color:#fff;font-size:1.2rem;">✕</button></div>
-    <div id="commentList" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:16px;"></div>
-    <div style="padding:12px 16px; border-top:1px solid #333; display:flex; gap:10px; padding-bottom: calc(12px + env(safe-area-inset-bottom));"><input type="text" id="commentInput" placeholder="Ketik komentar..." style="flex:1; background:#222; border:none; border-radius:20px; padding:10px 16px; color:#fff; outline:none;" /><button id="sendComment" style="background:#ff0050; border:none; color:#fff; width:40px; height:40px; border-radius:50%; font-size:1.2rem;">➤</button></div>
-  </div>
+    <!-- MONETISASI MODAL -->
+    <div id="monetModal" class="modal hidden">
+      <div class="modal-content">
+        <button class="close-btn" id="closeMonet">✕</button>
+        <div class="balance-card">
+          <div style="font-size:0.9rem;">Saldo Koin Kreator</div>
+          <h2>🪙 <span id="coinBalance">0</span></h2>
+          <div>≈ Rp <span id="coinRupiah">0</span></div>
+        </div>
+        <h3 style="padding:0 20px; margin-bottom:10px;">Beli Koin</h3>
+        <div class="price-list">
+          <div class="price-item" data-coins="100" data-price="10000"><span>🪙 100 Koin</span><span>Rp 10.000</span></div>
+          <div class="price-item" data-coins="500" data-price="45000"><span>🪙 500 Koin</span><span>Rp 45.000</span></div>
+        </div>
+      </div>
+    </div>
 
-  <div id="toast" class="toast"></div>
+    <!-- COMMENT SHEET -->
+    <div id="commentSheet" style="position:fixed; bottom:0; left:0; right:0; background:#1a1a1a; border-radius:16px 16px 0 0; z-index:300; height:60vh; display:flex; flex-direction:column; transform:translateY(100%); transition:transform 0.3s ease;">
+      <div style="display:flex; justify-content:space-between; padding:16px; border-bottom:1px solid #333;"><h3><span id="commentCount">0</span> Komentar</h3><button id="closeComment" style="background:none;border:none;color:#fff;font-size:1.2rem;">✕</button></div>
+      <div id="commentList" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:16px;"></div>
+      <div style="padding:12px 16px; border-top:1px solid #333; display:flex; gap:10px; padding-bottom: calc(12px + env(safe-area-inset-bottom));"><input type="text" id="commentInput" placeholder="Ketik komentar..." style="flex:1; background:#222; border:none; border-radius:20px; padding:10px 16px; color:#fff; outline:none;" /><button id="sendComment" style="background:#ff0050; border:none; color:#fff; width:40px; height:40px; border-radius:50%; font-size:1.2rem;">➤</button></div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+  </div>
 
   <script>
-    // STATE
-    const STORAGE_KEY = 'myflix_camera_gal_v1';
+    // ==========================================
+    // STATE LOKAL (TANPA FIREBASE)
+    // ==========================================
+    const STORAGE_KEY = 'myflix_local_v1';
     let state = { 
       coins: 0, userVideos: [], comments: {}, likedVideos: {}, followedUsers: {}, 
       profile: { name: "Pengguna", username: "@user", avatar: "https://ui-avatars.com/api/?name=User&background=random" }
     };
+    
     function loadState() { const s = localStorage.getItem(STORAGE_KEY); if (s) state = { ...state, ...JSON.parse(s) }; }
     function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
     function showToast(m, t='info') { 
@@ -220,13 +267,47 @@
       const el = document.getElementById('toast'); el.textContent = m; el.style.background = t==='error'?'#ff0050':t==='success'?'#00c853':'#333'; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 3000); 
     }
 
-    // KAMERA & GALERI
+    // ==========================================
+    // AUTH SIMULASI
+    // ==========================================
+    document.getElementById('tabLogin').onclick = () => { document.getElementById('tabLogin').classList.add('active'); document.getElementById('tabRegister').classList.remove('active'); document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('registerForm').classList.add('hidden'); };
+    document.getElementById('tabRegister').onclick = () => { document.getElementById('tabRegister').classList.add('active'); document.getElementById('tabLogin').classList.remove('active'); document.getElementById('registerForm').classList.remove('hidden'); document.getElementById('loginForm').classList.add('hidden'); };
+
+    document.getElementById('btnLogin').onclick = () => {
+      const email = document.getElementById('loginEmail').value;
+      const pass = document.getElementById('loginPassword').value;
+      if(!email || !pass) { showToast('Isi email dan password!', 'error'); return; }
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+      updateUI(); renderFeed();
+    };
+
+    document.getElementById('btnRegister').onclick = () => {
+      const name = document.getElementById('regName').value;
+      const email = document.getElementById('regEmail').value;
+      const pass = document.getElementById('regPassword').value;
+      if(!name || !email || pass.length < 6) { showToast('Data tidak valid! Password min 6 karakter.', 'error'); return; }
+      
+      state.profile = { name: name, username: "@" + name.toLowerCase().replace(/\s/g, ''), avatar: `https://ui-avatars.com/api/?name=${name}&background=random` };
+      saveState(); updateUI();
+      
+      showToast('Akun berhasil dibuat!', 'success');
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+      renderFeed();
+    };
+
+    document.getElementById('btnLogout').onclick = () => { if(confirm('Keluar akun?')) location.reload(); };
+
+    // ==========================================
+    // UPLOAD & KAMERA
+    // ==========================================
     let streamRef = null, mediaRecorder, chunks = [], facingMode = 'user', pendingFile = null;
     let textState = { x: 50, y: 50, size: 24, rot: 0 };
 
     async function startCamera() {
       if(streamRef) streamRef.getTracks().forEach(t => t.stop());
-      try { streamRef = await navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio: true }); document.getElementById('liveCamera').srcObject = streamRef; } catch(e) { showToast('Kamera gagal', 'error'); }
+      try { streamRef = await navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio: true }); document.getElementById('liveCamera').srcObject = streamRef; } catch(e) { showToast('Kamera gagal diakses', 'error'); }
     }
     function stopCamera() { if(streamRef) { streamRef.getTracks().forEach(t => t.stop()); streamRef = null; } }
 
@@ -238,18 +319,11 @@
     };
     document.getElementById('closeUpload').onclick = () => { document.getElementById('uploadModal').classList.add('hidden'); stopCamera(); };
     
-    document.getElementById('tabCam').onclick = () => { 
-      document.getElementById('tabCam').classList.add('active'); document.getElementById('tabGal').classList.remove('active'); 
-      document.getElementById('sectionCam').classList.remove('hidden'); document.getElementById('sectionGal').classList.add('hidden'); 
-      startCamera(); 
-    };
-    document.getElementById('tabGal').onclick = () => { 
-      document.getElementById('tabGal').classList.add('active'); document.getElementById('tabCam').classList.remove('active'); 
-      document.getElementById('sectionGal').classList.remove('hidden'); document.getElementById('sectionCam').classList.add('hidden'); 
-      stopCamera(); 
-    };
+    document.getElementById('tabCam').onclick = () => { document.getElementById('tabCam').classList.add('active'); document.getElementById('tabGal').classList.remove('active'); document.getElementById('sectionCam').classList.remove('hidden'); document.getElementById('sectionGal').classList.add('hidden'); startCamera(); };
+    document.getElementById('tabGal').onclick = () => { document.getElementById('tabGal').classList.add('active'); document.getElementById('tabCam').classList.remove('active'); document.getElementById('sectionGal').classList.remove('hidden'); document.getElementById('sectionCam').classList.add('hidden'); stopCamera(); };
     
     document.getElementById('btnFlipCam').onclick = () => { facingMode = facingMode === 'user' ? 'environment' : 'user'; startCamera(); };
+    
     document.getElementById('btnRecord').onclick = () => {
       if(!streamRef) return;
       if(mediaRecorder && mediaRecorder.state === 'recording') { mediaRecorder.stop(); document.getElementById('btnRecord').classList.remove('recording'); }
@@ -279,13 +353,12 @@
     }
     document.getElementById('uploadUsername').oninput = validateForm; document.getElementById('uploadCaption').oninput = validateForm;
 
-    // TEKS DRAG
+    // Teks Drag
     const iText = document.getElementById('interactiveText'); let drag = false, sX, sY, iX, iY;
     iText.onpointerdown = (e) => { if(e.target.tagName==='BUTTON') return; drag = true; iText.classList.add('active'); sX = e.clientX; sY = e.clientY; const r = document.getElementById('previewVideo').getBoundingClientRect(); iX = (textState.x/100)*r.width; iY = (textState.y/100)*r.height; iText.setPointerCapture(e.pointerId); };
     iText.onpointermove = (e) => { if(!drag) return; const r = document.getElementById('previewVideo').getBoundingClientRect(); let nX = Math.max(0, Math.min(iX + (e.clientX - sX), r.width)); let nY = Math.max(0, Math.min(iY + (e.clientY - sY), r.height)); textState.x = (nX/r.width)*100; textState.y = (nY/r.height)*100; updateTxtPos(); };
     iText.onpointerup = (e) => { drag = false; iText.releasePointerCapture(e.pointerId); };
     function updateTxtPos() { iText.style.left = textState.x + '%'; iText.style.top = textState.y + '%'; iText.style.transform = `translate(-50%,-50%) rotate(${textState.rot}deg)`; }
-    
     document.getElementById('inputText').oninput = (e) => { if(!e.target.value.trim()) iText.classList.add('hidden'); else { iText.classList.remove('hidden'); iText.childNodes[0].nodeValue = e.target.value; } };
     document.getElementById('selectFont').onchange = (e) => iText.style.fontFamily = e.target.value;
     document.getElementById('selectColor').onchange = (e) => iText.style.color = e.target.value;
@@ -294,7 +367,7 @@
     document.getElementById('btnTxtRot').onclick = (e) => { e.stopPropagation(); textState.rot+=45; updateTxtPos(); };
     document.getElementById('previewVideo').onclick = () => iText.classList.remove('active');
 
-    // SIMPAN
+    // IndexedDB untuk Simpan Video
     const DB_NAME = 'myflix_db', DB_STORE = 'videos'; let dbLocal;
     function initDB() { return new Promise((res) => { const req = indexedDB.open(DB_NAME, 1); req.onupgradeneeded = e => { if(!e.target.result.objectStoreNames.contains(DB_STORE)) e.target.result.createObjectStore(DB_STORE, {keyPath:'id'}); }; req.onsuccess = e => { dbLocal = e.target.result; res(); }; }); }
     function saveVideoDB(id, blob) { return new Promise(res => { const tx = dbLocal.transaction(DB_STORE, 'readwrite'); tx.objectStore(DB_STORE).put({id, blob}).onsuccess = () => res(); }); }
@@ -312,15 +385,14 @@
         await saveVideoDB(id, pendingFile);
         state.userVideos.unshift({ 
           id, username: document.getElementById('uploadUsername').value.trim(), caption: document.getElementById('uploadCaption').value.trim(), 
-          src: null, likes: 0, overlayData, monetize: true 
+          src: null, likes: 0, overlayData
         });
         saveState(); 
         
         showToast('🎉 Video berhasil dipublikasikan!', 'success'); 
         document.getElementById('uploadModal').classList.add('hidden'); 
         btn.textContent = '🚀 Publikasikan'; btn.disabled = false;
-        pendingFile = null;
-        document.getElementById('uploadCaption').value = '';
+        pendingFile = null; document.getElementById('uploadCaption').value = '';
         
         renderFeed();
         document.getElementById('feedView').scrollTo({ top: 0, behavior: 'smooth' });
@@ -330,7 +402,9 @@
       }
     };
 
-    // RENDER FEED
+    // ==========================================
+    // RENDER FEED & SOSIAL
+    // ==========================================
     const defaultVideos = [
       { id:101, username:"@nature_vibes", caption:"Sunset di pantai 🏖️", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes:1240 },
     ];
@@ -384,7 +458,6 @@
       document.querySelectorAll('.video-card').forEach(c => obs.observe(c));
     }
 
-    // SOSIAL
     let commentTargetId = null;
     function openComments(id) { commentTargetId = id; renderComments(id); document.getElementById('commentSheet').style.transform = 'translateY(0)'; }
     function renderComments(id) {
@@ -396,21 +469,27 @@
     document.getElementById('sendComment').onclick = () => { const v = document.getElementById('commentInput').value.trim(); if(!v || !commentTargetId) return; if(!state.comments[commentTargetId]) state.comments[commentTargetId] = []; state.comments[commentTargetId].push({user:state.profile.username, text:v}); saveState(); document.getElementById('commentInput').value = ''; renderComments(commentTargetId); };
 
     // PROFIL & LAINNYA
-    document.getElementById('btnMonet').onclick = () => document.getElementById('monetModal').classList.remove('hidden');
+    document.getElementById('btnMonet').onclick = () => { updateUI(); document.getElementById('monetModal').classList.remove('hidden'); };
+    document.getElementById('closeMonet').onclick = () => document.getElementById('monetModal').classList.add('hidden');
     document.getElementById('btnProfile').onclick = () => document.getElementById('profileModal').classList.remove('hidden');
     document.getElementById('closeProfile').onclick = () => document.getElementById('profileModal').classList.add('hidden');
-    document.getElementById('closeMonet').onclick = () => document.getElementById('monetModal').classList.add('hidden');
 
     document.getElementById('btnSaveProfile').onclick = () => {
       state.profile.name = document.getElementById('inputDisplayName').value.trim();
       state.profile.username = document.getElementById('inputUsername').value.trim();
-      saveState(); updateUI(); showToast('Pengaturan disimpan!', 'success'); document.getElementById('profileModal').classList.add('hidden');
+      saveState(); updateUI(); showToast('Profil disimpan!', 'success'); document.getElementById('profileModal').classList.add('hidden');
     };
     document.getElementById('avatarUpload').onchange = (e) => {
       const f = e.target.files[0]; 
       if(f) { const r = new FileReader(); r.onload = (ev) => { state.profile.avatar = ev.target.result; saveState(); updateUI(); showToast('Foto profil diganti!', 'success'); }; r.readAsDataURL(f); }
     };
-    document.getElementById('btnLogout').onclick = () => { if(confirm('Keluar akun?')) location.reload(); };
+
+    document.querySelectorAll('.price-item').forEach(item => {
+      item.onclick = () => {
+        const coins = parseInt(item.dataset.coins || 0); const price = parseInt(item.dataset.price || 0);
+        if(coins) { if(confirm(`Beli ${coins} koin seharga Rp ${price.toLocaleString('id-ID')}?`)) { state.coins += coins; saveState(); updateUI(); showToast(`✅ +${coins} koin`, 'success'); } }
+      };
+    });
 
     function updateUI() {
       document.getElementById('navAvatar').src = state.profile.avatar;
@@ -420,11 +499,17 @@
       document.getElementById('inputDisplayName').value = state.profile.name;
       document.getElementById('inputUsername').value = state.profile.username;
       document.getElementById('navBalance').textContent = state.coins || 0;
+      document.getElementById('coinBalance').textContent = state.coins || 0;
+      document.getElementById('coinRupiah').textContent = ((state.coins || 0) * 100).toLocaleString('id-ID');
     }
 
     // INIT
     (async () => {
-      loadState(); await initDB(); updateUI(); renderFeed();
+      loadState(); await initDB(); updateUI();
+      // Simulasi: Langsung masuk tanpa auth (karena versi lokal)
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+      renderFeed();
     })();
   </script>
 </body>
