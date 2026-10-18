@@ -168,7 +168,7 @@
 
     <main id="feedView" class="feed-container"></main>
 
-    <!-- PROFILE MODAL -->
+    <!-- PROFILE & SETTINGS MODAL -->
     <div id="profileModal" class="modal hidden">
       <div class="modal-content">
         <button class="close-btn" id="closeProfile">✕</button>
@@ -181,10 +181,14 @@
           <h3 id="profileNameDisplay">Memuat...</h3>
           <p style="color:#aaa;" id="profileUsernameDisplay">@username</p>
         </div>
-        <div class="form-group" style="margin-top:20px;"><label>Nama</label><input type="text" id="inputDisplayName" /></div>
+        
+        <h4 style="padding:20px 20px 10px; color:#00c853;">⚙️ Pengaturan Akun</h4>
+        <div class="form-group"><label>Nama Lengkap</label><input type="text" id="inputDisplayName" /></div>
         <div class="form-group"><label>Username</label><input type="text" id="inputUsername" /></div>
-        <button class="btn-primary" id="btnSaveProfile">Simpan Profil</button>
-        <button class="btn-primary" id="btnLogout" style="background:#333; margin-top:-10px;">Keluar Akun</button>
+        
+        <button class="btn-primary" id="btnSaveProfile" style="margin-bottom:10px;">Simpan Pengaturan</button>
+        <!-- TOMBOL LOGOUT BARU -->
+        <button class="btn-primary" id="btnLogout" style="background:#333; margin-top:0;">🚪 Keluar Akun (Logout)</button>
       </div>
     </div>
 
@@ -334,8 +338,8 @@
           username: newUsername,
           avatar: state.profile.avatar
         });
-        showToast('Profil berhasil disimpan!', 'success');
-        updateUI();
+        showToast('Pengaturan disimpan!', 'success');
+        updateUI(); // Update UI saja, tanpa re-render feed
         document.getElementById('profileModal').classList.add('hidden');
       } catch (error) {
         showToast('Gagal menyimpan profil', 'error');
@@ -356,8 +360,29 @@
       document.getElementById('adBalance').textContent = (state.profile.adBalance || 0).toLocaleString('id-ID');
     }
 
+    // --- UPLOAD AVATAR ---
+    document.getElementById('avatarUpload').onchange = async (e) => {
+      const f = e.target.files[0]; 
+      if(f) { 
+        const r = new FileReader(); 
+        r.onload = async (ev) => { 
+          const newAvatar = ev.target.result;
+          state.profile.avatar = newAvatar; 
+          updateUI();
+          
+          // Simpan ke Firebase
+          const user = auth.currentUser;
+          if (user) {
+            await updateDoc(doc(db, "users", user.uid), { avatar: newAvatar });
+            showToast('Foto profil berhasil diganti!', 'success');
+          }
+        }; 
+        r.readAsDataURL(f); 
+      }
+    };
+
     // ==========================================
-    // LOGIKA UPLOAD & VIDEO (DIPULIHKAN)
+    // LOGIKA UPLOAD & VIDEO
     // ==========================================
     const DB_NAME = 'myflix_db', DB_STORE = 'videos'; let dbLocal;
     function initDB() { return new Promise((res) => { const req = indexedDB.open(DB_NAME, 1); req.onupgradeneeded = e => { if(!e.target.result.objectStoreNames.contains(DB_STORE)) e.target.result.createObjectStore(DB_STORE, {keyPath:'id'}); }; req.onsuccess = e => { dbLocal = e.target.result; res(); }; }); }
