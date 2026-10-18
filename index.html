@@ -28,6 +28,17 @@
   .feed-container{height:100%; width:100%; overflow-y:scroll; scroll-snap-type:y mandatory;}
   .video-card{height:100%; width:100%; position:relative; scroll-snap-align:start; background:#000;}
   .video-card video{width:100%; height:100%; object-fit:contain;}
+  
+  /* Tombol Suara di Feed */
+  .volume-btn {
+    position:absolute; top:20px; right:20px; z-index:20;
+    background:rgba(0,0,0,0.6); color:#fff; border:none; border-radius:50%;
+    width:44px; height:44px; font-size:20px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .volume-btn.pulse { animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); background:rgba(254,44,85,0.8); } 100% { transform: scale(1); } }
+
   .video-info{position:absolute; bottom:70px; left:15px; right:70px; z-index:10;}
   .video-info .username{font-weight:bold; font-size:16px; margin-bottom:6px;}
   .video-info .desc{font-size:14px; line-height:1.3; margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
@@ -172,7 +183,7 @@
     <button class="icon-btn" onclick="publishVideo()" style="background:var(--primary);">✓</button>
   </div>
   <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; position:relative;">
-    <video id="editVideo" playsinline style="max-width:100%; max-height:100%; object-fit:contain;"></video>
+    <video id="editVideo" playsinline controls style="max-width:100%; max-height:100%; object-fit:contain;"></video>
     <div id="overlayLayer" style="position:absolute; inset:0; pointer-events:none;"></div>
   </div>
   
@@ -190,7 +201,6 @@
     <div class="editor-actions">
       <button class="btn-action" onclick="openTextModal()">📝 Text</button>
       <button class="btn-action" onclick="openMusicModal()">🎵 Musik</button>
-      <button class="btn-action" onclick="togglePlayPause()">▶️ Play/Pause</button>
     </div>
     
     <div id="overlayList" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
@@ -244,38 +254,18 @@
    KATALOG MUSIK BEBAS ROYALTI / VIRAL (URL MP3 LANGSUNG)
    ============================================================ */
 const MUSIC_CATALOG = [
-  { 
-    id: 'none', 
-    name: 'Tanpa Musik', 
-    url: null 
-  },
-  { 
-    id: 'viral-funk', 
-    name: 'Viral Funk (Upbeat)', 
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' // Lagu bebas royalti
-  },
-  { 
-    id: 'viral-chill', 
-    name: 'Chill Viral Beat', 
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'
-  },
-  { 
-    id: 'viral-epic', 
-    name: 'Epic Trend', 
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3'
-  },
-  { 
-    id: 'lofi-vibe', 
-    name: 'Lofi Study Vibe', 
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3'
-  }
+  { id: 'none', name: 'Tanpa Musik', url: null },
+  { id: 'viral-funk', name: 'Viral Funk (Upbeat)', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
+  { id: 'viral-chill', name: 'Chill Viral Beat', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' },
+  { id: 'viral-epic', name: 'Epic Trend', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' },
+  { id: 'lofi-vibe', name: 'Lofi Study Vibe', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3' }
 ];
 
-let previewAudio = null; // Untuk memutar preview di modal
-let bgAudio = null; // Untuk memutar musik di feed beranda
+let previewAudio = null; 
+let bgAudio = null; 
 
 /* ============================================================
-   DATABASE INDEXEDDB (Penyimpanan Permanen)
+   DATABASE INDEXEDDB
    ============================================================ */
 let db;
 const DB_NAME = 'VideoStreamDB';
@@ -286,9 +276,7 @@ function initDB() {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = e => {
       const db = e.target.result;
-      if (!db.objectStoreNames.contains('videos')) {
-        db.createObjectStore('videos', { keyPath: 'id' });
-      }
+      if (!db.objectStoreNames.contains('videos')) db.createObjectStore('videos', { keyPath: 'id' });
     };
     req.onsuccess = e => { db = e.target.result; resolve(); };
     req.onerror = e => reject(e.target.error);
@@ -298,8 +286,7 @@ function initDB() {
 function saveVideoToDB(video) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction('videos', 'readwrite');
-    const store = tx.objectStore('videos');
-    const req = store.put(video);
+    const req = tx.objectStore('videos').put(video);
     req.onsuccess = () => resolve();
     req.onerror = e => reject(e.target.error);
   });
@@ -308,8 +295,7 @@ function saveVideoToDB(video) {
 function getAllVideosFromDB() {
   return new Promise((resolve, reject) => {
     const tx = db.transaction('videos', 'readonly');
-    const store = tx.objectStore('videos');
-    const req = store.getAll();
+    const req = tx.objectStore('videos').getAll();
     req.onsuccess = () => resolve(req.result);
     req.onerror = e => reject(e.target.error);
   });
@@ -328,7 +314,7 @@ const state = {
   isRecording: false,
   recordingStartTime: 0,
   recTimerInterval: null,
-  camMuted: false, // Default UNMUTED agar suara video terekam
+  camMuted: false, // KUNCI PERBAIKAN: Default UNMUTED agar mikrofon menyala
   videoBlob: null,
   videoURL: null,
   videoDuration: 0,
@@ -344,8 +330,7 @@ const state = {
 function switchTab(tab) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  
-  stopAllAudio(); // Matikan semua suara saat pindah tab
+  stopAllAudio(); // Pause audio saat pindah menu
 
   if (tab === 'home') {
     document.getElementById('screen-home').classList.add('active');
@@ -392,7 +377,6 @@ function hideLoader() { document.getElementById('loader').classList.remove('show
 function renderFeed() {
   const container = document.getElementById('feedContainer');
   const empty = document.getElementById('emptyFeed');
-  
   Array.from(container.children).forEach(c => { if (c.id !== 'emptyFeed') c.remove(); });
 
   if (state.videos.length === 0) {
@@ -405,32 +389,45 @@ function renderFeed() {
     const card = document.createElement('div');
     card.className = 'video-card';
     
-    const videoURL = URL.createObjectURL(videoData.blob);
     const vid = document.createElement('video');
-    vid.src = videoURL;
+    vid.src = URL.createObjectURL(videoData.blob);
     vid.loop = true;
     vid.playsInline = true;
-    vid.muted = true; // Awalnya mute agar autoplay berjalan
+    vid.muted = true; // Wajib mute saat autoplay
     
-    // Klik video untuk nyalakan suara & musik
-    vid.onclick = () => {
-      if (vid.paused) {
-        vid.play();
-        vid.muted = false;
-        if (videoData.musicUrl) {
-          playBgMusic(videoData.musicUrl);
-        }
-      } else if (vid.muted) {
-        // Jika sedang jalan tapi masih mute, nyalakan suara
-        vid.muted = false;
-        if (videoData.musicUrl) {
-          playBgMusic(videoData.musicUrl);
-        }
+    // Tombol Volume
+    const volBtn = document.createElement('button');
+    volBtn.className = 'volume-btn pulse';
+    volBtn.innerHTML = '🔇'; // Ikon mute (karena belum diklik)
+
+    // Fungsi Toggle Suara
+    const toggleVolume = (e) => {
+      if(e) e.stopPropagation();
+      vid.muted = !vid.muted;
+      if (vid.muted) {
+        volBtn.innerHTML = '🔇';
+        volBtn.classList.add('pulse');
+        if (bgAudio) bgAudio.pause();
       } else {
-        // Jika sudah bersuara, pause semuanya
-        vid.pause();
-        stopAllAudio();
+        volBtn.innerHTML = '🔊';
+        volBtn.classList.remove('pulse');
+        // Nyalakan musik latar jika ada
+        if (videoData.musicUrl) {
+          if (!bgAudio) bgAudio = new Audio(videoData.musicUrl);
+          else if (bgAudio.src !== videoData.musicUrl) { bgAudio.pause(); bgAudio = new Audio(videoData.musicUrl); }
+          bgAudio.loop = true;
+          bgAudio.volume = 0.5;
+          bgAudio.play().catch(e => console.log("Musik gagal:", e));
+        }
       }
+    };
+
+    volBtn.onclick = toggleVolume;
+    
+    // Klik area video juga men-toggle suara
+    vid.onclick = (e) => {
+      if (vid.paused) vid.play();
+      toggleVolume(e);
     };
 
     // Overlay Text
@@ -464,6 +461,7 @@ function renderFeed() {
     `;
 
     card.appendChild(vid);
+    card.appendChild(volBtn);
     card.appendChild(overlayContainer);
     card.appendChild(info);
     card.appendChild(actions);
@@ -474,23 +472,17 @@ function renderFeed() {
       entries.forEach(entry => {
         if (entry.isIntersecting) { 
           vid.play().catch(e=>{}); 
-          // Jangan autoplay musik karena browser memblokir audio tanpa interaksi user
         } else { 
           vid.pause(); 
-          stopAllAudio(); // Matikan musik saat scroll turun
+          vid.muted = true; // Kembalikan ke mute saat scroll
+          volBtn.innerHTML = '🔇';
+          volBtn.classList.add('pulse');
+          if (bgAudio) bgAudio.pause();
         }
       });
     }, { threshold: 0.6 });
     observer.observe(card);
   });
-}
-
-function playBgMusic(url) {
-  stopAllAudio();
-  bgAudio = new Audio(url);
-  bgAudio.loop = true;
-  bgAudio.volume = 0.5; // Volume musik 50% agar suara asli video tetap terdengar
-  bgAudio.play().catch(e => console.log("Musik diblokir:", e));
 }
 
 /* ============================================================
@@ -500,12 +492,10 @@ function renderProfile() {
   const grid = document.getElementById('profileGrid');
   grid.innerHTML = '';
   document.getElementById('profileCount').textContent = state.videos.length + ' Video';
-
   if (state.videos.length === 0) {
     grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#666;">Belum ada video</div>';
     return;
   }
-
   state.videos.forEach(v => {
     const item = document.createElement('div');
     item.className = 'grid-item';
@@ -521,7 +511,7 @@ function renderProfile() {
 }
 
 /* ============================================================
-   KAMERA (Pastikan Audio Terekam)
+   KAMERA
    ============================================================ */
 async function openCamera() {
   showScreen('camera');
@@ -531,17 +521,20 @@ async function openCamera() {
 async function startCamera() {
   try {
     if (state.camStream) state.camStream.getTracks().forEach(t => t.stop());
+    
+    // Paksa minta audio jika tidak di-mute
     state.camStream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: state.camFacing, width: { ideal: 1280 }, height: { ideal: 720 } },
-      audio: !state.camMuted // Minta izin audio jika tidak di-mute
+      audio: !state.camMuted 
     });
+    
     const video = document.getElementById('camPreview');
     video.srcObject = state.camStream;
     video.muted = true; // Preview tetap mute agar tidak feedback
     await video.play();
     document.getElementById('camMuteBtn').textContent = state.camMuted ? '🔇' : '🔊';
   } catch (err) {
-    showToast('Gagal kamera: ' + err.message);
+    showToast('Gagal kamera/mic: ' + err.message);
     switchTab('home');
   }
 }
@@ -577,12 +570,17 @@ function toggleRecording() {
   } else {
     if (!state.camStream) return;
     state.recordedChunks = [];
+    
+    // Cek apakah ada track audio di stream
+    const hasAudio = state.camStream.getAudioTracks().length > 0;
+    const mime = hasAudio ? 'video/webm;codecs=vp9,opus' : 'video/webm;codecs=vp9';
+    
     try {
-      // Pastikan merekam audio jika tidak muted
-      state.mediaRecorder = new MediaRecorder(state.camStream, { mimeType: 'video/webm;codecs=vp9,opus' });
+      state.mediaRecorder = new MediaRecorder(state.camStream, { mimeType: mime });
     } catch (e) {
-      state.mediaRecorder = new MediaRecorder(state.camStream);
+      state.mediaRecorder = new MediaRecorder(state.camStream); // Fallback
     }
+    
     state.mediaRecorder.ondataavailable = e => { if (e.data.size > 0) state.recordedChunks.push(e.data); };
     state.mediaRecorder.onstop = () => {
       const blob = new Blob(state.recordedChunks, { type: 'video/webm' });
@@ -624,7 +622,7 @@ function handleNewVideo(blob, filename) {
   
   const v = document.getElementById('editVideo');
   v.src = state.videoURL;
-  v.muted = false; // Unmute di editor agar user bisa dengar
+  v.muted = false; // Pastikan tidak mute di editor
   v.onloadedmetadata = () => {
     state.videoDuration = v.duration;
     state.trimStart = 0;
@@ -682,11 +680,7 @@ function initTrimUI() {
   document.ontouchend = onEnd;
 }
 
-function togglePlayPause() {
-  const v = document.getElementById('editVideo');
-  if (v.paused) v.play(); else v.pause();
-}
-
+/* Text Overlay Logic */
 let selectedColor = '#ffffff';
 function openTextModal() {
   document.getElementById('txtContent').value = '';
@@ -766,7 +760,7 @@ function removeOverlay(idx) {
 }
 
 /* ============================================================
-   KATALOG MUSIK (Preview & Pilih)
+   KATALOG MUSIK
    ============================================================ */
 function openMusicModal() {
   const list = document.getElementById('musicList');
@@ -776,7 +770,6 @@ function openMusicModal() {
     const item = document.createElement('div');
     item.className = 'music-item' + (state.selectedMusicTrack.id === track.id ? ' selected' : '');
     
-    // Tombol Play Preview
     const playBtn = document.createElement('button');
     playBtn.className = 'music-play-btn';
     playBtn.textContent = '▶️';
@@ -846,7 +839,7 @@ async function confirmPublish() {
     desc: title + (desc ? ' ' + desc : ''),
     musicId: state.selectedMusicTrack.id,
     musicName: state.selectedMusicTrack.name,
-    musicUrl: state.selectedMusicTrack.url, // Simpan URL musiknya
+    musicUrl: state.selectedMusicTrack.url,
     texts: [...state.textOverlays],
     blob: state.videoBlob,
     timestamp: Date.now()
@@ -858,8 +851,6 @@ async function confirmPublish() {
   try {
     await saveVideoToDB(newVideo);
     state.videos.unshift(newVideo);
-    
-    // Reset
     state.videoBlob = null;
     state.videoURL = null;
     state.textOverlays = [];
@@ -871,7 +862,6 @@ async function confirmPublish() {
   } catch (err) {
     hideLoader();
     showToast('Gagal menyimpan: ' + err.message);
-    console.error(err);
   }
 }
 
