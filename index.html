@@ -36,7 +36,7 @@
     backdrop-filter:blur(10px);
   }
   .nav-left { display:flex; align-items:center; gap:8px; }
-  .profile-nav-btn { width:34px; height:34px; border-radius:50%; background:#333; border:2px solid #ff0050; cursor:pointer; overflow:hidden; display:flex; justify-content:center; align-items:center; }
+  .profile-nav-btn { width:34px; height:34px; border-radius:50%; background:#333; border:2px solid #ff0050; cursor:pointer; overflow:hidden; display:flex; justify-content:center; align-items:center; z-index:999; }
   .profile-nav-btn img { width:100%; height:100%; object-fit:cover; }
   .brand-logo { font-size:1.1rem; font-weight:900; letter-spacing:0.5px; white-space:nowrap; }
   .brand-logo span { color:#ff0050; }
@@ -187,7 +187,6 @@
         <div class="form-group"><label>Username</label><input type="text" id="inputUsername" /></div>
         
         <button class="btn-primary" id="btnSaveProfile" style="margin-bottom:10px;">Simpan Pengaturan</button>
-        <!-- TOMBOL LOGOUT BARU -->
         <button class="btn-primary" id="btnLogout" style="background:#333; margin-top:0;">🚪 Keluar Akun (Logout)</button>
       </div>
     </div>
