@@ -3,294 +3,185 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>VideoStream Studio</title>
+<title>VideoStream - TikTok Clone</title>
 <style>
   :root{
-    --bg:#121212; --surface:#1e1e1e; --surface2:#2a2a2a;
-    --primary:#7c4dff; --primary-dark:#5e35b1;
-    --text:#ffffff; --text-dim:#b0b0b0; --danger:#ff5252; --success:#4caf50;
+    --bg:#000; --surface:#121212; --surface2:#242424;
+    --primary:#fe2c55; --text:#fff; --text-dim:#b0b0b0;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;height:100%;overflow:hidden;}
-  body{
-    background:var(--bg); color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    display:flex; flex-direction:column;
+  html,body{margin:0;padding:0;height:100%;overflow:hidden; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  
+  /* ============ NAVIGASI BAWAH ============ */
+  .bottom-nav{
+    position:fixed; bottom:0; left:0; right:0; height:60px;
+    background:var(--surface); display:flex; justify-content:space-around;
+    align-items:center; z-index:100; border-top:1px solid #333;
   }
-
-  /* ============ HEADER ============ */
-  header{
-    background:var(--surface); padding:14px 18px;
-    display:flex; align-items:center; justify-content:space-between;
-    border-bottom:1px solid #333; flex-shrink:0;
+  .nav-item{
+    display:flex; flex-direction:column; align-items:center;
+    color:var(--text-dim); font-size:11px; cursor:pointer; gap:4px; width:60px;
   }
-  header h1{margin:0; font-size:17px; font-weight:600; letter-spacing:.3px;}
-  header .logo{display:flex; align-items:center; gap:8px;}
-  .back-btn{
-    background:none; border:none; color:var(--text); font-size:22px;
-    cursor:pointer; padding:4px 8px; display:none;
+  .nav-item.active{color:var(--text);}
+  .nav-item .icon{font-size:22px;}
+  
+  /* Tombol Tambah (+) ala TikTok */
+  .btn-plus{
+    position:relative; top:-15px; width:46px; height:32px;
+    background:var(--text); border-radius:8px; display:flex;
+    align-items:center; justify-content:center; color:#000; font-weight:bold; font-size:20px;
+    border-left:3px solid var(--primary); border-right:3px solid #25f4ee;
+    box-shadow:0 2px 10px rgba(0,0,0,0.5);
   }
 
   /* ============ SCREENS ============ */
-  .screen{flex:1; overflow-y:auto; display:none; padding:20px;}
+  .screen{display:none; height:100%; width:100%; position:absolute; top:0; left:0;}
   .screen.active{display:block;}
-  .screen.no-pad{padding:0; overflow:hidden; display:none;}
-  .screen.no-pad.active{display:flex; flex-direction:column;}
+  
+  /* ============ BERANDA (FEED) ============ */
+  #screen-home{background:#000;}
+  .feed-container{height:100%; width:100%; overflow-y:scroll; scroll-snap-type:y mandatory;}
+  .video-card{
+    height:100%; width:100%; position:relative; scroll-snap-align:start; background:#000;
+  }
+  .video-card video{width:100%; height:100%; object-fit:contain;}
+  .video-info{
+    position:absolute; bottom:70px; left:15px; right:70px; z-index:10;
+  }
+  .video-info .username{font-weight:bold; font-size:16px; margin-bottom:6px;}
+  .video-info .desc{font-size:14px; line-height:1.3; margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  .video-info .music{font-size:13px; display:flex; align-items:center; gap:6px;}
+  .side-actions{
+    position:absolute; bottom:80px; right:10px; display:flex; flex-direction:column; gap:20px; align-items:center; z-index:10;
+  }
+  .action-btn-side{display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12px; cursor:pointer;}
+  .action-btn-side .icon{font-size:32px; background:rgba(0,0,0,0.4); border-radius:50%; padding:8px;}
+  
+  .empty-feed{display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--text-dim);}
 
-  /* ============ HOME ============ */
-  .home-wrap{
-    display:flex; flex-direction:column; align-items:center;
-    justify-content:center; min-height:100%; text-align:center; gap:10px;
-  }
-  .home-wrap .icon-big{font-size:80px; margin-bottom:10px;}
-  .home-wrap h2{font-size:22px; margin:0 0 30px;}
-  .menu-btn{
-    width:100%; max-width:360px; padding:20px 24px;
-    background:var(--surface); border:2px solid transparent;
-    border-radius:16px; display:flex; align-items:center; gap:16px;
-    color:var(--text); font-size:17px; font-weight:600; cursor:pointer;
-    transition:all .15s; margin-bottom:14px;
-  }
-  .menu-btn:active{transform:scale(.97);}
-  .menu-btn .m-icon{font-size:28px;}
-  .menu-btn.cam{border-color:var(--danger);}
-  .menu-btn.gal{border-color:#448aff;}
-
-  /* ============ CAMERA ============ */
-  .cam-preview-wrap{
-    flex:1; position:relative; background:#000;
-    display:flex; align-items:center; justify-content:center; overflow:hidden;
-  }
+  /* ============ CAMERA & EDITOR ============ */
+  #screen-camera, #screen-editor{background:#000; z-index:150;}
+  .top-bar{display:flex; justify-content:space-between; padding:15px; position:absolute; top:0; left:0; right:0; z-index:10;}
+  .icon-btn{background:rgba(0,0,0,0.5); border:none; color:#fff; width:40px; height:40px; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;}
+  
+  .cam-preview-wrap{width:100%; height:100%; display:flex; align-items:center; justify-content:center;}
   #camPreview{width:100%; height:100%; object-fit:cover;}
+  
   .cam-controls{
-    background:var(--surface); padding:24px; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center; gap:50px; position:relative;
+    position:absolute; bottom:0; left:0; right:0; height:140px;
+    display:flex; align-items:center; justify-content:space-around; padding-bottom:20px; z-index:10;
   }
   .rec-btn{
-    width:76px; height:76px; border-radius:50%;
-    border:4px solid #fff; background:transparent;
-    cursor:pointer; position:relative; transition:all .2s;
+    width:70px; height:70px; border-radius:50%; border:4px solid #fff;
+    background:transparent; cursor:pointer; position:relative; transition:all .2s;
   }
-  .rec-btn::after{
-    content:""; position:absolute; inset:8px; border-radius:50%;
-    background:var(--danger); transition:all .2s;
-  }
-  .rec-btn.recording::after{
-    inset:20px; border-radius:8px;
-  }
-  .icon-btn{
-    background:var(--surface2); border:none; color:var(--text);
-    width:52px; height:52px; border-radius:50%; font-size:22px;
-    cursor:pointer; display:flex; align-items:center; justify-content:center;
-  }
+  .rec-btn::after{content:""; position:absolute; inset:6px; border-radius:50%; background:var(--primary); transition:all .2s;}
+  .rec-btn.recording::after{inset:18px; border-radius:8px;}
+  
   .rec-timer{
-    position:absolute; top:-40px; left:50%; transform:translateX(-50%);
-    background:rgba(0,0,0,.7); color:#fff; padding:6px 16px;
-    border-radius:20px; font-size:14px; display:none; align-items:center; gap:8px;
+    position:absolute; top:-30px; left:50%; transform:translateX(-50%);
+    background:rgba(0,0,0,0.7); color:#fff; padding:4px 12px; border-radius:20px;
+    font-size:13px; display:none; align-items:center; gap:6px;
   }
   .rec-timer.show{display:flex;}
-  .rec-dot{width:10px;height:10px;background:var(--danger);border-radius:50%;animation:blink 1s infinite;}
-  @keyframes blink{50%{opacity:.2;}}
+  .rec-dot{width:8px;height:8px;background:var(--primary);border-radius:50%;animation:blink 1s infinite;}
+  @keyframes blink{50%{opacity:0.2;}}
 
-  /* ============ EDITOR ============ */
-  .editor-preview{
-    flex:1; position:relative; background:#000; overflow:hidden;
-    display:flex; align-items:center; justify-content:center; min-height:0;
-  }
-  #editVideo{
-    max-width:100%; max-height:100%; object-fit:contain;
-  }
-  .text-overlay{
-    position:absolute; color:#fff; font-weight:bold;
-    text-shadow:2px 2px 4px rgba(0,0,0,.9);
-    white-space:nowrap; user-select:none; cursor:move;
-    transform:translate(-50%,-50%);
-    padding:2px 6px; border:1px dashed transparent;
-  }
-  .text-overlay:hover, .text-overlay.selected{border-color:rgba(124,77,255,.8);}
+  /* Editor Panel */
   .editor-panel{
-    background:var(--surface); flex-shrink:0; max-height:52%; overflow-y:auto;
-    padding:16px; border-top:1px solid #333;
+    position:absolute; bottom:0; left:0; right:0; background:var(--surface);
+    padding:16px; border-radius:20px 20px 0 0; z-index:20;
   }
-  .editor-actions{
-    display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;
-  }
-  .action-btn{
-    flex:1; min-width:130px; padding:12px; border-radius:12px;
-    background:var(--primary); border:none; color:#fff; font-size:14px;
-    font-weight:600; cursor:pointer; display:flex; align-items:center;
-    justify-content:center; gap:8px; transition:all .15s;
-  }
-  .action-btn:active{transform:scale(.96);}
-  .action-btn.sec{background:var(--surface2);}
+  .trim-track{position:relative; height:36px; background:#333; border-radius:6px; margin-bottom:10px; overflow:hidden;}
+  .trim-selection{position:absolute; top:0; bottom:0; background:rgba(254,44,85,0.3); border-left:3px solid var(--primary); border-right:3px solid var(--primary); pointer-events:none;}
+  .trim-handle{position:absolute; top:0; width:20px; height:100%; background:var(--primary); cursor:ew-resize; z-index:2; display:flex; align-items:center; justify-content:center;}
+  .trim-handle::after{content:""; width:3px; height:16px; background:rgba(255,255,255,0.7); border-radius:2px;}
+  .trim-handle.left{left:0; border-radius:6px 0 0 6px;}
+  .trim-handle.right{right:0; border-radius:0 6px 6px 0;}
+  
+  .editor-actions{display:flex; gap:10px; margin-bottom:10px; overflow-x:auto;}
+  .btn-action{background:var(--surface2); border:none; color:#fff; padding:8px 12px; border-radius:8px; font-size:13px; cursor:pointer; white-space:nowrap;}
+  .btn-publish{width:100%; padding:14px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:bold; font-size:16px; cursor:pointer;}
 
-  /* Trim */
-  .trim-section{margin-bottom:16px;}
-  .trim-label{
-    display:flex; justify-content:space-between;
-    font-size:13px; color:var(--text-dim); margin-bottom:8px;
+  /* Overlay Text Preview */
+  .text-overlay{
+    position:absolute; color:#fff; font-weight:bold; text-shadow:2px 2px 4px rgba(0,0,0,0.9);
+    white-space:nowrap; user-select:none; cursor:move; transform:translate(-50%,-50%);
+    padding:4px; border:1px dashed transparent; z-index:5;
   }
-  .trim-track{
-    position:relative; height:44px; background:#333;
-    border-radius:8px; overflow:hidden; margin-bottom:8px;
-  }
-  .trim-selection{
-    position:absolute; top:0; bottom:0;
-    background:rgba(124,77,255,.4); border-left:3px solid var(--primary);
-    border-right:3px solid var(--primary); pointer-events:none;
-  }
-  .trim-handle{
-    position:absolute; top:0; width:20px; height:100%;
-    background:var(--primary); cursor:ew-resize; z-index:2;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .trim-handle::after{
-    content:""; width:4px; height:20px;
-    background:rgba(255,255,255,.7); border-radius:2px;
-  }
-  .trim-handle.left{left:0; border-radius:8px 0 0 8px;}
-  .trim-handle.right{right:0; border-radius:0 8px 8px 0;}
-  .trim-info{
-    display:flex; justify-content:space-between;
-    font-size:12px; color:var(--text-dim);
-  }
-  .trim-info .range{color:var(--primary); font-weight:600;}
+  .text-overlay:hover{border-color:rgba(255,255,255,0.5);}
 
-  /* Text overlay list */
-  .overlay-list{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;}
-  .overlay-chip{
-    background:var(--surface2); padding:8px 12px; border-radius:20px;
-    font-size:13px; display:flex; align-items:center; gap:8px;
-  }
-  .overlay-chip button{
-    background:none; border:none; color:var(--danger);
-    font-size:16px; cursor:pointer; padding:0; line-height:1;
-  }
+  /* ============ PROFIL ============ */
+  #screen-profile{padding:20px; padding-top:60px; overflow-y:auto;}
+  .profile-header{display:flex; flex-direction:column; align-items:center; margin-bottom:20px;}
+  .avatar{width:80px; height:80px; border-radius:50%; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:40px; margin-bottom:10px;}
+  .grid-videos{display:grid; grid-template-columns:repeat(3, 1fr); gap:2px;}
+  .grid-item{aspect-ratio:9/16; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:24px; overflow:hidden;}
+  .grid-item video{width:100%; height:100%; object-fit:cover;}
 
-  /* ============ MODAL ============ */
-  .modal-bg{
-    position:fixed; inset:0; background:rgba(0,0,0,.75);
-    display:none; align-items:center; justify-content:center;
-    padding:20px; z-index:100;
-  }
+  /* ============ MODALS ============ */
+  .modal-bg{position:fixed; inset:0; background:rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; z-index:200; padding:20px;}
   .modal-bg.show{display:flex;}
-  .modal{
-    background:var(--surface); border-radius:20px; padding:24px;
-    width:100%; max-width:420px; max-height:85vh; overflow-y:auto;
-  }
-  .modal h3{margin:0 0 18px; font-size:18px;}
-  .form-group{margin-bottom:14px;}
-  .form-group label{
-    display:block; font-size:13px; color:var(--text-dim); margin-bottom:6px;
-  }
-  .form-group input[type=text], .form-group input[type=number],
-  .form-group textarea, .form-group select{
-    width:100%; padding:12px 14px; background:var(--surface2);
-    border:1px solid #444; border-radius:10px; color:var(--text);
-    font-size:15px; font-family:inherit; outline:none;
-  }
-  .form-group input:focus, .form-group textarea:focus, .form-group select:focus{
-    border-color:var(--primary);
-  }
-  .form-group textarea{resize:vertical; min-height:80px;}
-  .color-picker{display:flex; gap:10px; flex-wrap:wrap;}
-  .color-swatch{
-    width:38px; height:38px; border-radius:50%; cursor:pointer;
-    border:3px solid transparent; transition:all .15s;
-  }
-  .color-swatch.selected{border-color:var(--primary); transform:scale(1.1);}
-  .modal-actions{display:flex; gap:10px; margin-top:20px;}
-  .modal-actions button{
-    flex:1; padding:14px; border-radius:12px; border:none;
-    font-size:15px; font-weight:600; cursor:pointer;
-  }
-  .modal-actions .btn-cancel{background:var(--surface2); color:var(--text);}
-  .modal-actions .btn-ok{background:var(--primary); color:#fff;}
-
-  /* Music list */
-  .music-item{
-    display:flex; align-items:center; gap:14px; padding:14px;
-    background:var(--surface2); border-radius:12px; margin-bottom:10px;
-    cursor:pointer; transition:all .15s;
-  }
-  .music-item:active{transform:scale(.98);}
-  .music-item.selected{border:2px solid var(--primary); background:rgba(124,77,255,.15);}
-  .music-item .m-play{font-size:24px;}
-
-  /* ============ PUBLISH ============ */
-  .publish-wrap{padding:20px; max-width:500px; margin:0 auto; width:100%;}
-  .publish-thumb{
-    width:100%; aspect-ratio:16/9; background:#000; border-radius:14px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:56px; margin-bottom:10px;
-  }
-  .publish-meta{
-    font-size:12px; color:var(--text-dim); margin-bottom:20px;
-    display:flex; gap:14px; flex-wrap:wrap;
-  }
-  .btn-publish{
-    width:100%; padding:16px; border-radius:14px; border:none;
-    background:var(--primary); color:#fff; font-size:16px;
-    font-weight:700; cursor:pointer; margin-top:10px;
-    display:flex; align-items:center; justify-content:center; gap:10px;
-  }
-  .btn-publish:disabled{opacity:.5; cursor:not-allowed;}
-  .progress-bar{
-    height:8px; background:var(--surface2); border-radius:4px;
-    overflow:hidden; margin:16px 0 8px;
-  }
-  .progress-fill{
-    height:100%; width:0%; background:var(--primary);
-    border-radius:4px; transition:width .2s;
-  }
-
-  /* ============ TOAST ============ */
-  .toast{
-    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(120px);
-    background:var(--surface2); color:#fff; padding:14px 22px;
-    border-radius:12px; font-size:14px; z-index:200;
-    transition:transform .3s; max-width:90%; text-align:center;
-    box-shadow:0 6px 20px rgba(0,0,0,.4);
-  }
+  .modal{background:var(--surface); border-radius:16px; padding:20px; width:100%; max-width:400px;}
+  .form-group{margin-bottom:12px;}
+  .form-group label{display:block; font-size:12px; color:var(--text-dim); margin-bottom:4px;}
+  .form-group input, .form-group select, .form-group textarea{width:100%; padding:10px; background:var(--surface2); border:1px solid #444; border-radius:8px; color:#fff; outline:none;}
+  .color-picker{display:flex; gap:8px; flex-wrap:wrap;}
+  .color-swatch{width:32px; height:32px; border-radius:50%; cursor:pointer; border:2px solid transparent;}
+  .color-swatch.selected{border-color:#fff;}
+  .modal-actions{display:flex; gap:10px; margin-top:15px;}
+  .modal-actions button{flex:1; padding:12px; border-radius:8px; border:none; font-weight:bold; cursor:pointer;}
+  .btn-cancel{background:var(--surface2); color:#fff;}
+  .btn-ok{background:var(--primary); color:#fff;}
+  
+  /* Toast */
+  .toast{position:fixed; top:50px; left:50%; transform:translateX(-50%) translateY(-100px); background:var(--surface2); padding:10px 20px; border-radius:20px; font-size:13px; z-index:300; transition:transform 0.3s;}
   .toast.show{transform:translateX(-50%) translateY(0);}
-  .toast.err{background:#b71c1c;}
-  .toast.ok{background:#2e7d32;}
-
-  /* Gallery upload zone */
-  .upload-zone{
-    border:2px dashed #555; border-radius:16px; padding:60px 20px;
-    text-align:center; cursor:pointer; transition:all .15s;
-  }
-  .upload-zone:active{border-color:var(--primary); background:rgba(124,77,255,.05);}
-  .upload-zone .uz-icon{font-size:64px; margin-bottom:16px;}
 </style>
 </head>
 <body>
 
-<!-- ============ HEADER ============ -->
-<header>
-  <div class="logo">
-    <button class="back-btn" id="backBtn" onclick="goBack()">←</button>
-    <h1>🎬 VideoStream Studio</h1>
-  </div>
-</header>
-
-<!-- ============ HOME ============ -->
+<!-- ============ BERANDA (FEED) ============ -->
 <div class="screen active" id="screen-home">
-  <div class="home-wrap">
-    <div class="icon-big">🎥</div>
-    <h2>Buat Video Keren Kamu</h2>
-    <button class="menu-btn cam" onclick="openCamera()">
-      <span class="m-icon">📹</span> Rekam Video
-    </button>
-    <button class="menu-btn gal" onclick="pickFromGallery()">
-      <span class="m-icon">🖼️</span> Pilih dari Galeri
-    </button>
+  <div class="feed-container" id="feedContainer">
+    <!-- Video akan di-inject lewat JS -->
+    <div class="empty-feed" id="emptyFeed">
+      <div style="font-size:60px; margin-bottom:10px;">🎬</div>
+      <div>Belum ada video</div>
+      <div style="font-size:12px; margin-top:5px;">Ketuk tombol + untuk merekam</div>
+    </div>
   </div>
 </div>
 
-<!-- ============ CAMERA ============ -->
-<div class="screen no-pad" id="screen-camera">
+<!-- ============ PROFIL ============ -->
+<div class="screen" id="screen-profile">
+  <div class="profile-header">
+    <div class="avatar">👤</div>
+    <div style="font-weight:bold; font-size:18px;">@user_stream</div>
+    <div style="color:var(--text-dim); font-size:13px;">0 Video</div>
+  </div>
+  <div class="grid-videos" id="profileGrid"></div>
+</div>
+
+<!-- ============ NAVIGASI BAWAH ============ -->
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="switchTab('home')">
+    <span class="icon">🏠</span> Beranda
+  </div>
+  <div class="nav-item" onclick="openCamera()">
+    <div class="btn-plus">+</div>
+  </div>
+  <div class="nav-item" onclick="switchTab('profile')">
+    <span class="icon">👤</span> Profil
+  </div>
+</div>
+
+<!-- ============ KAMERA ============ -->
+<div class="screen" id="screen-camera">
+  <div class="top-bar">
+    <button class="icon-btn" onclick="stopCamera(); switchTab('home')">✕</button>
+    <button class="icon-btn" onclick="toggleCameraFacing()">🔄</button>
+  </div>
   <div class="cam-preview-wrap">
     <video id="camPreview" autoplay playsinline muted></video>
   </div>
@@ -298,123 +189,54 @@
     <div class="rec-timer" id="recTimer">
       <span class="rec-dot"></span><span id="recTimerText">00:00</span>
     </div>
-    <button class="icon-btn" onclick="toggleCameraFacing()" title="Ganti Kamera">🔄</button>
+    <button class="icon-btn" onclick="pickFromGallery()" style="width:50px;height:50px;font-size:24px;">🖼️</button>
     <button class="rec-btn" id="recBtn" onclick="toggleRecording()"></button>
-    <button class="icon-btn" onclick="toggleCamMute()" id="camMuteBtn" title="Mute">🔊</button>
+    <button class="icon-btn" onclick="toggleCamMute()" id="camMuteBtn" style="width:50px;height:50px;font-size:24px;">🔇</button>
   </div>
   <input type="file" id="galleryInput" accept="video/*" style="display:none">
 </div>
 
-<!-- ============ GALLERY ============ -->
-<div class="screen" id="screen-gallery">
-  <div class="upload-zone" onclick="pickFromGallery()">
-    <div class="uz-icon">🖼️</div>
-    <div style="font-size:17px; font-weight:600;">Pilih Video dari Galeri</div>
-    <div style="color:var(--text-dim); font-size:13px; margin-top:8px;">Ketuk untuk membuka galeri</div>
-  </div>
-</div>
-
 <!-- ============ EDITOR ============ -->
-<div class="screen no-pad" id="screen-editor">
-  <div class="editor-preview" id="editorPreview">
-    <video id="editVideo" playsinline></video>
+<div class="screen" id="screen-editor">
+  <div class="top-bar">
+    <button class="icon-btn" onclick="goBackFromEditor()">←</button>
+    <button class="icon-btn" onclick="publishVideo()" style="background:var(--primary);">✓</button>
+  </div>
+  <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; position:relative;">
+    <video id="editVideo" playsinline style="max-width:100%; max-height:100%; object-fit:contain;"></video>
     <div id="overlayLayer" style="position:absolute; inset:0; pointer-events:none;"></div>
-    <button class="icon-btn" id="playPauseBtn" onclick="togglePlayPause()"
-      style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,.6);">
-      ▶️
-    </button>
   </div>
+  
   <div class="editor-panel">
-    <!-- Trim -->
-    <div class="trim-section">
-      <div class="trim-label">
-        <span>✂️ Trim Durasi Video</span>
-        <span id="trimCurrent" class="range" style="color:var(--primary); font-weight:600;">00:00 - 00:00</span>
-      </div>
-      <div class="trim-track" id="trimTrack">
-        <div class="trim-selection" id="trimSelection"></div>
-        <div class="trim-handle left" id="trimLeft" style="left:0;"></div>
-        <div class="trim-handle right" id="trimRight" style="right:0;"></div>
-      </div>
-      <div class="trim-info">
-        <span id="trimMin">Min: 00:03</span>
-        <span id="trimDur">Durasi dipilih: 00:00</span>
-      </div>
+    <div class="trim-track" id="trimTrack">
+      <div class="trim-selection" id="trimSelection"></div>
+      <div class="trim-handle left" id="trimLeft" style="left:0;"></div>
+      <div class="trim-handle right" id="trimRight" style="right:0;"></div>
     </div>
-
-    <!-- Actions -->
+    <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-dim); margin-bottom:15px;">
+      <span id="trimCurrent">00:00 - 00:00</span>
+      <span id="trimDur">Durasi: 00:00</span>
+    </div>
+    
     <div class="editor-actions">
-      <button class="action-btn" onclick="openTextModal()">📝 Tambah Text</button>
-      <button class="action-btn sec" onclick="openMusicModal()">🎵 Musik</button>
+      <button class="btn-action" onclick="openTextModal()">📝 Text</button>
+      <button class="btn-action" onclick="openMusicModal()">🎵 Musik</button>
+      <button class="btn-action" onclick="togglePlayPause()">▶️ Play/Pause</button>
     </div>
-
-    <!-- Overlay chips -->
-    <div class="overlay-list" id="overlayList"></div>
-
-    <!-- Next -->
-    <button class="btn-publish" onclick="goToPublish()">
-      ☁️ Lanjut ke Publish
-    </button>
+    
+    <div id="overlayList" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
+    
+    <button class="btn-publish" onclick="publishVideo()">Posting Video</button>
   </div>
 </div>
 
-<!-- ============ PUBLISH ============ -->
-<div class="screen no-pad" id="screen-publish">
-  <div class="publish-wrap">
-    <div class="publish-thumb">🎞️</div>
-    <div class="publish-meta">
-      <span id="pubFile">📁 video.mp4</span>
-      <span id="pubDuration">⏱️ 00:00</span>
-      <span id="pubTexts">📝 0 text</span>
-      <span id="pubMusic">🎵 -</span>
-    </div>
-
-    <div class="form-group">
-      <label>Judul Video *</label>
-      <input type="text" id="pubTitle" maxlength="100" placeholder="Judul menarik...">
-    </div>
-    <div class="form-group">
-      <label>Deskripsi</label>
-      <textarea id="pubDesc" maxlength="500" placeholder="Ceritakan tentang video ini..."></textarea>
-    </div>
-
-    <div class="progress-bar" id="uploadProgressWrap" style="display:none;">
-      <div class="progress-fill" id="uploadProgress"></div>
-    </div>
-    <div id="uploadStatus" style="display:none; font-size:13px; color:var(--text-dim); text-align:center;"></div>
-
-    <button class="btn-publish" id="publishBtn" onclick="publishVideo()">
-      ☁️ Publish Sekarang
-    </button>
-  </div>
-</div>
-
-<!-- ============ MODAL: TEXT ============ -->
+<!-- ============ MODAL TEXT ============ -->
 <div class="modal-bg" id="textModal">
   <div class="modal">
-    <h3>📝 Tambah Text Overlay</h3>
-    <div class="form-group">
-      <label>Teks</label>
-      <input type="text" id="txtContent" maxlength="80" placeholder="Tulis teks...">
-    </div>
-    <div class="form-group">
-      <label>Ukuran Font</label>
-      <input type="number" id="txtSize" value="28" min="10" max="120">
-    </div>
-    <div class="form-group">
-      <label>Font</label>
-      <select id="txtFont">
-        <option value="sans-serif">Sans Serif</option>
-        <option value="serif">Serif</option>
-        <option value="monospace">Monospace</option>
-        <option value="'Comic Sans MS', cursive">Comic</option>
-        <option value="Impact, sans-serif">Impact</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Warna</label>
-      <div class="color-picker" id="txtColors"></div>
-    </div>
+    <h3 style="margin-top:0;">Tambah Text</h3>
+    <div class="form-group"><label>Teks</label><input type="text" id="txtContent" placeholder="Tulis..."></div>
+    <div class="form-group"><label>Ukuran</label><input type="number" id="txtSize" value="28"></div>
+    <div class="form-group"><label>Warna</label><div class="color-picker" id="txtColors"></div></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('textModal')">Batal</button>
       <button class="btn-ok" onclick="addTextOverlay()">Tambah</button>
@@ -422,18 +244,30 @@
   </div>
 </div>
 
-<!-- ============ MODAL: MUSIC ============ -->
+<!-- ============ MODAL MUSIK ============ -->
 <div class="modal-bg" id="musicModal">
   <div class="modal">
-    <h3>🎵 Pilih Musik Background</h3>
+    <h3 style="margin-top:0;">Pilih Musik</h3>
     <div id="musicList"></div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeMusicModal()">Tutup</button>
+      <button class="btn-cancel" onclick="closeModal('musicModal')">Tutup</button>
     </div>
   </div>
 </div>
 
-<!-- ============ TOAST ============ -->
+<!-- ============ MODAL PUBLISH ============ -->
+<div class="modal-bg" id="publishModal">
+  <div class="modal">
+    <h3 style="margin-top:0;">Posting Video</h3>
+    <div class="form-group"><label>Judul Video</label><input type="text" id="pubTitle" placeholder="Judul menarik..."></div>
+    <div class="form-group"><label>Deskripsi</label><textarea id="pubDesc" rows="3" placeholder="Deskripsi..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('publishModal')">Batal</button>
+      <button class="btn-ok" onclick="confirmPublish()">Posting</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -441,8 +275,8 @@
    STATE GLOBAL
    ============================================================ */
 const state = {
-  currentScreen: 'home',
-  history: [],
+  currentTab: 'home',
+  videos: [], // Array video yang sudah diposting { id, url, title, desc, music, texts, blob }
   // camera
   camStream: null,
   camFacing: 'environment',
@@ -452,49 +286,39 @@ const state = {
   recordingStartTime: 0,
   recTimerInterval: null,
   camMuted: true,
-  // video
+  // editor
   videoBlob: null,
   videoURL: null,
   videoDuration: 0,
   trimStart: 0,
   trimEnd: 0,
-  // overlays
   textOverlays: [],
-  // music
   musicPath: null,
-  musicAudio: null,
-  musicName: null,
-  // publish
-  publishedVideos: []
+  musicName: null
 };
 
 /* ============================================================
-   NAVIGASI
+   NAVIGASI & TABS
    ============================================================ */
-function showScreen(name, addHistory = true) {
-  if (addHistory && state.currentScreen !== name) {
-    state.history.push(state.currentScreen);
-  }
+function switchTab(tab) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const el = document.getElementById('screen-' + name);
-  if (el) el.classList.add('active');
-  state.currentScreen = name;
-
-  const backBtn = document.getElementById('backBtn');
-  backBtn.style.display = name === 'home' ? 'none' : 'block';
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  
+  if (tab === 'home') {
+    document.getElementById('screen-home').classList.add('active');
+    document.querySelectorAll('.nav-item')[0].classList.add('active');
+    renderFeed();
+  } else if (tab === 'profile') {
+    document.getElementById('screen-profile').classList.add('active');
+    document.querySelectorAll('.nav-item')[2].classList.add('active');
+    renderProfile();
+  }
+  state.currentTab = tab;
 }
 
-function goBack() {
-  // cleanup per screen
-  if (state.currentScreen === 'camera') stopCamera();
-  if (state.currentScreen === 'editor') {
-    pauseEditVideo();
-    stopMusic();
-  }
-  if (state.currentScreen === 'publish') stopMusic();
-
-  const prev = state.history.pop() || 'home';
-  showScreen(prev, false);
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
 }
 
 /* ============================================================
@@ -504,9 +328,118 @@ let toastTimer;
 function showToast(msg, type = '') {
   const el = document.getElementById('toast');
   el.textContent = msg;
-  el.className = 'toast show ' + type;
+  el.className = 'toast show';
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+/* ============================================================
+   FEED BERANDA
+   ============================================================ */
+function renderFeed() {
+  const container = document.getElementById('feedContainer');
+  const empty = document.getElementById('emptyFeed');
+  
+  // Hapus video lama, sisakan emptyFeed
+  Array.from(container.children).forEach(c => {
+    if (c.id !== 'emptyFeed') c.remove();
+  });
+
+  if (state.videos.length === 0) {
+    empty.style.display = 'flex';
+    return;
+  }
+  empty.style.display = 'none';
+
+  state.videos.forEach(video => {
+    const card = document.createElement('div');
+    card.className = 'video-card';
+    
+    // Video Element
+    const vid = document.createElement('video');
+    vid.src = video.url;
+    vid.loop = true;
+    vid.playsInline = true;
+    vid.muted = true; // Autoplay butuh muted
+    vid.onclick = () => {
+      if (vid.paused) { vid.play(); vid.muted = false; } 
+      else { vid.pause(); }
+    };
+
+    // Text Overlays
+    const overlayContainer = document.createElement('div');
+    overlayContainer.style.position = 'absolute'; overlayContainer.style.inset = '0'; overlayContainer.style.pointerEvents = 'none';
+    video.texts.forEach(t => {
+      const textEl = document.createElement('div');
+      textEl.className = 'text-overlay';
+      textEl.textContent = t.text;
+      textEl.style.left = (t.x * 100) + '%';
+      textEl.style.top = (t.y * 100) + '%';
+      textEl.style.fontSize = t.size + 'px';
+      textEl.style.color = t.color;
+      overlayContainer.appendChild(textEl);
+    });
+
+    // Info (Username, Desc, Music)
+    const info = document.createElement('div');
+    info.className = 'video-info';
+    info.innerHTML = `
+      <div class="username">@user_stream</div>
+      <div class="desc">${escapeHtml(video.desc)}</div>
+      <div class="music">🎵 ${video.music ? video.music : 'Suara Asli'}</div>
+    `;
+
+    // Side Actions (Like, Comment, Share)
+    const actions = document.createElement('div');
+    actions.className = 'side-actions';
+    actions.innerHTML = `
+      <div class="action-btn-side"><span class="icon">❤️</span>12K</div>
+      <div class="action-btn-side"><span class="icon">💬</span>345</div>
+      <div class="action-btn-side"><span class="icon">↗️</span>Share</div>
+    `;
+
+    card.appendChild(vid);
+    card.appendChild(overlayContainer);
+    card.appendChild(info);
+    card.appendChild(actions);
+    container.appendChild(card);
+
+    // Autoplay pakai IntersectionObserver
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) { vid.play().catch(e=>{}); } 
+        else { vid.pause(); }
+      });
+    }, { threshold: 0.6 });
+    observer.observe(card);
+  });
+}
+
+/* ============================================================
+   PROFIL
+   ============================================================ */
+function renderProfile() {
+  const grid = document.getElementById('profileGrid');
+  grid.innerHTML = '';
+  document.querySelector('.profile-header div:nth-child(3)').textContent = state.videos.length + ' Video';
+
+  if (state.videos.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#666;">Belum ada video</div>';
+    return;
+  }
+
+  state.videos.forEach(v => {
+    const item = document.createElement('div');
+    item.className = 'grid-item';
+    const vid = document.createElement('video');
+    vid.src = v.url;
+    vid.muted = true;
+    vid.playsInline = true;
+    vid.onmouseenter = () => vid.play();
+    vid.onmouseleave = () => { vid.pause(); vid.currentTime = 0; };
+    item.appendChild(vid);
+    grid.appendChild(item);
+  });
 }
 
 /* ============================================================
@@ -519,36 +452,24 @@ async function openCamera() {
 
 async function startCamera() {
   try {
-    if (state.camStream) {
-      state.camStream.getTracks().forEach(t => t.stop());
-    }
+    if (state.camStream) state.camStream.getTracks().forEach(t => t.stop());
     state.camStream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: state.camFacing,
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      },
+      video: { facingMode: state.camFacing, width: { ideal: 1280 }, height: { ideal: 720 } },
       audio: !state.camMuted
     });
     const video = document.getElementById('camPreview');
     video.srcObject = state.camStream;
-    video.muted = true; // selalu mute preview agar tidak feedback
+    video.muted = true;
     await video.play();
   } catch (err) {
-    console.error(err);
-    showToast('Gagal membuka kamera: ' + err.message, 'err');
-    goBack();
+    showToast('Gagal kamera: ' + err.message);
+    switchTab('home');
   }
 }
 
 function stopCamera() {
-  if (state.camStream) {
-    state.camStream.getTracks().forEach(t => t.stop());
-    state.camStream = null;
-  }
-  if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
-    state.mediaRecorder.stop();
-  }
+  if (state.camStream) { state.camStream.getTracks().forEach(t => t.stop()); state.camStream = null; }
+  if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') state.mediaRecorder.stop();
   clearInterval(state.recTimerInterval);
   state.isRecording = false;
   document.getElementById('recBtn').classList.remove('recording');
@@ -556,10 +477,7 @@ function stopCamera() {
 }
 
 async function toggleCameraFacing() {
-  if (state.isRecording) {
-    showToast('Stop rekaman dulu sebelum ganti kamera', 'err');
-    return;
-  }
+  if (state.isRecording) return;
   state.camFacing = state.camFacing === 'environment' ? 'user' : 'environment';
   await startCamera();
 }
@@ -567,63 +485,41 @@ async function toggleCameraFacing() {
 function toggleCamMute() {
   state.camMuted = !state.camMuted;
   document.getElementById('camMuteBtn').textContent = state.camMuted ? '🔇' : '🔊';
-  // restart stream untuk terapkan audio
   if (!state.isRecording) startCamera();
 }
 
 function toggleRecording() {
   if (state.isRecording) {
-    stopRecording();
+    if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') state.mediaRecorder.stop();
+    state.isRecording = false;
+    clearInterval(state.recTimerInterval);
+    document.getElementById('recBtn').classList.remove('recording');
+    document.getElementById('recTimer').classList.remove('show');
   } else {
-    startRecording();
-  }
-}
-
-function startRecording() {
-  if (!state.camStream) return;
-  state.recordedChunks = [];
-  const options = { mimeType: 'video/webm;codecs=vp9,opus' };
-  try {
-    state.mediaRecorder = new MediaRecorder(state.camStream, options);
-  } catch (e) {
+    if (!state.camStream) return;
+    state.recordedChunks = [];
     try {
-      state.mediaRecorder = new MediaRecorder(state.camStream, { mimeType: 'video/webm' });
-    } catch (e2) {
+      state.mediaRecorder = new MediaRecorder(state.camStream, { mimeType: 'video/webm;codecs=vp9,opus' });
+    } catch (e) {
       state.mediaRecorder = new MediaRecorder(state.camStream);
     }
+    state.mediaRecorder.ondataavailable = e => { if (e.data.size > 0) state.recordedChunks.push(e.data); };
+    state.mediaRecorder.onstop = () => {
+      const blob = new Blob(state.recordedChunks, { type: 'video/webm' });
+      handleNewVideo(blob, 'rekaman.webm');
+    };
+    state.mediaRecorder.start();
+    state.isRecording = true;
+    state.recordingStartTime = Date.now();
+    document.getElementById('recBtn').classList.add('recording');
+    document.getElementById('recTimer').classList.add('show');
+    state.recTimerInterval = setInterval(() => {
+      const s = Math.floor((Date.now() - state.recordingStartTime) / 1000);
+      document.getElementById('recTimerText').textContent = formatTime(s);
+    }, 250);
   }
-  state.mediaRecorder.ondataavailable = e => {
-    if (e.data && e.data.size > 0) state.recordedChunks.push(e.data);
-  };
-  state.mediaRecorder.onstop = () => {
-    const blob = new Blob(state.recordedChunks, { type: 'video/webm' });
-    handleNewVideo(blob, 'rekaman_' + Date.now() + '.webm');
-  };
-  state.mediaRecorder.start();
-  state.isRecording = true;
-  state.recordingStartTime = Date.now();
-  document.getElementById('recBtn').classList.add('recording');
-  document.getElementById('recTimer').classList.add('show');
-
-  state.recTimerInterval = setInterval(() => {
-    const s = Math.floor((Date.now() - state.recordingStartTime) / 1000);
-    document.getElementById('recTimerText').textContent = formatTime(s);
-  }, 250);
 }
 
-function stopRecording() {
-  if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
-    state.mediaRecorder.stop();
-  }
-  state.isRecording = false;
-  clearInterval(state.recTimerInterval);
-  document.getElementById('recBtn').classList.remove('recording');
-  document.getElementById('recTimer').classList.remove('show');
-}
-
-/* ============================================================
-   GALERI
-   ============================================================ */
 function pickFromGallery() {
   const input = document.getElementById('galleryInput');
   input.value = '';
@@ -636,13 +532,13 @@ function pickFromGallery() {
 }
 
 /* ============================================================
-   HANDLE VIDEO BARU → MASUK EDITOR
+   EDITOR (Dipanggil setelah rekam/pilih galeri)
    ============================================================ */
 function handleNewVideo(blob, filename) {
+  stopCamera();
   if (state.videoURL) URL.revokeObjectURL(state.videoURL);
   state.videoBlob = blob;
   state.videoURL = URL.createObjectURL(blob);
-  state.videoFilename = filename;
   state.textOverlays = [];
   state.musicPath = null;
   state.musicName = null;
@@ -658,24 +554,15 @@ function handleNewVideo(blob, filename) {
     showScreen('editor');
     v.currentTime = 0;
     v.play();
-    updatePlayPauseBtn();
   };
-  v.onerror = () => showToast('Format video tidak didukung browser', 'err');
 }
 
-/* ============================================================
-   TRIM SLIDER
-   ============================================================ */
+/* Trim Slider Logic */
 function initTrimUI() {
   const track = document.getElementById('trimTrack');
   const sel = document.getElementById('trimSelection');
   const left = document.getElementById('trimLeft');
   const right = document.getElementById('trimRight');
-
-  // reset posisi
-  left.style.left = '0px';
-  right.style.right = '0px';
-  updateSelection();
 
   function updateSelection() {
     const w = track.clientWidth;
@@ -683,24 +570,14 @@ function initTrimUI() {
     const e = (state.trimEnd / state.videoDuration) * w;
     sel.style.left = s + 'px';
     sel.style.width = Math.max(0, e - s) + 'px';
-    document.getElementById('trimCurrent').textContent =
-      formatTime(state.trimStart) + ' - ' + formatTime(state.trimEnd);
-    document.getElementById('trimDur').textContent =
-      'Durasi dipilih: ' + formatTime(state.trimEnd - state.trimStart);
-    document.getElementById('trimMin').textContent =
-      'Min: 00:03 / Max: ' + formatTime(state.videoDuration);
+    document.getElementById('trimCurrent').textContent = formatTime(state.trimStart) + ' - ' + formatTime(state.trimEnd);
+    document.getElementById('trimDur').textContent = 'Durasi: ' + formatTime(state.trimEnd - state.trimStart);
   }
   updateSelection();
 
   let dragging = null;
-
-  function onStart(side) {
-    return e => {
-      e.preventDefault();
-      dragging = side;
-    };
-  }
-  function onMove(e) {
+  const onStart = side => e => { e.preventDefault(); dragging = side; };
+  const onMove = e => {
     if (!dragging) return;
     e.preventDefault();
     const rect = track.getBoundingClientRect();
@@ -710,17 +587,14 @@ function initTrimUI() {
     const minDur = 3;
 
     if (dragging === 'left') {
-      const maxAllowed = state.trimEnd - minDur;
-      state.trimStart = Math.min(Math.max(0, time), maxAllowed);
+      state.trimStart = Math.min(Math.max(0, time), state.trimEnd - minDur);
     } else {
-      const minAllowed = state.trimStart + minDur;
-      state.trimEnd = Math.max(Math.min(state.videoDuration, time), minAllowed);
+      state.trimEnd = Math.max(Math.min(state.videoDuration, time), state.trimStart + minDur);
     }
     updateSelection();
-  }
-  function onEnd() { dragging = null; }
+  };
+  const onEnd = () => { dragging = null; };
 
-  // bersihkan listener lama
   left.onmousedown = left.ontouchstart = onStart('left');
   right.onmousedown = right.ontouchstart = onStart('right');
   document.onmousemove = onMove;
@@ -729,39 +603,15 @@ function initTrimUI() {
   document.ontouchend = onEnd;
 }
 
-/* ============================================================
-   EDITOR — PLAY/PAUSE
-   ============================================================ */
 function togglePlayPause() {
   const v = document.getElementById('editVideo');
-  if (v.paused) { v.play(); } else { v.pause(); }
-  updatePlayPauseBtn();
-}
-function updatePlayPauseBtn() {
-  const v = document.getElementById('editVideo');
-  document.getElementById('playPauseBtn').textContent = v.paused ? '▶️' : '⏸️';
-}
-function pauseEditVideo() {
-  const v = document.getElementById('editVideo');
-  v.pause();
-  updatePlayPauseBtn();
+  if (v.paused) v.play(); else v.pause();
 }
 
-/* ============================================================
-   TEXT OVERLAY
-   ============================================================ */
-let selectedTextColor = 0xFFFFFF;
-
+/* Overlays */
+let selectedColor = '#ffffff';
 function openTextModal() {
   document.getElementById('txtContent').value = '';
-  document.getElementById('txtSize').value = '28';
-  document.getElementById('txtFont').value = 'sans-serif';
-  renderColorPicker();
-  document.getElementById('textModal').classList.add('show');
-  setTimeout(() => document.getElementById('txtContent').focus(), 100);
-}
-
-function renderColorPicker() {
   const colors = ['#ffffff', '#ffff00', '#ff5252', '#00e5ff', '#69f0ae', '#ff4081'];
   const wrap = document.getElementById('txtColors');
   wrap.innerHTML = '';
@@ -772,33 +622,25 @@ function renderColorPicker() {
     sw.onclick = () => {
       document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
       sw.classList.add('selected');
+      selectedColor = c;
     };
     wrap.appendChild(sw);
   });
+  document.getElementById('textModal').classList.add('show');
 }
 
 function addTextOverlay() {
   const text = document.getElementById('txtContent').value.trim();
-  if (!text) { showToast('Teks tidak boleh kosong', 'err'); return; }
+  if (!text) return;
   const size = parseInt(document.getElementById('txtSize').value) || 28;
-  const font = document.getElementById('txtFont').value;
-  const colorEl = document.querySelector('.color-swatch.selected');
-  const color = colorEl ? colorEl.style.background : '#ffffff';
-
-  state.textOverlays.push({
-    id: Date.now(),
-    text, size, font, color,
-    x: 0.5, y: 0.5, // relatif 0-1
-  });
+  state.textOverlays.push({ id: Date.now(), text, size, color: selectedColor, x: 0.5, y: 0.5 });
   closeModal('textModal');
   renderOverlays();
-  renderOverlayList();
 }
 
 function renderOverlays() {
   const layer = document.getElementById('overlayLayer');
   layer.innerHTML = '';
-  layer.style.pointerEvents = 'none';
   state.textOverlays.forEach((t, idx) => {
     const el = document.createElement('div');
     el.className = 'text-overlay';
@@ -806,238 +648,97 @@ function renderOverlays() {
     el.style.left = (t.x * 100) + '%';
     el.style.top = (t.y * 100) + '%';
     el.style.fontSize = t.size + 'px';
-    el.style.fontFamily = t.font;
     el.style.color = t.color;
-    el.dataset.idx = idx;
     el.style.pointerEvents = 'auto';
-    makeDraggable(el, idx);
+    
+    // Drag logic
+    let drag = false;
+    const parent = document.getElementById('editVideo').parentElement;
+    el.onmousedown = el.ontouchstart = (e) => { e.preventDefault(); drag = true; };
+    document.addEventListener('mousemove', (e) => {
+      if (!drag) return;
+      const rect = parent.getBoundingClientRect();
+      const cx = (e.touches ? e.touches[0].clientX : e.clientX);
+      const cy = (e.touches ? e.touches[0].clientY : e.clientY);
+      let x = (cx - rect.left) / rect.width;
+      let y = (cy - rect.top) / rect.height;
+      state.textOverlays[idx].x = Math.max(0, Math.min(1, x));
+      state.textOverlays[idx].y = Math.max(0, Math.min(1, y));
+      el.style.left = (state.textOverlays[idx].x * 100) + '%';
+      el.style.top = (state.textOverlays[idx].y * 100) + '%';
+    });
+    document.addEventListener('mouseup', () => drag = false);
+    document.addEventListener('touchend', () => drag = false);
+    
     layer.appendChild(el);
   });
-}
-
-function makeDraggable(el, idx) {
-  let dragging = false, offsetX = 0, offsetY = 0;
-  const parent = document.getElementById('editorPreview');
-
-  function start(e) {
-    e.preventDefault();
-    dragging = true;
-    el.classList.add('selected');
-  }
-  function move(e) {
-    if (!dragging) return;
-    e.preventDefault();
-    const rect = parent.getBoundingClientRect();
-    const cx = (e.touches ? e.touches[0].clientX : e.clientX);
-    const cy = (e.touches ? e.touches[0].clientY : e.clientY);
-    let x = (cx - rect.left) / rect.width;
-    let y = (cy - rect.top) / rect.height;
-    x = Math.max(0.03, Math.min(0.97, x));
-    y = Math.max(0.05, Math.min(0.95, y));
-    state.textOverlays[idx].x = x;
-    state.textOverlays[idx].y = y;
-    el.style.left = (x * 100) + '%';
-    el.style.top = (y * 100) + '%';
-  }
-  function end() {
-    dragging = false;
-    el.classList.remove('selected');
-  }
-
-  el.onmousedown = el.ontouchstart = start;
-  document.addEventListener('mousemove', move);
-  document.addEventListener('touchmove', move, { passive: false });
-  document.addEventListener('mouseup', end);
-  document.addEventListener('touchend', end);
-}
-
-function renderOverlayList() {
+  
+  // Render chips
   const list = document.getElementById('overlayList');
   list.innerHTML = '';
-  state.textOverlays.forEach((t, idx) => {
+  state.textOverlays.forEach((t, i) => {
     const chip = document.createElement('div');
-    chip.className = 'overlay-chip';
-    chip.innerHTML = `<span>"${escapeHtml(t.text)}"</span>`;
-    const btn = document.createElement('button');
-    btn.textContent = '✕';
-    btn.onclick = () => {
-      state.textOverlays.splice(idx, 1);
-      renderOverlays();
-      renderOverlayList();
-    };
-    chip.appendChild(btn);
+    chip.style.cssText = 'background:#333; padding:4px 8px; border-radius:10px; font-size:12px;';
+    chip.innerHTML = `${t.text} <span style="color:red; cursor:pointer;" onclick="removeOverlay(${i})">✕</span>`;
     list.appendChild(chip);
   });
 }
 
-function escapeHtml(s) {
-  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function removeOverlay(idx) {
+  state.textOverlays.splice(idx, 1);
+  renderOverlays();
 }
 
-/* ============================================================
-   MUSIK — pakai Web Audio API synth (tanpa file eksternal)
-   ============================================================ */
-const MUSIC_TRACKS = [
-  { id: 'chill',     name: 'Chill Vibes',   notes: [261.63, 329.63, 392.00, 329.63], tempo: 400 },
-  { id: 'energetic', name: 'Energetic',     notes: [440.00, 523.25, 659.25, 523.25], tempo: 220 },
-  { id: 'ambient',   name: 'Ambient Pad',   notes: [196.00, 246.94, 293.66, 246.94], tempo: 700 },
-  { id: 'happy',     name: 'Happy Tune',    notes: [523.25, 659.25, 783.99, 659.25], tempo: 300 },
-];
-
-let audioCtx = null;
-let musicLoopTimer = null;
-
+/* Musik (Simulasi) */
 function openMusicModal() {
   const list = document.getElementById('musicList');
-  list.innerHTML = '';
-
-  // opsi tanpa musik
-  const none = document.createElement('div');
-  none.className = 'music-item' + (state.musicPath === null ? ' selected' : '');
-  none.innerHTML = '<span class="m-play">🚫</span><span>Tanpa Musik</span>';
-  none.onclick = () => { stopMusic(); state.musicPath = null; state.musicName = null; closeMusicModal(); };
-  list.appendChild(none);
-
-  MUSIC_TRACKS.forEach(track => {
-    const item = document.createElement('div');
-    item.className = 'music-item' + (state.musicPath === track.id ? ' selected' : '');
-    item.innerHTML = `<span class="m-play">🎵</span><span>${track.name}</span>`;
-    item.onclick = () => {
-      selectMusic(track);
-      closeMusicModal();
-    };
-    list.appendChild(item);
-  });
-
+  list.innerHTML = `
+    <div style="padding:10px; border-bottom:1px solid #333; cursor:pointer;" onclick="selectMusic('Tanpa Musik')">🚫 Tanpa Musik</div>
+    <div style="padding:10px; border-bottom:1px solid #333; cursor:pointer;" onclick="selectMusic('Chill Vibes')">🎵 Chill Vibes</div>
+    <div style="padding:10px; border-bottom:1px solid #333; cursor:pointer;" onclick="selectMusic('Energetic')">🎵 Energetic</div>
+  `;
   document.getElementById('musicModal').classList.add('show');
 }
-
-function closeMusicModal() {
-  document.getElementById('musicModal').classList.remove('show');
+function selectMusic(name) {
+  state.musicName = name === 'Tanpa Musik' ? null : name;
+  closeModal('musicModal');
+  showToast('Musik: ' + name);
 }
 
-function selectMusic(track) {
-  stopMusic();
-  state.musicPath = track.id;
-  state.musicName = track.name;
-  playMusicLoop(track);
-  showToast('Musik: ' + track.name, 'ok');
+/* Publish Video */
+function publishVideo() {
+  // Pause video preview
+  const v = document.getElementById('editVideo');
+  v.pause();
+  document.getElementById('publishModal').classList.add('show');
 }
 
-function playMusicLoop(track) {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-
-  let idx = 0;
-  function playNote() {
-    if (state.musicPath !== track.id) return;
-    const freq = track.notes[idx % track.notes.length];
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.value = freq;
-    gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.08, audioCtx.currentTime + 0.05);
-    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + track.tempo / 1000);
-    osc.connect(gain).connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + track.tempo / 1000);
-    idx++;
-    musicLoopTimer = setTimeout(playNote, track.tempo);
-  }
-  playNote();
-}
-
-function stopMusic() {
-  clearTimeout(musicLoopTimer);
-  musicLoopTimer = null;
-}
-
-/* ============================================================
-   PUBLISH
-   ============================================================ */
-function goToPublish() {
-  pauseEditVideo();
-
-  document.getElementById('pubFile').textContent =
-    '📁 ' + (state.videoFilename || 'video.webm');
-  document.getElementById('pubDuration').textContent =
-    '⏱️ ' + formatTime(state.trimEnd - state.trimStart);
-  document.getElementById('pubTexts').textContent =
-    '📝 ' + state.textOverlays.length + ' text';
-  document.getElementById('pubMusic').textContent =
-    '🎵 ' + (state.musicName || '-');
-
-  document.getElementById('pubTitle').value = '';
-  document.getElementById('pubDesc').value = '';
-  document.getElementById('uploadProgressWrap').style.display = 'none';
-  document.getElementById('uploadStatus').style.display = 'none';
-  document.getElementById('uploadProgress').style.width = '0%';
-  document.getElementById('publishBtn').disabled = false;
-
-  showScreen('publish');
-}
-
-async function publishVideo() {
+function confirmPublish() {
   const title = document.getElementById('pubTitle').value.trim();
-  if (!title) { showToast('Judul wajib diisi', 'err'); return; }
-
-  const btn = document.getElementById('publishBtn');
-  const wrap = document.getElementById('uploadProgressWrap');
-  const fill = document.getElementById('uploadProgress');
-  const status = document.getElementById('uploadStatus');
-  btn.disabled = true;
-  wrap.style.display = 'block';
-  status.style.display = 'block';
-
-  // Simulasi upload (progress)
-  status.textContent = 'Menyiapkan metadata...';
-  await sleep(300);
-
-  const payload = {
-    id: 'vid_' + Date.now(),
-    title,
-    description: document.getElementById('pubDesc').value.trim(),
-    filename: state.videoFilename,
-    size: state.videoBlob ? state.videoBlob.size : 0,
-    duration: state.trimEnd - state.trimStart,
-    trimStart: state.trimStart,
-    trimEnd: state.trimEnd,
-    textOverlays: state.textOverlays,
-    music: state.musicPath,
-    createdAt: new Date().toISOString(),
+  const desc = document.getElementById('pubDesc').value.trim();
+  if (!title) { showToast('Judul wajib diisi!'); return; }
+  
+  const newVideo = {
+    id: Date.now(),
+    url: state.videoURL, // Simpan object URL
+    title: title,
+    desc: title + ' ' + desc, // Gabung untuk feed
+    music: state.musicName,
+    texts: [...state.textOverlays]
   };
-
-  // Simulasi progress upload
-  for (let p = 0; p <= 100; p += 5) {
-    fill.style.width = p + '%';
-    status.textContent = `Mengupload... ${p}%`;
-    await sleep(80);
-  }
-
-  // Simpan ke localStorage (simulasi database)
-  try {
-    const list = JSON.parse(localStorage.getItem('publishedVideos') || '[]');
-    list.unshift(payload);
-    localStorage.setItem('publishedVideos', JSON.stringify(list));
-  } catch (e) { /* quota exceeded - ignore */ }
-
-  status.textContent = '✅ Berhasil dipublish!';
-  showToast('Video berhasil dipublish! 🎉', 'ok');
-  await sleep(1200);
-
-  resetToHome();
-}
-
-function resetToHome() {
-  stopMusic();
-  if (state.videoURL) { URL.revokeObjectURL(state.videoURL); state.videoURL = null; }
+  
+  state.videos.unshift(newVideo); // Tambah ke urutan teratas
+  
+  closeModal('publishModal');
+  showToast('Video berhasil diposting! 🎉');
+  
+  // Reset state editor
   state.videoBlob = null;
+  state.videoURL = null;
   state.textOverlays = [];
-  state.musicPath = null;
   state.musicName = null;
-  state.history = [];
-  showScreen('home', false);
+  
+  switchTab('home'); // Kembali ke beranda
 }
 
 /* ============================================================
@@ -1045,45 +746,13 @@ function resetToHome() {
    ============================================================ */
 function formatTime(sec) {
   sec = Math.max(0, Math.floor(sec));
-  const m = String(Math.floor(sec / 60)).padStart(2, '0');
-  const s = String(sec % 60).padStart(2, '0');
-  return `${m}:${s}`;
+  return `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
 }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('show');
-}
-
-/* klik background modal untuk close */
-document.querySelectorAll('.modal-bg').forEach(m => {
-  m.addEventListener('click', e => {
-    if (e.target === m) m.classList.remove('show');
-  });
-});
-
-/* esc untuk close modal */
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    document.querySelectorAll('.modal-bg.show').forEach(m => m.classList.remove('show'));
-  }
-});
-
-/* cleanup saat halaman ditutup */
-window.addEventListener('beforeunload', () => {
-  stopCamera();
-  stopMusic();
-});
-
-/* update tombol play/pause saat video berubah */
-document.getElementById('editVideo').addEventListener('play', updatePlayPauseBtn);
-document.getElementById('editVideo').addEventListener('pause', updatePlayPauseBtn);
-
-/* inisialisasi */
-window.addEventListener('load', () => {
-  showScreen('home', false);
-});
+// Inisialisasi
+window.addEventListener('load', () => { switchTab('home'); });
 </script>
 </body>
 </html>
