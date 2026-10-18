@@ -1,612 +1,101 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>MyFlix — Local Version (100% Offline)</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    body {
-      background: #000;
-      color: #fff;
-      overflow-x: hidden;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    /* ===== NAVBAR ===== */
-    .navbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 100;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 12px;
-      background: linear-gradient(180deg, rgba(0, 0, 0, 0.95), transparent);
-      backdrop-filter: blur(10px);
-    }
-
-    .nav-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .profile-nav-btn {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: #333;
-      border: 2px solid #ff0050;
-      cursor: pointer;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-    }
-
-    .profile-nav-btn img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .brand-logo {
-      font-size: 1.1rem;
-      font-weight: 900;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-
-    .brand-logo span {
-      color: #ff0050;
-    }
-
-    .nav-right {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-
-    .nav-btn {
-      background: #2a2a2a;
-      border: 1px solid #444;
-      color: #fff;
-      padding: 6px;
-      border-radius: 50%;
-      font-size: 0.95rem;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 32px;
-      height: 32px;
-      transition: 0.2s;
-    }
-
-    .nav-btn.active {
-      background: linear-gradient(135deg, #ff8a00, #ff0050);
-      border-color: #ff8a00;
-    }
-
-    .nav-btn.coin-btn {
-      background: linear-gradient(135deg, #f7b733, #fc4a1a);
-      border: none;
-      font-weight: bold;
-      border-radius: 20px;
-      width: auto;
-      padding: 6px 10px;
-      font-size: 0.75rem;
-      gap: 4px;
-      color: #fff;
-    }
-
-    /* ===== FEED ===== */
-    .feed-container {
-      height: 100vh;
-      overflow-y: scroll;
-      scroll-snap-type: y mandatory;
-      scrollbar-width: none;
-    }
-
-    .feed-container::-webkit-scrollbar {
-      display: none;
-    }
-
-    .video-card {
-      position: relative;
-      height: 100vh;
-      width: 100%;
-      scroll-snap-align: start;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: #000;
-    }
-
-    .video-card video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .video-text-overlay {
-      position: absolute;
-      z-index: 2;
-      text-align: center;
-      font-weight: bold;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
-      pointer-events: none;
-      white-space: nowrap;
-    }
-
-    .video-info {
-      position: absolute;
-      bottom: 80px;
-      left: 16px;
-      right: 80px;
-      z-index: 2;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-    }
-
-    .user-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 6px;
-    }
-
-    .video-info .username {
-      font-weight: bold;
-      font-size: 1rem;
-    }
-
-    .follow-btn {
-      background: transparent;
-      border: 1px solid #fff;
-      color: #fff;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 0.7rem;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .follow-btn.followed {
-      background: #fff;
-      color: #000;
-    }
-
-    .video-info .caption {
-      font-size: 0.85rem;
-      opacity: 0.9;
-      line-height: 1.3;
-    }
-
-    .side-actions {
-      position: absolute;
-      right: 12px;
-      bottom: 80px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      z-index: 2;
-    }
-
-    .action-btn {
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 1.3rem;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-    }
-
-    .action-btn span {
-      font-size: 0.65rem;
-      font-weight: 600;
-    }
-
-    .mute-btn {
-      position: absolute;
-      top: 60px;
-      right: 16px;
-      z-index: 3;
-      background: rgba(0, 0, 0, 0.5);
-      border: none;
-      color: #fff;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      font-size: 1.2rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .play-indicator {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 4rem;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-    }
-
-    .play-indicator.show {
-      opacity: 0.8;
-    }
-
-    .progress-bar {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: #ff0050;
-      width: 0%;
-    }
-
-    /* ===== MODAL ===== */
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.95);
-      z-index: 200;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 16px;
-    }
-
-    .modal-content {
-      position: relative;
-      width: 100%;
-      max-width: 520px;
-      background: #1a1a1a;
-      border-radius: 16px;
-      overflow: hidden;
-      max-height: 90vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .close-btn {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      z-index: 10;
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      color: #fff;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 1rem;
-    }
-
-    /* PROFIL */
-    .profile-header {
-      text-align: center;
-      padding: 30px 20px 20px;
-      border-bottom: 1px solid #333;
-    }
-
-    .avatar-preview {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: #333;
-      margin: 0 auto 12px;
-      overflow: hidden;
-      border: 3px solid #ff0050;
-      position: relative;
-    }
-
-    .avatar-preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .avatar-edit-label {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      background: #ff0050;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-    }
-
-    .form-group {
-      padding: 0 20px;
-      margin-bottom: 16px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.8rem;
-      color: #aaa;
-      margin-bottom: 6px;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      width: 100%;
-      padding: 12px;
-      background: #222;
-      border: 1px solid #444;
-      border-radius: 8px;
-      color: #fff;
-      font-size: 1rem;
-      outline: none;
-    }
-
-    .btn-primary {
-      width: calc(100% - 40px);
-      margin: 0 20px 20px;
-      padding: 14px;
-      background: linear-gradient(90deg, #ff0050, #ff8a00);
-      border: none;
-      color: #fff;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    .btn-primary:disabled {
-      opacity: 0.5;
-    }
-
-    /* UPLOAD & KAMERA */
-    .upload-body {
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-
-    .tab-selector {
-      display: flex;
-      margin-bottom: 16px;
-      background: #222;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 10px;
-      background: transparent;
-      border: none;
-      color: #aaa;
-      cursor: pointer;
-      font-weight: bold;
-      transition: 0.2s;
-    }
-
-    .tab-btn.active {
-      background: #333;
-      color: #fff;
-      border-bottom: 2px solid #ff0050;
-    }
-
-    .camera-container {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 9/16;
-      background: #000;
-      border-radius: 12px;
-      overflow: hidden;
-      margin-bottom: 16px;
-    }
-
-    .camera-container video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .record-btn {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.3);
-      border: 4px solid #fff;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .record-btn.recording {
-      background: rgba(255, 0, 80, 0.5);
-      border-color: #ff0050;
-    }
-
-    .record-btn .inner {
-      width: 46px;
-      height: 46px;
-      border-radius: 50%;
-      background: #ff0050;
-      transition: 0.2s;
-    }
-
-    .record-btn.recording .inner {
-      border-radius: 8px;
-      width: 24px;
-      height: 24px;
-      background: #fff;
-    }
-
-    .flip-cam-btn {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: rgba(0, 0, 0, 0.6);
-      border: none;
-      color: #fff;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 1.5rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .preview-wrapper {
-      position: relative;
-      width: 100%;
-      margin-bottom: 16px;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #000;
-      display: flex;
-      justify-content: center;
-    }
-
-    .preview-wrapper video {
-      width: 100%;
-      max-height: 300px;
-      object-fit: contain;
-    }
-
-    .interactive-text {
-      position: absolute;
-      z-index: 10;
-      cursor: move;
-      padding: 4px;
-      border: 1px dashed transparent;
-      user-select: none;
-      touch-action: none;
-      white-space: nowrap;
-      font-weight: bold;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
-    }
-
-    .interactive-text.active {
-      border-color: #ff0050;
-      background: rgba(255, 0, 80, 0.1);
-    }
-
-    .interactive-text .controls {
-      position: absolute;
-      bottom: -30px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 6px;
-      background: #222;
-      padding: 4px 8px;
-      border-radius: 12px;
-      opacity: 0;
-      transition: 0.2s;
-    }
-
-    .interactive-text.active .controls {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .interactive-text .controls button {
-      background: none;
-      border: none;
-      color: #fff;
-      cursor: pointer;
-      font-size: 1rem;
-    }
-
-    /* MONETISASI */
-    .balance-card {
-      background: linear-gradient(135deg, #f7b733, #fc4a1a);
-      border-radius: 16px;
-      padding: 24px;
-      margin: 20px;
-      text-align: center;
-    }
-
-    .balance-card h2 {
-      font-size: 2.5rem;
-      margin: 8px 0;
-    }
-
-    .price-list {
-      padding: 0 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .price-item {
-      display: flex;
-      justify-content: space-between;
-      background: #222;
-      padding: 14px;
-      border-radius: 12px;
-      cursor: pointer;
-      border: 1px solid #444;
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: #333;
-      color: #fff;
-      padding: 12px 20px;
-      border-radius: 24px;
-      z-index: 500;
-      opacity: 0;
-      transition: 0.3s;
-      pointer-events: none;
-      text-align: center;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>MyFlix — Local Camera & Timestamp</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; }
+  body { background:#000; color:#fff; overflow-x:hidden; }
+  .hidden { display:none !important; }
+
+  /* NAVBAR */
+  .navbar { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:linear-gradient(180deg,rgba(0,0,0,0.95),transparent); backdrop-filter:blur(10px); }
+  .nav-left { display:flex; align-items:center; gap:8px; }
+  .profile-nav-btn { width:34px; height:34px; border-radius:50%; background:#333; border:2px solid #ff0050; cursor:pointer; overflow:hidden; display:flex; justify-content:center; align-items:center; z-index:999; }
+  .profile-nav-btn img { width:100%; height:100%; object-fit:cover; }
+  .brand-logo { font-size:1.1rem; font-weight:900; letter-spacing:0.5px; white-space:nowrap; }
+  .brand-logo span { color:#ff0050; }
+  .nav-right { display:flex; gap:6px; align-items:center; }
+  .nav-btn { background:#2a2a2a; border:1px solid #444; color:#fff; padding:6px; border-radius:50%; font-size:0.95rem; cursor:pointer; display:flex; justify-content:center; align-items:center; width:32px; height:32px; transition:0.2s; }
+  .nav-btn.active { background:linear-gradient(135deg,#ff8a00,#ff0050); border-color:#ff8a00; }
+  .nav-btn.coin-btn { background:linear-gradient(135deg,#f7b733,#fc4a1a); border:none; font-weight:bold; border-radius:20px; width:auto; padding:6px 10px; font-size:0.75rem; gap:4px; color:#fff; }
+
+  /* FEED */
+  .feed-container { height:100vh; overflow-y:scroll; scroll-snap-type:y mandatory; scrollbar-width:none; }
+  .feed-container::-webkit-scrollbar { display:none; }
+  .video-card { position:relative; height:100vh; width:100%; scroll-snap-align:start; display:flex; justify-content:center; align-items:center; background:#000; }
+  .video-card video { width:100%; height:100%; object-fit:cover; }
+  .video-text-overlay { position:absolute; z-index:2; text-align:center; font-weight:bold; text-shadow:0 2px 8px rgba(0,0,0,0.9); pointer-events:none; white-space:nowrap; }
+  
+  .feed-timestamp { position:absolute; top:70px; left:16px; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:8px; font-size:0.7rem; color:#ccc; z-index:3; display:flex; align-items:center; gap:4px; }
+
+  .video-info { position:absolute; bottom:80px; left:16px; right:80px; z-index:2; text-shadow:0 2px 8px rgba(0,0,0,0.8); }
+  .user-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .video-info .username { font-weight:bold; font-size:1rem; }
+  .follow-btn { background:transparent; border:1px solid #fff; color:#fff; padding:4px 10px; border-radius:12px; font-size:0.7rem; font-weight:bold; cursor:pointer; }
+  .follow-btn.followed { background:#fff; color:#000; }
+  .video-info .caption { font-size:0.85rem; opacity:0.9; line-height:1.3; }
+  
+  .side-actions { position:absolute; right:12px; bottom:80px; display:flex; flex-direction:column; gap:14px; z-index:2; }
+  .action-btn { background:none; border:none; color:#fff; font-size:1.3rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+  .action-btn span { font-size:0.65rem; font-weight:600; }
+  
+  .mute-btn { position:absolute; top:60px; right:16px; z-index:3; background:rgba(0,0,0,0.5); border:none; color:#fff; width:36px; height:36px; border-radius:50%; font-size:1.2rem; display:flex; justify-content:center; align-items:center; }
+  .play-indicator { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:4rem; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+  .play-indicator.show { opacity:0.8; }
+  .progress-bar { position:absolute; bottom:0; left:0; right:0; height:3px; background:rgba(255,255,255,0.2); }
+  .progress-fill { height:100%; background:#ff0050; width:0%; }
+
+  /* MODAL */
+  .modal { position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:200; display:flex; justify-content:center; align-items:center; padding:16px; }
+  .modal-content { position:relative; width:100%; max-width:520px; background:#1a1a1a; border-radius:16px; overflow:hidden; max-height:90vh; display:flex; flex-direction:column; }
+  .close-btn { position:absolute; top:12px; right:12px; z-index:10; background:rgba(255,255,255,0.1); border:none; color:#fff; width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:1rem; }
+
+  /* PROFIL */
+  .profile-header { text-align:center; padding:30px 20px 20px; border-bottom:1px solid #333; }
+  .avatar-preview { width:80px; height:80px; border-radius:50%; background:#333; margin:0 auto 12px; overflow:hidden; border:3px solid #ff0050; position:relative; }
+  .avatar-preview img { width:100%; height:100%; object-fit:cover; }
+  .avatar-edit-label { position:absolute; bottom:0; right:0; background:#ff0050; width:28px; height:28px; border-radius:50%; display:flex; justify-content:center; align-items:center; cursor:pointer; }
+  .form-group { padding:0 20px; margin-bottom:16px; }
+  .form-group label { display:block; font-size:0.8rem; color:#aaa; margin-bottom:6px; }
+  .form-group input { width:100%; padding:12px; background:#222; border:1px solid #444; border-radius:8px; color:#fff; font-size:1rem; outline:none; }
+  .btn-primary { width:calc(100% - 40px); margin:0 20px 20px; padding:14px; background:linear-gradient(90deg,#ff0050,#ff8a00); border:none; color:#fff; border-radius:8px; font-weight:bold; font-size:1rem; cursor:pointer; }
+  .btn-primary:disabled { opacity:0.5; }
+
+  /* UPLOAD & KAMERA */
+  .upload-body { padding:20px; overflow-y:auto; display:flex; flex-direction:column; height:100%; }
+  .tab-selector { display:flex; margin-bottom:16px; background:#222; border-radius:8px; overflow:hidden; }
+  .tab-btn { flex:1; padding:10px; background:transparent; border:none; color:#aaa; cursor:pointer; font-weight:bold; transition:0.2s; }
+  .tab-btn.active { background:#333; color:#fff; border-bottom:2px solid #ff0050; }
+  .camera-container { position:relative; width:100%; aspect-ratio:9/16; background:#000; border-radius:12px; overflow:hidden; margin-bottom:16px; }
+  .camera-container video { width:100%; height:100%; object-fit:cover; }
+  
+  .camera-watermark { position:absolute; bottom:100px; left:20px; color:#fff; font-family:monospace; font-size:1.1rem; font-weight:bold; text-shadow: 0 0 4px #000, 0 0 4px #000; z-index:10; pointer-events:none; background:rgba(0,0,0,0.4); padding:4px 8px; border-radius:6px; }
+
+  .record-btn { position:absolute; bottom:20px; left:50%; transform:translateX(-50%); width:60px; height:60px; border-radius:50%; background:rgba(255,255,255,0.3); border:4px solid #fff; cursor:pointer; display:flex; justify-content:center; align-items:center; }
+  .record-btn.recording { background:rgba(255,0,80,0.5); border-color:#ff0050; }
+  .record-btn .inner { width:46px; height:46px; border-radius:50%; background:#ff0050; transition:0.2s; }
+  .record-btn.recording .inner { border-radius:8px; width:24px; height:24px; background:#fff; }
+  .flip-cam-btn { position:absolute; top:16px; right:16px; background:rgba(0,0,0,0.6); border:none; color:#fff; width:44px; height:44px; border-radius:50%; cursor:pointer; font-size:1.5rem; display:flex; justify-content:center; align-items:center; }
+  
+  .preview-wrapper { position:relative; width:100%; margin-bottom:16px; border-radius:12px; overflow:hidden; background:#000; display:flex; justify-content:center; }
+  .preview-wrapper video { width:100%; max-height:300px; object-fit:contain; }
+  .interactive-text { position:absolute; z-index:10; cursor:move; padding:4px; border:1px dashed transparent; user-select:none; touch-action:none; white-space:nowrap; font-weight:bold; text-shadow:0 2px 8px rgba(0,0,0,0.9); }
+  .interactive-text.active { border-color:#ff0050; background:rgba(255,0,80,0.1); }
+  .interactive-text .controls { position:absolute; bottom:-30px; left:50%; transform:translateX(-50%); display:flex; gap:6px; background:#222; padding:4px 8px; border-radius:12px; opacity:0; transition:0.2s; }
+  .interactive-text.active .controls { opacity:1; pointer-events:auto; }
+  .interactive-text .controls button { background:none; border:none; color:#fff; cursor:pointer; font-size:1rem; }
+
+  /* MONETISASI */
+  .balance-card { background:linear-gradient(135deg,#f7b733,#fc4a1a); border-radius:16px; padding:24px; margin:20px; text-align:center; }
+  .balance-card h2 { font-size:2.5rem; margin:8px 0; }
+  .price-list { padding:0 20px; display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+  .price-item { display:flex; justify-content:space-between; background:#222; padding:14px; border-radius:12px; cursor:pointer; border:1px solid #444; }
+
+  .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px); background:#333; color:#fff; padding:12px 20px; border-radius:24px; z-index:500; opacity:0; transition:0.3s; pointer-events:none; text-align:center; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
 </head>
 <body>
 
@@ -637,6 +126,7 @@
           <div id="sectionCam" style="flex:1;">
             <div class="camera-container">
               <video id="liveCamera" autoplay playsinline muted></video>
+              <div class="camera-watermark" id="cameraWatermark">00/00/0000 00:00:00</div>
               <button class="flip-cam-btn" id="btnFlipCam">🔄</button>
               <button class="record-btn" id="btnRecord"><div class="inner"></div></button>
             </div>
@@ -723,51 +213,46 @@
 
   <script>
     // ==========================================
-    // STATE & STORAGE (LOKAL)
+    // STATE LOKAL (TANPA FIREBASE/CLOUDINARY)
     // ==========================================
-    const STORAGE_KEY = 'myflix_local_final_v3';
+    const STORAGE_KEY = 'myflix_local_timestamp';
     let state = { 
       coins: 0, userVideos: [], comments: {}, likedVideos: {}, followedUsers: {}, 
       profile: { name: "Mudo", username: "@mudo", avatar: "https://ui-avatars.com/api/?name=Mudo&background=random" }
     };
     
-    function loadState() { 
-      const s = localStorage.getItem(STORAGE_KEY); 
-      if (s) state = { ...state, ...JSON.parse(s) }; 
-    }
-    function saveState() { 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); 
-    }
+    function loadState() { const s = localStorage.getItem(STORAGE_KEY); if (s) state = { ...state, ...JSON.parse(s) }; }
+    function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
     function showToast(m, t='info') { 
       if(t === 'error') alert("PESAN ERROR:\n" + m);
-      const el = document.getElementById('toast'); 
-      el.textContent = m; 
-      el.style.background = t==='error'?'#ff0050':t==='success'?'#00c853':'#333'; 
-      el.classList.add('show'); 
-      setTimeout(()=>el.classList.remove('show'), 3000); 
+      const el = document.getElementById('toast'); el.textContent = m; el.style.background = t==='error'?'#ff0050':t==='success'?'#00c853':'#333'; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 3000); 
     }
 
     // ==========================================
-    // LOGIKA KAMERA & GALERI
+    // TIMESTAMP
+    // ==========================================
+    function updateTimestamp() {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\./g, ':');
+      const fullStamp = `${dateStr} ${timeStr}`;
+      const watermarkEl = document.getElementById('cameraWatermark');
+      if (watermarkEl) watermarkEl.textContent = fullStamp;
+      return fullStamp;
+    }
+    setInterval(updateTimestamp, 1000);
+
+    // ==========================================
+    // KAMERA
     // ==========================================
     let streamRef = null, mediaRecorder, chunks = [], facingMode = 'user', pendingFile = null;
     let textState = { x: 50, y: 50, size: 24, rot: 0 };
 
     async function startCamera() {
       if(streamRef) streamRef.getTracks().forEach(t => t.stop());
-      try { 
-        streamRef = await navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio: true }); 
-        document.getElementById('liveCamera').srcObject = streamRef; 
-      } catch(e) { 
-        showToast('Kamera gagal diakses', 'error'); 
-      }
+      try { streamRef = await navigator.mediaDevices.getUserMedia({ video: { facingMode }, audio: true }); document.getElementById('liveCamera').srcObject = streamRef; } catch(e) { showToast('Kamera gagal diakses', 'error'); }
     }
-    function stopCamera() { 
-      if(streamRef) { 
-        streamRef.getTracks().forEach(t => t.stop()); 
-        streamRef = null; 
-      } 
-    }
+    function stopCamera() { if(streamRef) { streamRef.getTracks().forEach(t => t.stop()); streamRef = null; } }
 
     document.getElementById('btnUpload').onclick = () => { 
       document.getElementById('uploadModal').classList.remove('hidden'); 
@@ -775,236 +260,111 @@
       document.getElementById('pageEditor').classList.add('hidden'); 
       startCamera(); 
     };
-    document.getElementById('closeUpload').onclick = () => { 
-      document.getElementById('uploadModal').classList.add('hidden'); 
-      stopCamera(); 
-    };
+    document.getElementById('closeUpload').onclick = () => { document.getElementById('uploadModal').classList.add('hidden'); stopCamera(); };
     
-    document.getElementById('tabCam').onclick = () => { 
-      document.getElementById('tabCam').classList.add('active'); 
-      document.getElementById('tabGal').classList.remove('active'); 
-      document.getElementById('sectionCam').classList.remove('hidden'); 
-      document.getElementById('sectionGal').classList.add('hidden'); 
-      startCamera(); 
-    };
-    document.getElementById('tabGal').onclick = () => { 
-      document.getElementById('tabGal').classList.add('active'); 
-      document.getElementById('tabCam').classList.remove('active'); 
-      document.getElementById('sectionGal').classList.remove('hidden'); 
-      document.getElementById('sectionCam').classList.add('hidden'); 
-      stopCamera(); 
-    };
+    document.getElementById('tabCam').onclick = () => { document.getElementById('tabCam').classList.add('active'); document.getElementById('tabGal').classList.remove('active'); document.getElementById('sectionCam').classList.remove('hidden'); document.getElementById('sectionGal').classList.add('hidden'); startCamera(); };
+    document.getElementById('tabGal').onclick = () => { document.getElementById('tabGal').classList.add('active'); document.getElementById('tabCam').classList.remove('active'); document.getElementById('sectionGal').classList.remove('hidden'); document.getElementById('sectionCam').classList.add('hidden'); stopCamera(); };
     
-    document.getElementById('btnFlipCam').onclick = () => { 
-      facingMode = facingMode === 'user' ? 'environment' : 'user'; 
-      startCamera(); 
-    };
+    document.getElementById('btnFlipCam').onclick = () => { facingMode = facingMode === 'user' ? 'environment' : 'user'; startCamera(); };
     
     document.getElementById('btnRecord').onclick = () => {
       if(!streamRef) return;
-      if(mediaRecorder && mediaRecorder.state === 'recording') { 
-        mediaRecorder.stop(); 
-        document.getElementById('btnRecord').classList.remove('recording'); 
-      }
+      if(mediaRecorder && mediaRecorder.state === 'recording') { mediaRecorder.stop(); document.getElementById('btnRecord').classList.remove('recording'); }
       else { 
-        chunks = []; 
-        mediaRecorder = new MediaRecorder(streamRef); 
+        chunks = []; mediaRecorder = new MediaRecorder(streamRef); 
         mediaRecorder.ondataavailable = e => chunks.push(e.data); 
         mediaRecorder.onstop = () => { 
           pendingFile = new File([new Blob(chunks, {type:'video/webm'})], "rec.webm", {type:'video/webm'}); 
           stopCamera(); showEditor(); 
         }; 
-        mediaRecorder.start(); 
-        document.getElementById('btnRecord').classList.add('recording'); 
+        mediaRecorder.start(); document.getElementById('btnRecord').classList.add('recording'); 
       }
     };
     
     document.getElementById('dropzone').onclick = () => document.getElementById('fileInput').click();
-    document.getElementById('fileInput').onchange = (e) => { 
-      if(e.target.files[0]) { 
-        pendingFile = e.target.files[0]; 
-        showEditor(); 
-      } 
-    };
+    document.getElementById('fileInput').onchange = (e) => { if(e.target.files[0]) { pendingFile = e.target.files[0]; showEditor(); } };
 
     function showEditor() {
-      document.getElementById('pageSelect').classList.add('hidden'); 
-      document.getElementById('pageEditor').classList.remove('hidden');
-      document.getElementById('previewVideo').src = URL.createObjectURL(pendingFile); 
-      document.getElementById('previewVideo').play();
+      document.getElementById('pageSelect').classList.add('hidden'); document.getElementById('pageEditor').classList.remove('hidden');
+      document.getElementById('previewVideo').src = URL.createObjectURL(pendingFile); document.getElementById('previewVideo').play();
       validateForm();
     }
-    
     function validateForm() { 
       const u = document.getElementById('uploadUsername').value.trim();
       const c = document.getElementById('uploadCaption').value.trim();
       document.getElementById('btnSubmitUpload').disabled = !(u && c && pendingFile); 
     }
-    document.getElementById('uploadUsername').oninput = validateForm; 
-    document.getElementById('uploadCaption').oninput = validateForm;
+    document.getElementById('uploadUsername').oninput = validateForm; document.getElementById('uploadCaption').oninput = validateForm;
 
-    // Teks Drag
-    const iText = document.getElementById('interactiveText'); 
-    let drag = false, sX, sY, iX, iY;
-    
-    iText.onpointerdown = (e) => { 
-      if(e.target.tagName==='BUTTON') return; 
-      drag = true; 
-      iText.classList.add('active'); 
-      sX = e.clientX; 
-      sY = e.clientY; 
-      const r = document.getElementById('previewVideo').getBoundingClientRect(); 
-      iX = (textState.x/100)*r.width; 
-      iY = (textState.y/100)*r.height; 
-      iText.setPointerCapture(e.pointerId); 
-    };
-    iText.onpointermove = (e) => { 
-      if(!drag) return; 
-      const r = document.getElementById('previewVideo').getBoundingClientRect(); 
-      let nX = Math.max(0, Math.min(iX + (e.clientX - sX), r.width)); 
-      let nY = Math.max(0, Math.min(iY + (e.clientY - sY), r.height)); 
-      textState.x = (nX/r.width)*100; 
-      textState.y = (nY/r.height)*100; 
-      updateTxtPos(); 
-    };
-    iText.onpointerup = (e) => { 
-      drag = false; 
-      iText.releasePointerCapture(e.pointerId); 
-    };
-    
-    function updateTxtPos() { 
-      iText.style.left = textState.x + '%'; 
-      iText.style.top = textState.y + '%'; 
-      iText.style.transform = `translate(-50%,-50%) rotate(${textState.rot}deg)`; 
-    }
-    
-    document.getElementById('inputText').oninput = (e) => { 
-      if(!e.target.value.trim()) iText.classList.add('hidden'); 
-      else { 
-        iText.classList.remove('hidden'); 
-        iText.childNodes[0].nodeValue = e.target.value; 
-      } 
-    };
-    
+    // TEKS DRAG
+    const iText = document.getElementById('interactiveText'); let drag = false, sX, sY, iX, iY;
+    iText.onpointerdown = (e) => { if(e.target.tagName==='BUTTON') return; drag = true; iText.classList.add('active'); sX = e.clientX; sY = e.clientY; const r = document.getElementById('previewVideo').getBoundingClientRect(); iX = (textState.x/100)*r.width; iY = (textState.y/100)*r.height; iText.setPointerCapture(e.pointerId); };
+    iText.onpointermove = (e) => { if(!drag) return; const r = document.getElementById('previewVideo').getBoundingClientRect(); let nX = Math.max(0, Math.min(iX + (e.clientX - sX), r.width)); let nY = Math.max(0, Math.min(iY + (e.clientY - sY), r.height)); textState.x = (nX/r.width)*100; textState.y = (nY/r.height)*100; updateTxtPos(); };
+    iText.onpointerup = (e) => { drag = false; iText.releasePointerCapture(e.pointerId); };
+    function updateTxtPos() { iText.style.left = textState.x + '%'; iText.style.top = textState.y + '%'; iText.style.transform = `translate(-50%,-50%) rotate(${textState.rot}deg)`; }
+    document.getElementById('inputText').oninput = (e) => { if(!e.target.value.trim()) iText.classList.add('hidden'); else { iText.classList.remove('hidden'); iText.childNodes[0].nodeValue = e.target.value; } };
     document.getElementById('selectFont').onchange = (e) => iText.style.fontFamily = e.target.value;
     document.getElementById('selectColor').onchange = (e) => iText.style.color = e.target.value;
-    document.getElementById('btnTxtPlus').onclick = (e) => { 
-      e.stopPropagation(); 
-      textState.size+=4; 
-      iText.style.fontSize = textState.size+'px'; 
-    };
-    document.getElementById('btnTxtMin').onclick = (e) => { 
-      e.stopPropagation(); 
-      textState.size=Math.max(10, textState.size-4); 
-      iText.style.fontSize = textState.size+'px'; 
-    };
-    document.getElementById('btnTxtRot').onclick = (e) => { 
-      e.stopPropagation(); 
-      textState.rot+=45; 
-      updateTxtPos(); 
-    };
+    document.getElementById('btnTxtPlus').onclick = (e) => { e.stopPropagation(); textState.size+=4; iText.style.fontSize = textState.size+'px'; };
+    document.getElementById('btnTxtMin').onclick = (e) => { e.stopPropagation(); textState.size=Math.max(10, textState.size-4); iText.style.fontSize = textState.size+'px'; };
+    document.getElementById('btnTxtRot').onclick = (e) => { e.stopPropagation(); textState.rot+=45; updateTxtPos(); };
     document.getElementById('previewVideo').onclick = () => iText.classList.remove('active');
 
-    // IndexedDB (Penyimpanan Video)
+    // IndexedDB (Penyimpanan Lokal)
     const DB_NAME = 'myflix_db', DB_STORE = 'videos'; let dbLocal;
-    
-    function initDB() { 
-      return new Promise((res) => { 
-        const req = indexedDB.open(DB_NAME, 1); 
-        req.onupgradeneeded = e => { 
-          if(!e.target.result.objectStoreNames.contains(DB_STORE)) 
-            e.target.result.createObjectStore(DB_STORE, {keyPath:'id'}); 
-        }; 
-        req.onsuccess = e => { 
-          dbLocal = e.target.result; 
-          res(); 
-        }; 
-      }); 
-    }
-    
-    function saveVideoDB(id, blob) { 
-      return new Promise(res => { 
-        const tx = dbLocal.transaction(DB_STORE, 'readwrite'); 
-        tx.objectStore(DB_STORE).put({id, blob}).onsuccess = () => res(); 
-      }); 
-    }
-    
-    function getVideoDB(id) { 
-      return new Promise(res => { 
-        const tx = dbLocal.transaction(DB_STORE, 'readonly'); 
-        tx.objectStore(DB_STORE).get(id).onsuccess = e => res(e.target.result ? e.target.result.blob : null); 
-      }); 
-    }
+    function initDB() { return new Promise((res) => { const req = indexedDB.open(DB_NAME, 1); req.onupgradeneeded = e => { if(!e.target.result.objectStoreNames.contains(DB_STORE)) e.target.result.createObjectStore(DB_STORE, {keyPath:'id'}); }; req.onsuccess = e => { dbLocal = e.target.result; res(); }; }); }
+    function saveVideoDB(id, blob) { return new Promise(res => { const tx = dbLocal.transaction(DB_STORE, 'readwrite'); tx.objectStore(DB_STORE).put({id, blob}).onsuccess = () => res(); }); }
+    function getVideoDB(id) { return new Promise(res => { const tx = dbLocal.transaction(DB_STORE, 'readonly'); tx.objectStore(DB_STORE).get(id).onsuccess = e => res(e.target.result ? e.target.result.blob : null); }); }
 
-    // SIMPAN VIDEO
+    // PUBLISH
     document.getElementById('btnSubmitUpload').onclick = async () => {
       if(!pendingFile) return; 
       const btn = document.getElementById('btnSubmitUpload');
-      btn.textContent = '⏳ Menyimpan...'; 
-      btn.disabled = true; 
+      btn.textContent = '⏳ Menyimpan...'; btn.disabled = true; 
       
       try {
+        const uploadTime = new Date().toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         const id = Date.now();
-        const overlayData = document.getElementById('inputText').value.trim() ? { 
-          text: document.getElementById('inputText').value.trim(), 
-          x: textState.x, 
-          y: textState.y, 
-          size: textState.size, 
-          rot: textState.rot, 
-          color: document.getElementById('selectColor').value, 
-          font: document.getElementById('selectFont').value 
-        } : null;
+        const overlayData = document.getElementById('inputText').value.trim() ? { text: document.getElementById('inputText').value.trim(), x: textState.x, y: textState.y, size: textState.size, rot: textState.rot, color: document.getElementById('selectColor').value, font: document.getElementById('selectFont').value } : null;
         
         await saveVideoDB(id, pendingFile);
-        
         state.userVideos.unshift({ 
-          id, 
-          username: document.getElementById('uploadUsername').value.trim(), 
-          caption: document.getElementById('uploadCaption').value.trim(), 
-          src: null, 
-          likes: 0, 
-          overlayData
+          id, username: document.getElementById('uploadUsername').value.trim(), caption: document.getElementById('uploadCaption').value.trim(), 
+          src: null, likes: 0, overlayData, uploadTime: uploadTime
         });
-        
         saveState(); 
+        
         showToast('🎉 Video berhasil dipublikasikan!', 'success'); 
         document.getElementById('uploadModal').classList.add('hidden'); 
-        btn.textContent = '🚀 Publikasikan'; 
-        btn.disabled = false;
-        pendingFile = null; 
-        document.getElementById('uploadCaption').value = '';
+        btn.textContent = '🚀 Publikasikan'; btn.disabled = false;
+        pendingFile = null; document.getElementById('uploadCaption').value = '';
         
         renderFeed();
         document.getElementById('feedView').scrollTo({ top: 0, behavior: 'smooth' });
       } catch (error) {
         showToast('Gagal: ' + error.message, 'error');
-        btn.textContent = '🚀 Publikasikan'; 
-        btn.disabled = false;
+        btn.textContent = '🚀 Publikasikan'; btn.disabled = false;
       }
     };
 
-    // ==========================================
-    // RENDER FEED & SOSIAL
-    // ==========================================
+    // RENDER FEED
     const defaultVideos = [
-      { id:101, username:"@nature_vibes", caption:"Sunset di pantai 🏖️", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes:1240 },
+      { id:101, username:"@nature_vibes", caption:"Sunset di pantai 🏖️", src:"https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes:1240, uploadTime: "12/08/2024 10:00" },
     ];
     function getAllVideos() { return [...state.userVideos, ...defaultVideos]; }
 
     async function renderFeed() {
-      const feed = document.getElementById('feedView'); 
-      feed.innerHTML = '';
-      
+      const feed = document.getElementById('feedView'); feed.innerHTML = '';
       for(let v of getAllVideos()) {
-        const card = document.createElement('div'); 
-        card.className = 'video-card';
+        const card = document.createElement('div'); card.className = 'video-card';
         const isLiked = state.likedVideos[v.id];
-        
         let overlayHTML = v.overlayData ? `<div class="video-text-overlay" style="left:${v.overlayData.x}%; top:${v.overlayData.y}%; transform:translate(-50%,-50%) rotate(${v.overlayData.rot}deg); font-size:${v.overlayData.size}px; color:${v.overlayData.color}; font-family:${v.overlayData.font};">${v.overlayData.text}</div>` : '';
-        
+        let timestampHTML = v.uploadTime ? `<div class="feed-timestamp">🕒 ${v.uploadTime}</div>` : '';
+
         card.innerHTML = `
           <video class="main-video" loop muted playsinline preload="metadata"></video>
           <button class="mute-btn">🔇</button>
+          ${timestampHTML}
           ${overlayHTML}
           <div class="play-indicator">▶</div>
           <div class="progress-bar"><div class="progress-fill"></div></div>
@@ -1022,48 +382,15 @@
         `;
         
         const vid = card.querySelector('.main-video');
-        if(v.src) {
-          vid.src = v.src; 
-        } else { 
-          try { 
-            const b = await getVideoDB(v.id); 
-            if(b) vid.src = URL.createObjectURL(b); 
-          } catch(e){} 
-        }
+        if(v.src) vid.src = v.src; else { try { const b = await getVideoDB(v.id); if(b) vid.src = URL.createObjectURL(b); } catch(e){} }
 
-        card.querySelector('.mute-btn').onclick = (e) => { 
-          e.stopPropagation(); 
-          vid.muted = !vid.muted; 
-          e.target.textContent = vid.muted ? '🔇' : '🔊'; 
-        };
-        card.querySelector('.like-btn').onclick = (e) => { 
-          e.stopPropagation(); 
-          if(state.likedVideos[v.id]) delete state.likedVideos[v.id]; 
-          else state.likedVideos[v.id] = true; 
-          saveState(); 
-          renderFeed(); 
-        };
-        card.querySelector('.comment-btn').onclick = (e) => { 
-          e.stopPropagation(); 
-          openComments(v.id); 
-        };
-        card.querySelector('.follow-btn').onclick = (e) => { 
-          e.stopPropagation(); 
-          const u = v.username; 
-          if(state.followedUsers[u]) delete state.followedUsers[u]; 
-          else state.followedUsers[u] = true; 
-          saveState(); 
-          renderFeed(); 
-        };
+        card.querySelector('.mute-btn').onclick = (e) => { e.stopPropagation(); vid.muted = !vid.muted; e.target.textContent = vid.muted ? '🔇' : '🔊'; };
+        card.querySelector('.like-btn').onclick = (e) => { e.stopPropagation(); if(state.likedVideos[v.id]) delete state.likedVideos[v.id]; else state.likedVideos[v.id] = true; saveState(); renderFeed(); };
+        card.querySelector('.comment-btn').onclick = (e) => { e.stopPropagation(); openComments(v.id); };
+        card.querySelector('.follow-btn').onclick = (e) => { e.stopPropagation(); const u = v.username; if(state.followedUsers[u]) delete state.followedUsers[u]; else state.followedUsers[u] = true; saveState(); renderFeed(); };
         
-        vid.onclick = () => { 
-          if(vid.paused) vid.play(); 
-          else vid.pause(); 
-        };
-        vid.ontimeupdate = () => { 
-          if(vid.duration) card.querySelector('.progress-fill').style.width = (vid.currentTime/vid.duration*100)+'%'; 
-        };
-        
+        vid.onclick = () => { if(vid.paused) vid.play(); else vid.pause(); };
+        vid.ontimeupdate = () => { if(vid.duration) card.querySelector('.progress-fill').style.width = (vid.currentTime/vid.duration*100)+'%'; };
         feed.appendChild(card);
       }
       observeFeed();
@@ -1071,102 +398,41 @@
 
     function observeFeed() {
       const obs = new IntersectionObserver(entries => {
-        entries.forEach(en => { 
-          const vid = en.target.querySelector('.main-video'); 
-          if(en.isIntersecting && en.intersectionRatio > 0.6) { 
-            vid.play().catch(()=>{}); 
-          } else { 
-            vid.pause(); 
-            vid.currentTime = 0; 
-          } 
-        });
+        entries.forEach(en => { const vid = en.target.querySelector('.main-video'); if(en.isIntersecting && en.intersectionRatio > 0.6) { vid.play().catch(()=>{}); } else { vid.pause(); vid.currentTime = 0; } });
       }, { threshold: [0, 0.6, 1] });
       document.querySelectorAll('.video-card').forEach(c => obs.observe(c));
     }
 
-    // KOMENTAR
+    // SOSIAL & PROFIL
     let commentTargetId = null;
-    
-    function openComments(id) { 
-      commentTargetId = id; 
-      renderComments(id); 
-      document.getElementById('commentSheet').style.transform = 'translateY(0)'; 
-    }
-    
+    function openComments(id) { commentTargetId = id; renderComments(id); document.getElementById('commentSheet').style.transform = 'translateY(0)'; }
     function renderComments(id) {
-      const cmts = state.comments[id] || []; 
-      document.getElementById('commentCount').textContent = cmts.length;
-      document.getElementById('commentList').innerHTML = cmts.length ? cmts.map(c => `
-        <div style="display:flex; gap:12px;">
-          <div style="width:36px;height:36px;border-radius:50%;background:#ff0050;display:flex;justify-content:center;align-items:center;font-weight:bold;">${c.user.charAt(1).toUpperCase()}</div>
-          <div>
-            <div style="font-weight:bold;font-size:0.8rem;color:#ccc;">${c.user}</div>
-            <div style="font-size:0.9rem;">${c.text}</div>
-          </div>
-        </div>
-      `).join('') : `<p style="color:#666; text-align:center;">Belum ada komentar</p>`;
+      const cmts = state.comments[id] || []; document.getElementById('commentCount').textContent = cmts.length;
+      document.getElementById('commentList').innerHTML = cmts.length ? cmts.map(c => `<div style="display:flex; gap:12px;"><div style="width:36px;height:36px;border-radius:50%;background:#ff0050;display:flex;justify-content:center;align-items:center;font-weight:bold;">${c.user.charAt(1).toUpperCase()}</div><div><div style="font-weight:bold;font-size:0.8rem;color:#ccc;">${c.user}</div><div style="font-size:0.9rem;">${c.text}</div></div></div>`).join('') : `<p style="color:#666; text-align:center;">Belum ada komentar</p>`;
       document.getElementById('commentList').scrollTop = 9999;
     }
-    
     document.getElementById('closeComment').onclick = () => document.getElementById('commentSheet').style.transform = 'translateY(100%)';
-    document.getElementById('sendComment').onclick = () => { 
-      const v = document.getElementById('commentInput').value.trim(); 
-      if(!v || !commentTargetId) return; 
-      if(!state.comments[commentTargetId]) state.comments[commentTargetId] = []; 
-      state.comments[commentTargetId].push({user:state.profile.username, text:v}); 
-      saveState(); 
-      document.getElementById('commentInput').value = ''; 
-      renderComments(commentTargetId); 
-    };
-
-    // PROFIL & LAINNYA
-    document.getElementById('btnMonet').onclick = () => { 
-      updateUI(); 
-      document.getElementById('monetModal').classList.remove('hidden'); 
-    };
+    document.getElementById('sendComment').onclick = () => { const v = document.getElementById('commentInput').value.trim(); if(!v || !commentTargetId) return; if(!state.comments[commentTargetId]) state.comments[commentTargetId] = []; state.comments[commentTargetId].push({user:state.profile.username, text:v}); saveState(); document.getElementById('commentInput').value = ''; renderComments(commentTargetId); };
+    
+    document.getElementById('btnMonet').onclick = () => { updateUI(); document.getElementById('monetModal').classList.remove('hidden'); };
     document.getElementById('closeMonet').onclick = () => document.getElementById('monetModal').classList.add('hidden');
     document.getElementById('btnProfile').onclick = () => document.getElementById('profileModal').classList.remove('hidden');
     document.getElementById('closeProfile').onclick = () => document.getElementById('profileModal').classList.add('hidden');
-
     document.getElementById('btnSaveProfile').onclick = () => {
       state.profile.name = document.getElementById('inputDisplayName').value.trim();
       state.profile.username = document.getElementById('inputUsername').value.trim();
-      saveState(); 
-      updateUI(); 
-      showToast('Profil disimpan!', 'success'); 
-      document.getElementById('profileModal').classList.add('hidden');
+      saveState(); updateUI(); showToast('Profil disimpan!', 'success'); document.getElementById('profileModal').classList.add('hidden');
     };
-    
     document.getElementById('avatarUpload').onchange = (e) => {
       const f = e.target.files[0]; 
-      if(f) { 
-        const r = new FileReader(); 
-        r.onload = (ev) => { 
-          state.profile.avatar = ev.target.result; 
-          saveState(); 
-          updateUI(); 
-          showToast('Foto profil diganti!', 'success'); 
-        }; 
-        r.readAsDataURL(f); 
-      }
+      if(f) { const r = new FileReader(); r.onload = (ev) => { state.profile.avatar = ev.target.result; saveState(); updateUI(); showToast('Foto profil diganti!', 'success'); }; r.readAsDataURL(f); }
     };
-    
-    document.getElementById('btnLogout').onclick = () => { 
-      if(confirm('Keluar akun?')) location.reload(); 
-    };
+    document.getElementById('btnLogout').onclick = () => { if(confirm('Keluar akun?')) location.reload(); };
 
     document.querySelectorAll('.price-item').forEach(item => {
       item.onclick = () => {
-        const coins = parseInt(item.dataset.coins || 0); 
-        const price = parseInt(item.dataset.price || 0);
-        if(coins) { 
-          if(confirm(`Beli ${coins} koin seharga Rp ${price.toLocaleString('id-ID')}?`)) { 
-            state.coins += coins; 
-            saveState(); 
-            updateUI(); 
-            showToast(`✅ +${coins} koin`, 'success'); 
-          } 
-        }
+        const coins = parseInt(item.dataset.coins || 0); const price = parseInt(item.dataset.price || 0);
+        if(coins) { if(confirm(`Beli ${coins} koin seharga Rp ${price.toLocaleString('id-ID')}?`)) { state.coins += coins; saveState(); updateUI(); showToast(`✅ +${coins} koin`, 'success'); } }
       };
     });
 
@@ -1184,10 +450,7 @@
 
     // INIT
     (async () => {
-      loadState(); 
-      await initDB(); 
-      updateUI(); 
-      renderFeed();
+      loadState(); await initDB(); updateUI(); updateTimestamp(); renderFeed();
     })();
   </script>
 </body>
