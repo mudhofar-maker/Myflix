@@ -3,10 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>TikVid - Video Cloud DB & Music API</title>
+<title>TikVid - Video Pendek & Database IndexedDB</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans@5.0.3/index.css" />
-<!-- Puter.js untuk Free Cloud Storage Database khusus file media -->
-<script src="https://js.puter..com/v2/"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
@@ -645,7 +643,7 @@
     </div>
   </div>
 
-  <!-- Music Picker Modal (Connected to Live Jamendo API) -->
+  <!-- Music Picker Modal -->
   <div class="modal-overlay" id="musicModal">
     <div class="modal" style="height: 380px;">
       <div class="modal-header">
@@ -698,22 +696,77 @@
   let videos = [];
   let currentSelectedMusic = '♪ Lofi Sunset Vibes - ChillBeats';
 
-  // Inisialisasi Cloud Storage DB Gratis via Puter.js
-  async function initCloudDatabase() {
+  // Inisialisasi IndexedDB (Database khusus penyimpanan video tanpa batas lokal yang mudah hilang)
+  let db;
+  function initIndexedDB() {
+    return new Promise((resolve) => {
+      const request = indexedDB.open('TikVidDatabase', 1);
+      request.onerror = () => {
+        loadVideosFallback();
+        resolve();
+      };
+      request.onupgradeneeded = (e) => {
+        db = e.target.result;
+        if (!db.objectStoreNames.contains('videos')) {
+          db.createObjectStore('videos', { keyPath: 'id' });
+        }
+      };
+      request.onsuccess = (e) => {
+        db = e.target.result;
+        getAllVideosFromDB((storedVideos) => {
+          if (storedVideos && storedVideos.length > 0) {
+            videos = storedVideos;
+          } else {
+            videos = [...defaultVideos];
+            saveAllVideosToDB(videos);
+          }
+          renderFeed(videos);
+          resolve();
+        });
+      };
+    });
+  }
+
+  function getAllVideosFromDB(callback) {
+    if (!db) { callback(null); return; }
     try {
-      // Membaca file database cloud khusus video
-      const file = await puter.fs.read('tikvid_cloud_videos.json');
-      if (file) {
-        const text = await file.text();
-        videos = JSON.parse(text);
-      } else {
-        videos = [...defaultVideos];
-      }
+      const transaction = db.transaction(['videos'], 'readonly');
+      const store = transaction.objectStore('videos');
+      const request = store.getAll();
+      request.onsuccess = () => {
+        // Urutkan dari yang terbaru
+        const result = request.result.sort((a, b) => b.id - a.id);
+        callback(result.length ? result : null);
+      };
+      request.onerror = () => callback(null);
     } catch (e) {
-      // Fallback jika belum ada file di cloud DB, gunakan default/lokal
-      const saved = localStorage.getItem('tikvid_custom_videos');
-      videos = saved ? JSON.parse(saved) : [...defaultVideos];
+      callback(null);
     }
+  }
+
+  function saveVideoToDB(videoObj) {
+    if (!db) return;
+    try {
+      const transaction = db.transaction(['videos'], 'readwrite');
+      const store = transaction.objectStore('videos');
+      store.put(videoObj);
+    } catch (e) {
+      console.error('Gagal menyimpan ke IndexedDB:', e);
+    }
+  }
+
+  function saveAllVideosToDB(list) {
+    if (!db) return;
+    try {
+      const transaction = db.transaction(['videos'], 'readwrite');
+      const store = transaction.objectStore('videos');
+      list.forEach(v => store.put(v));
+    } catch (e) {}
+  }
+
+  function loadVideosFallback() {
+    const saved = localStorage.getItem('tikvid_custom_videos');
+    videos = saved ? JSON.parse(saved) : [...defaultVideos];
     renderFeed(videos);
   }
 
@@ -729,7 +782,7 @@
     { name: 'Salin Link', icon: '🔗', bg: '#555' }
   ];
 
-  // Fetch Live Viral Music from Jamendo API
+  // Fetch Music dari Jamendo API
   async function fetchViralMusicAPI() {
     const musicListEl = document.getElementById('musicList');
     try {
@@ -846,7 +899,8 @@
     comments: [...sampleComments]
   }));
 
-  initCloudDatabase();
+  // Jalankan inisialisasi database
+  initIndexedDB();
 
   // Canvas background animations
   document.querySelectorAll('.video-slide').forEach((slide, idx) => {
@@ -1004,7 +1058,7 @@
     showToast(muted ? 'Audio dimatikan' : 'Audio diaktifkan');
   });
 
-  // ============ CAMERA, LIVE & CLOUD DB STORAGE ============
+  // ============ CAMERA, LIVE & INDEXEDDB STORAGE ============
   const cameraModal = document.getElementById('cameraModal');
   const cameraVideo = document.getElementById('cameraVideo');
   const openCameraBtn = document.getElementById('openCameraModal');
@@ -1090,7 +1144,7 @@
         const reader = new FileReader();
         reader.readAsDataURL(blob);
         reader.onloadend = () => {
-          addNewVideoToCloudDB(reader.result);
+          addNewVideoToDB(reader.result);
         };
       };
       mediaRecorder.start();
@@ -1103,7 +1157,7 @@
       recordShutter.classList.remove('recording');
       cameraModal.classList.remove('show');
       if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
-      showToast('Video berhasil direkam & disimpan ke Cloud DB!');
+      showToast('Video berhasil direkam & disimpan ke Database IndexedDB!');
     }
   });
 
@@ -1117,23 +1171,23 @@
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onloadend = () => {
-        addNewVideoToCloudDB(reader.result);
+        addNewVideoToDB(reader.result);
         cameraModal.classList.remove('show');
         if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
-        showToast('Video galeri diunggah ke Cloud DB!');
+        showToast('Video galeri diunggah ke Database!');
       };
     }
   });
 
-  async function addNewVideoToCloudDB(videoDataUrl) {
+  function addNewVideoToDB(videoDataUrl) {
     const newVid = {
       id: Date.now(),
-      user: 'kreator_cloud',
+      user: 'kreator_db',
       displayName: 'Anda',
-      avatar: '☁️',
-      avatarBg: '#25f4ee',
-      caption: 'Video tersimpan di Cloud Database gratis 🚀',
-      hashtags: ['fyp', 'cloud', 'viral'],
+      avatar: '💾',
+      avatarBg: '#ff2d55',
+      caption: 'Video tersimpan aman di Database IndexedDB 🚀',
+      hashtags: ['fyp', 'database', 'viral'],
       music: currentSelectedMusic,
       likes: 1, comments: 0, shares: 0, bookmarks: 0,
       isCustomVideo: true,
@@ -1143,14 +1197,8 @@
     videos.unshift(newVid);
     state.unshift({ liked: false, bookmarked: false, followed: true, likes: 1, bookmarks: 0, comments: [] });
     
-    // Simpan otomatis ke Puter Cloud Storage & LocalStorage Backup
-    try {
-      await puter.fs.write('tikvid_cloud_videos.json', JSON.stringify(videos));
-      localStorage.setItem('tikvid_custom_videos', JSON.stringify(videos));
-    } catch (e) {
-      localStorage.setItem('tikvid_custom_videos', JSON.stringify(videos));
-    }
-
+    // Simpan permanen ke IndexedDB
+    saveVideoToDB(newVid);
     renderFeed(videos);
   }
 </script>
