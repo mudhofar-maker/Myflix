@@ -1,6 +1,6 @@
 let currentUser = localStorage.getItem('tikvid_username') || 'kreator_tamu';
 let currentWhatsApp = localStorage.getItem('tikvid_wa') || '';
-let currentBio = localStorage.getItem('tikvid_bio') || 'Buat akun dengan nomor WhatsApp Anda dan mulai berbagi video.';
+let currentBio = localStorage.getItem('tikvid_bio') || 'Selamat datang di profil resmi saya! Jelajahi video & produk terbaik.';
 let currentAvatar = localStorage.getItem('tikvid_avatar') || '';
 let currentShopLink = localStorage.getItem('tikvid_shoplink') || 'https://shopee.co.id';
 let activeTab = 'foryou';
@@ -9,7 +9,7 @@ let activeShareVideoUrl = window.location.href;
 let dbProfile;
 function initProfileDB() {
   return new Promise((resolve) => {
-    const request = indexedDB.open('TikVidAccountDB', 1);
+    const request = indexedDB.open('TikVidAccountDB', 2);
     request.onerror = () => { loadProfileFallback(); resolve(); };
     request.onupgradeneeded = (e) => {
       dbProfile = e.target.result;
@@ -59,7 +59,7 @@ function saveProfileToDB(profileObj) {
 function loadProfileFallback() {
   currentUser = localStorage.getItem('tikvid_username') || 'kreator_tamu';
   currentWhatsApp = localStorage.getItem('tikvid_wa') || '';
-  currentBio = localStorage.getItem('tikvid_bio') || 'Buat akun dengan nomor WhatsApp Anda...';
+  currentBio = localStorage.getItem('tikvid_bio') || 'Selamat datang di profil resmi saya!';
   currentAvatar = localStorage.getItem('tikvid_avatar') || '';
   currentShopLink = localStorage.getItem('tikvid_shoplink') || 'https://shopee.co.id';
 }
@@ -78,8 +78,7 @@ function updateProfileUI() {
 }
 
 const defaultVideos = [
-  { id: 1, user: 'cinematic_vlog', wa: '08123456789', bio: 'Pecinta alam & videografi perjalanan.', avatar: '', shopLink: 'https://shopee.co.id', caption: 'Dokumenter perjalanan alam terbuka berdurasi panjang 🌲✨', hashtags: ['longvideo', 'vlog', 'alam'], music: '♪ Cinematic Journey - LongChill', likes: 245000, comments: 4120, shares: 1520, bookmarks: 9800, durationLabel: '03:45', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
-  { id: 2, user: 'tech_insight', wa: '08987654321', bio: 'Berbagi wawasan teknologi dan pemrograman web masa depan.', avatar: '', shopLink: 'https://tokopedia.com', caption: 'Pembahasan mendalam mengenai arsitektur web masa depan 💻', hashtags: ['tech', 'coding', 'education'], music: '♪ Tech Ambient - FutureSound', likes: 182000, comments: 3010, shares: 920, bookmarks: 6400, durationLabel: '05:12', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4' }
+  { id: 1, user: 'kreator_hebat', wa: '085710717478', bio: 'Selamat datang di profil resmi saya! Jelajahi video & produk terbaik.', avatar: '', shopLink: 'https://shopee.co.id', caption: 'Video original baru dari @kreator_hebat 🚀 #longformat #whatsapp #fyp', hashtags: ['longformat', 'whatsapp', 'fyp'], music: '♪ Lofi Long Session - ChillBeats', likes: 1, comments: 0, shares: 0, bookmarks: 0, durationLabel: '00:05', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' }
 ];
 
 let videos = [];
@@ -88,7 +87,7 @@ let currentSelectedMusic = '♪ Lofi Long Session - ChillBeats';
 let db;
 function initIndexedDB() {
   return new Promise((resolve) => {
-    const request = indexedDB.open('TikVidWhatsAppDB', 1);
+    const request = indexedDB.open('TikVidWhatsAppDB', 2);
     request.onerror = () => { loadVideosFallback(); resolve(); };
     request.onupgradeneeded = (e) => {
       db = e.target.result;
@@ -284,11 +283,11 @@ function renderFeed(list) {
       </div>
       <div class="bottom-info">
         <div class="username">
-          @${v.user} ${v.wa ? `(WA: ${v.wa})` : ''}
+          @${v.user}
           <span class="long-badge">⏳ ${v.durationLabel || '02:00'}</span>
         </div>
         <div class="user-bio">${v.bio || ''}</div>
-        <div class="caption">${v.caption} ${(v.hashtags || []).map(h => `<span class="hashtag">#${h}</span>`).join(' ')}</div>
+        <div class="caption" style="color: ${v.captionColor || '#ffffff'};">${v.caption}</div>
         <div class="music">
           <span>🎵</span>
           <div class="marquee"><span>${v.music} &nbsp;&nbsp;&nbsp; </span></div>
@@ -557,7 +556,7 @@ function openFriendsModal() {
         <div class="comment-avatar" style="background:#ff2d55">${v.user[0].toUpperCase()}</div>
         <div>
           <div style="font-weight: bold; font-size: 14px;">@${v.user}</div>
-          <div style="font-size: 11px; opacity: 0.6;">WA: ${v.wa || 'Terverifikasi'}</div>
+          <div style="font-size: 11px; opacity: 0.6;">Kreator Terverifikasi</div>
         </div>
       </div>
       <button class="comment-send" data-action="follow" data-idx="${idx}" style="padding: 6px 14px; font-size: 12px; background: ${isFollowed ? '#2ecc71' : '#fe2c55'};">
@@ -617,7 +616,7 @@ const openCameraBtn = document.getElementById('openCameraModal');
 const closeCameraBtn = document.getElementById('closeCamera');
 const switchCameraBtn = document.getElementById('switchCameraBtn');
 const recordShutter = document.getElementById('recordShutter');
-const uploadGalleryBtn = document.getElementById('uploadGalleryBtn');
+let uploadGalleryBtn = document.getElementById('uploadGalleryBtn');
 const galleryInput = document.getElementById('galleryInput');
 const liveBadge = document.getElementById('liveBadge');
 const camModeToggleBtn = document.getElementById('camModeToggleBtn');
@@ -703,7 +702,7 @@ recordShutter.addEventListener('click', () => {
       reader.onloadend = () => {
         const m = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
         const s = String(secondsElapsed % 60).padStart(2, '0');
-        addNewLongVideoToDB(reader.result, `${m}:${s}`);
+        openCaptionEditor(reader.result, `${m}:${s}`);
       };
     };
     mediaRecorder.start(1000);
@@ -725,7 +724,6 @@ recordShutter.addEventListener('click', () => {
     recordShutter.classList.remove('recording');
     cameraModal.classList.remove('show');
     if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
-    showToast('Video panjang berhasil disimpan!');
   }
 });
 
@@ -746,16 +744,117 @@ galleryInput.addEventListener('change', (e) => {
       tempVideo.onloadedmetadata = () => {
         const mins = String(Math.floor(tempVideo.duration / 60)).padStart(2, '0');
         const secs = String(Math.floor(tempVideo.duration % 60)).padStart(2, '0');
-        addNewLongVideoToDB(reader.result, `${mins}:${secs}`);
+        openCaptionEditor(reader.result, `${mins}:${secs}`);
         cameraModal.classList.remove('show');
         if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
-        showToast('Video galeri berhasil diunggah!');
       };
     };
   }
 });
 
-function addNewLongVideoToDB(videoDataUrl, durationStr) {
+// --- FITUR EDIT CAPTION INTERAKTIF (Bisa Digeser, Cubit/Ukuran, Full Color) ---
+function openCaptionEditor(videoDataUrl, durationStr) {
+  let existingModal = document.getElementById('captionEditorModal');
+  if (existingModal) existingModal.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'captionEditorModal';
+  modal.className = 'modal-overlay show';
+  modal.style.cssText = 'z-index: 500; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.9);';
+  
+  modal.innerHTML = `
+    <div style="width: 100%; height: 100%; max-width: 480px; position: relative; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; background: #000;">
+      <video src="${videoDataUrl}" autoplay loop muted style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1;"></video>
+      
+      <!-- Teks Caption Interaktif yang bisa digeser & dicubit ukurannya -->
+      <div id="draggableCaption" style="position: absolute; top: 40%; left: 10%; right: 10%; z-index: 10; text-align: center; cursor: move; touch-action: none; padding: 10px;">
+        <div id="previewCaptionText" style="font-size: 20px; font-weight: bold; color: #ffffff; text-shadow: 0 2px 8px rgba(0,0,0,0.8); word-break: break-word;">Tulis caption keren Anda di sini... 🚀</div>
+      </div>
+
+      <!-- Top Bar Editor -->
+      <div style="position: relative; z-index: 20; padding: 15px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);">
+        <div id="closeCaptionEditor" style="color: #fff; font-size: 16px; cursor: pointer; font-weight: bold;">✕ Batal</div>
+        <div style="color: #fff; font-weight: bold; font-size: 15px;">🎨 Edit Teks & Warna</div>
+        <div id="publishVideoBtn" style="color: #000; background: #25f4ee; padding: 6px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 14px;">Posting</div>
+      </div>
+
+      <!-- Bottom Controls Editor -->
+      <div style="position: relative; z-index: 20; padding: 20px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); display: flex; flex-direction: column; gap: 12px;">
+        <input type="text" id="captionInputText" placeholder="Ketik caption video Anda..." class="comment-input" style="width: 100%; font-size: 15px;" />
+        
+        <div style="display: flex; gap: 10px; align-items: center; justify-content: space-between;">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span style="font-size: 12px; color: #fff;">Warna:</span>
+            <input type="color" id="captionColorPicker" value="#ffffff" style="width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; background: none;" />
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span style="font-size: 12px; color: #fff;">Ukuran Teks:</span>
+            <input type="range" id="captionSizeRange" min="14" max="36" value="20" style="cursor: pointer;" />
+          </div>
+        </div>
+        <div style="font-size: 11px; text-align: center; opacity: 0.7; color: #fff;">💡 Tips: Teks di atas layar dapat digeser sesuka Anda!</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('app').appendChild(modal);
+
+  const textEl = document.getElementById('previewCaptionText');
+  const inputEl = document.getElementById('captionInputText');
+  const colorPicker = document.getElementById('captionColorPicker');
+  const sizeRange = document.getElementById('captionSizeRange');
+  const dragBox = document.getElementById('draggableCaption');
+
+  inputEl.addEventListener('input', () => {
+    textEl.textContent = inputEl.value || 'Tulis caption keren Anda di sini... 🚀';
+  });
+
+  colorPicker.addEventListener('input', () => {
+    textEl.style.color = colorPicker.value;
+  });
+
+  sizeRange.addEventListener('input', () => {
+    textEl.style.fontSize = sizeRange.value + 'px';
+  });
+
+  // Fitur Geser (Drag & Move) untuk Teks Caption
+  let isDragging = false;
+  let startX = 0, startY = 0;
+  let posX = 0, posY = 0;
+
+  dragBox.addEventListener('pointerdown', (e) => {
+    isDragging = true;
+    startX = e.clientX - posX;
+    startY = e.clientY - posY;
+    dragBox.setPointerCapture(e.pointerId);
+  });
+
+  dragBox.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    posX = e.clientX - startX;
+    posY = e.clientY - startY;
+    dragBox.style.transform = `translate(${posX}px, ${posY}px)`;
+  });
+
+  dragBox.addEventListener('pointerup', (e) => {
+    isDragging = false;
+    dragBox.releasePointerCapture(e.pointerId);
+  });
+
+  document.getElementById('closeCaptionEditor').addEventListener('click', () => {
+    modal.remove();
+  });
+
+  document.getElementById('publishVideoBtn').addEventListener('click', () => {
+    const finalCaption = inputEl.value.trim() || `Video original baru dari @${currentUser} 🚀 #longformat #whatsapp #fyp`;
+    const finalColor = colorPicker.value;
+    addNewLongVideoToDB(videoDataUrl, durationStr, finalCaption, finalColor);
+    modal.remove();
+    showToast('Video berhasil diposting!');
+  });
+}
+
+function addNewLongVideoToDB(videoDataUrl, durationStr, captionText, captionColor) {
   const newVid = {
     id: Date.now(),
     user: currentUser,
@@ -763,7 +862,8 @@ function addNewLongVideoToDB(videoDataUrl, durationStr) {
     bio: currentBio,
     avatar: currentAvatar,
     shopLink: currentShopLink,
-    caption: `Video original baru dari @${currentUser} 🚀`,
+    caption: captionText,
+    captionColor: captionColor || '#ffffff',
     hashtags: ['longformat', 'whatsapp', 'fyp'],
     music: currentSelectedMusic,
     likes: 1, comments: 0, shares: 0, bookmarks: 0,
