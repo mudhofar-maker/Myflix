@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>TikVid - Profil, Bio & Troli Belanja Terintegrasi</title>
+<title>TikVid - Share Link, Pendaftaran WhatsApp & Tambah Teman</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans@5.0.3/index.css" />
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -66,7 +66,7 @@
     border-radius: 20px;
     cursor: pointer;
     font-weight: 600;
-    max-width: 120px;
+    max-width: 130px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -143,14 +143,12 @@
     font-size: 18px;
     overflow: hidden;
   }
-  .sidebar .avatar img {
-    width: 100%; height: 100%; object-fit: cover;
-  }
+  .sidebar .avatar img { width: 100%; height: 100%; object-fit: cover; }
   .sidebar .follow-btn {
     position: absolute;
     bottom: -8px; left: 50%;
     transform: translateX(-50%);
-    width: 20px; height: 20px;
+    width: 22px; height: 22px;
     border-radius: 50%;
     background: #ff2d55;
     color: #fff;
@@ -161,6 +159,7 @@
     justify-content: center;
     cursor: pointer;
     border: 2px solid #000;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
   }
   .sidebar .follow-btn.followed { background: #2ecc71; }
   .sidebar .action {
@@ -353,7 +352,7 @@
   .modal-overlay.show { display: flex; }
   .modal {
     width: 100%;
-    max-height: 75%;
+    max-height: 80%;
     background: #1c1c1e;
     border-radius: 16px 16px 0 0;
     padding: 16px;
@@ -387,6 +386,7 @@
     display: flex;
     gap: 10px;
     padding: 10px 0;
+    align-items: center;
   }
   .comment-avatar {
     width: 36px; height: 36px;
@@ -450,6 +450,7 @@
     align-items: center;
     justify-content: center;
     font-size: 24px;
+    color: #fff;
   }
   /* Toast */
   .toast {
@@ -596,12 +597,12 @@
   <div class="top-bar">
     <div class="live-btn" id="liveBtn">🔴 LIVE</div>
     <div class="tabs">
-      <div class="tab" data-tab="following">Mengikuti</div>
+      <div class="tab" data-tab="following" id="tabFollowing">Mengikuti</div>
       <div class="tab active" data-tab="foryou">Panjang & FYP</div>
     </div>
-    <div class="profile-badge" id="openAccountModal" title="Pengaturan Profil">
+    <div class="profile-badge" id="openAccountModal" title="Daftar / Ganti Akun">
       <img id="navProfileAvatar" src="" alt="" style="display:none;" />
-      <span id="currentUsername">Akunku</span>
+      <span id="currentUsername">Daftar Akun (WA)</span>
     </div>
   </div>
 
@@ -620,9 +621,9 @@
       <div class="nav-icon">🏠</div>
       <div>Beranda</div>
     </div>
-    <div class="nav-item" data-nav="jelajahi">
-      <div class="nav-icon">🧭</div>
-      <div>Jelajahi</div>
+    <div class="nav-item" data-nav="teman" id="friendsNavBtn">
+      <div class="nav-icon">👥</div>
+      <div>Teman</div>
     </div>
     <div class="nav-item">
       <div class="upload-btn" id="openCameraModal"></div>
@@ -637,11 +638,11 @@
     </div>
   </div>
 
-  <!-- Account & Profile Settings Modal -->
+  <!-- Account Registration Modal (Pendaftaran Akun Baru dengan Nomor WhatsApp) -->
   <div class="modal-overlay" id="accountModal">
-    <div class="modal" style="height: 440px;">
+    <div class="modal" style="height: 480px;">
       <div class="modal-header">
-        Pengaturan Profil & Toko Penjual
+        Daftar Akun Baru TikVid (Nomor WhatsApp)
         <div class="modal-close" data-close="accountModal">✕</div>
       </div>
       <div style="padding-top: 12px; overflow-y: auto; flex:1;">
@@ -654,15 +655,30 @@
         <div style="text-align: center; font-size: 11px; opacity: 0.6; margin-bottom: 12px;">Ketuk lingkaran untuk unggah foto profil</div>
 
         <label style="font-size: 12px; opacity: 0.8;">Nama Akun / Username:</label>
-        <input type="text" class="comment-input" id="accountInput" placeholder="Contoh: toko_budi" style="width: 100%; margin: 6px 0 12px 0;" />
+        <input type="text" class="comment-input" id="accountInput" placeholder="Contoh: andi_vlog" style="width: 100%; margin: 6px 0 12px 0;" />
 
-        <label style="font-size: 12px; opacity: 0.8;">Bio Profil:</label>
-        <textarea class="comment-input" id="bioInput" placeholder="Tulis bio profil Anda di sini..." style="width: 100%; height: 60px; border-radius: 12px; resize: none; margin: 6px 0 12px 0; padding: 10px;"></textarea>
+        <label style="font-size: 12px; opacity: 0.8;">Nomor WhatsApp (Untuk Akun & Verifikasi):</label>
+        <input type="tel" class="comment-input" id="whatsappInput" placeholder="Contoh: 081234567890" style="width: 100%; margin: 6px 0 12px 0;" />
 
-        <label style="font-size: 12px; opacity: 0.8;">Link Jualan / Toko (Affiliate / Marketplace):</label>
-        <input type="text" class="comment-input" id="shopLinkInput" placeholder="https://shopee.co.id/namatoko atau link produk" style="width: 100%; margin: 6px 0 16px 0;" />
+        <label style="font-size: 12px; opacity: 0.8;">Bio Profil & Link Toko (Troli Kuning):</label>
+        <textarea class="comment-input" id="bioInput" placeholder="Tulis bio profil Anda..." style="width: 100%; height: 50px; border-radius: 12px; resize: none; margin: 6px 0 12px 0; padding: 10px;"></textarea>
 
-        <button class="comment-send" id="saveAccountBtn" style="width: 100%; border-radius: 20px; padding: 12px; background: #fe2c55; font-weight: bold;">Simpan Profil (Save)</button>
+        <input type="text" class="comment-input" id="shopLinkInput" placeholder="Link jualan/toko (https://...)" style="width: 100%; margin: 0 0 16px 0;" />
+
+        <button class="comment-send" id="saveAccountBtn" style="width: 100%; border-radius: 20px; padding: 12px; background: #fe2c55; font-weight: bold;">Daftar & Simpan Akun (Save)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Friends / Tambah Teman Modal -->
+  <div class="modal-overlay" id="friendsModal">
+    <div class="modal" style="height: 420px;">
+      <div class="modal-header">
+        👥 Temukan & Tambah Teman
+        <div class="modal-close" data-close="friendsModal">✕</div>
+      </div>
+      <div style="padding: 12px 0;" id="friendsListContainer" class="comments-list">
+        <!-- Daftar kreator/teman untuk diikuti -->
       </div>
     </div>
   </div>
@@ -682,6 +698,34 @@
     </div>
   </div>
 
+  <!-- Share Modal (WhatsApp, Facebook, Instagram, Twitter/X) -->
+  <div class="modal-overlay" id="shareModal">
+    <div class="modal" style="height: 260px;">
+      <div class="modal-header">
+        Bagikan Video Ini
+        <div class="modal-close" data-close="shareModal">✕</div>
+      </div>
+      <div class="share-grid">
+        <div class="share-item" id="shareWhatsApp">
+          <div class="share-icon" style="background: #25D366;">💬</div>
+          <div>WhatsApp</div>
+        </div>
+        <div class="share-item" id="shareFacebook">
+          <div class="share-icon" style="background: #1877F2;">📘</div>
+          <div>Facebook</div>
+        </div>
+        <div class="share-item" id="shareTwitter">
+          <div class="share-icon" style="background: #1DA1F2;">🐦</div>
+          <div>Twitter / X</div>
+        </div>
+        <div class="share-item" id="shareCopyLink">
+          <div class="share-icon" style="background: #555;">🔗</div>
+          <div>Salin Link</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Comments Modal -->
   <div class="modal-overlay" id="commentsModal">
     <div class="modal">
@@ -694,17 +738,6 @@
         <input type="text" class="comment-input" id="commentInput" placeholder="Tambah komentar..." />
         <button class="comment-send" id="commentSend">Kirim</button>
       </div>
-    </div>
-  </div>
-
-  <!-- Share Modal -->
-  <div class="modal-overlay" id="shareModal">
-    <div class="modal">
-      <div class="modal-header">
-        Bagikan ke
-        <div class="modal-close" data-close="shareModal">✕</div>
-      </div>
-      <div class="share-grid" id="shareGrid"></div>
     </div>
   </div>
 
@@ -766,10 +799,14 @@
 </div>
 
 <script>
-  let currentUser = localStorage.getItem('tikvid_username') || 'kreator_hebat';
-  let currentBio = localStorage.getItem('tikvid_bio') || 'Selamat datang di profil resmi saya! Jelajahi video & produk terbaik.';
+  // Data Profil & WhatsApp
+  let currentUser = localStorage.getItem('tikvid_username') || 'kreator_tamu';
+  let currentWhatsApp = localStorage.getItem('tikvid_wa') || '';
+  let currentBio = localStorage.getItem('tikvid_bio') || 'Buat akun dengan nomor WhatsApp Anda dan mulai berbagi video.';
   let currentAvatar = localStorage.getItem('tikvid_avatar') || '';
   let currentShopLink = localStorage.getItem('tikvid_shoplink') || 'https://shopee.co.id';
+  let activeTab = 'foryou'; // 'foryou' atau 'following'
+  let activeShareVideoUrl = window.location.href;
 
   function updateProfileUI() {
     document.getElementById('currentUsername').textContent = currentUser;
@@ -784,8 +821,8 @@
   updateProfileUI();
 
   const defaultVideos = [
-    { id: 1, user: 'cinematic_vlog', bio: 'Pecinta alam & videografi perjalanan.', avatar: '', shopLink: 'https://shopee.co.id', caption: 'Dokumenter perjalanan alam terbuka berdurasi panjang 🌲✨', hashtags: ['longvideo', 'vlog', 'alam'], music: '♪ Cinematic Journey - LongChill', likes: 245000, comments: 4120, shares: 1520, bookmarks: 9800, durationLabel: '03:45', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
-    { id: 2, user: 'tech_insight', bio: 'Berbagi wawasan teknologi dan pemrograman web masa depan.', avatar: '', shopLink: 'https://tokopedia.com', caption: 'Pembahasan mendalam mengenai arsitektur web masa depan 💻', hashtags: ['tech', 'coding', 'education'], music: '♪ Tech Ambient - FutureSound', likes: 182000, comments: 3010, shares: 920, bookmarks: 6400, durationLabel: '05:12', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4' }
+    { id: 1, user: 'cinematic_vlog', wa: '08123456789', bio: 'Pecinta alam & videografi perjalanan.', avatar: '', shopLink: 'https://shopee.co.id', caption: 'Dokumenter perjalanan alam terbuka berdurasi panjang 🌲✨', hashtags: ['longvideo', 'vlog', 'alam'], music: '♪ Cinematic Journey - LongChill', likes: 245000, comments: 4120, shares: 1520, bookmarks: 9800, durationLabel: '03:45', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
+    { id: 2, user: 'tech_insight', wa: '08987654321', bio: 'Berbagi wawasan teknologi dan pemrograman web masa depan.', avatar: '', shopLink: 'https://tokopedia.com', caption: 'Pembahasan mendalam mengenai arsitektur web masa depan 💻', hashtags: ['tech', 'coding', 'education'], music: '♪ Tech Ambient - FutureSound', likes: 182000, comments: 3010, shares: 920, bookmarks: 6400, durationLabel: '05:12', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4' }
   ];
 
   let videos = [];
@@ -794,7 +831,7 @@
   let db;
   function initIndexedDB() {
     return new Promise((resolve) => {
-      const request = indexedDB.open('TikVidShopProfileDB', 1);
+      const request = indexedDB.open('TikVidWhatsAppDB', 1);
       request.onerror = () => { loadVideosFallback(); resolve(); };
       request.onupgradeneeded = (e) => {
         db = e.target.result;
@@ -851,20 +888,13 @@
   }
 
   function loadVideosFallback() {
-    const saved = localStorage.getItem('tikvid_shop_videos');
+    const saved = localStorage.getItem('tikvid_wa_videos');
     videos = saved ? JSON.parse(saved) : [...defaultVideos];
     renderFeed(videos);
   }
 
   const sampleComments = [
     { user: 'pengunjung', text: 'Keren banget videonya! 👍', time: '1j', likes: 120 }
-  ];
-
-  const shareOptions = [
-    { name: 'WhatsApp', icon: '💬', bg: '#25D366' },
-    { name: 'Instagram', icon: '📷', bg: '#dc2743' },
-    { name: 'Facebook', icon: '📘', bg: '#1877F2' },
-    { name: 'Salin Link', icon: '🔗', bg: '#555' }
   ];
 
   async function fetchViralMusicAPI() {
@@ -903,10 +933,33 @@
   }
 
   const feed = document.getElementById('feed');
+  const state = [];
+
+  function initStates() {
+    state.length = 0;
+    videos.forEach(() => {
+      state.push({ liked: false, bookmarked: false, followed: false, likes: 120, bookmarks: 45, comments: [...sampleComments] });
+    });
+  }
 
   function renderFeed(list) {
     feed.innerHTML = '';
-    list.forEach((v, idx) => {
+    
+    // Filter jika tab "Mengikuti" aktif
+    let filteredList = list;
+    if (activeTab === 'following') {
+      filteredList = list.filter((_, idx) => state[idx] && state[idx].followed);
+      if (filteredList.length === 0) {
+        feed.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:20px; opacity:0.7;">
+          <div style="font-size:40px; margin-bottom:10px;">👥</div>
+          <div style="font-size:16px; font-weight:bold;">Belum Mengikuti Siapapun</div>
+          <div style="font-size:13px; margin-top:6px;">Gunakan tombol Tambah Teman untuk mengikuti kreator lain!</div>
+        </div>`;
+        return;
+      }
+    }
+
+    filteredList.forEach((v, idx) => {
       const slide = document.createElement('div');
       slide.className = 'video-slide';
       slide.dataset.idx = idx;
@@ -915,6 +968,8 @@
       if (v.avatar) {
         avatarHtml = `<div class="avatar"><img src="${v.avatar}" alt="" /></div>`;
       }
+
+      const isFollowed = state[idx] && state[idx].followed;
 
       slide.innerHTML = `
         <video src="${v.videoUrl}" loop playsinline controls></video>
@@ -926,7 +981,7 @@
         <div class="sidebar">
           <div class="avatar-wrap">
             ${avatarHtml}
-            <div class="follow-btn" data-action="follow" data-idx="${idx}">+</div>
+            <div class="follow-btn ${isFollowed ? 'followed' : ''}" data-action="follow" data-idx="${idx}">${isFollowed ? '✓' : '+'}</div>
           </div>
           <div class="action like-btn" data-action="like" data-idx="${idx}">
             <div class="icon">
@@ -948,14 +1003,14 @@
             </div>
             <div class="count" id="bookmarkCount-${idx}">${formatCount(v.bookmarks)}</div>
           </div>
-          <div class="action share-btn" data-action="share" data-idx="${idx}">
+          <div class="action share-btn" data-action="share" data-idx="${idx}" data-url="${v.videoUrl}" data-caption="${v.caption}">
             <div class="icon">↗</div>
             <div class="count">${formatCount(v.shares)}</div>
           </div>
         </div>
         <div class="bottom-info">
           <div class="username">
-            @${v.user}
+            @${v.user} ${v.wa ? `(WA: ${v.wa})` : ''}
             <span class="long-badge">⏳ ${v.durationLabel || '02:00'}</span>
           </div>
           <div class="user-bio">${v.bio || ''}</div>
@@ -971,14 +1026,6 @@
     });
 
     setupVideoInteractions();
-  }
-
-  const state = [];
-  function initStates() {
-    state.length = 0;
-    videos.forEach(() => {
-      state.push({ liked: false, bookmarked: false, followed: false, likes: 120, bookmarks: 45, comments: [...sampleComments] });
-    });
   }
 
   initIndexedDB().then(() => initStates());
@@ -1055,11 +1102,13 @@
 
   // ============ GLOBAL EVENT LISTENER ============
   document.addEventListener('click', (e) => {
+    // Tab Atas (Mengikuti / FYP)
     const tab = e.target.closest('.tab');
     if (tab) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
-      showToast(`Tab: ${tab.textContent}`);
+      activeTab = tab.dataset.tab;
+      renderFeed(videos);
       return;
     }
 
@@ -1067,9 +1116,16 @@
     if (e.target.closest('#searchBtn')) { document.getElementById('searchModal').classList.add('show'); return; }
     if (e.target.closest('#executeSearch')) { document.getElementById('searchModal').classList.remove('show'); showToast('Pencarian dijalankan'); return; }
 
-    // Buka Modal Profil & Toko
+    // Tombol Teman (Buka daftar tambah teman)
+    if (e.target.closest('#friendsNavBtn')) {
+      openFriendsModal();
+      return;
+    }
+
+    // Buka Modal Pendaftaran Akun WhatsApp
     if (e.target.closest('#openAccountModal') || e.target.closest('#profileTabBtn')) {
-      document.getElementById('accountInput').value = currentUser;
+      document.getElementById('accountInput').value = currentUser === 'kreator_tamu' ? '' : currentUser;
+      document.getElementById('whatsappInput').value = currentWhatsApp;
       document.getElementById('bioInput').value = currentBio;
       document.getElementById('shopLinkInput').value = currentShopLink;
       tempAvatarData = currentAvatar;
@@ -1082,28 +1138,34 @@
       return;
     }
 
-    // Tombol Save Profil
+    // Tombol Save Akun Baru dengan Nomor WA
     if (e.target.closest('#saveAccountBtn')) {
       const newName = document.getElementById('accountInput').value.trim();
+      const newWA = document.getElementById('whatsappInput').value.trim();
       const newBio = document.getElementById('bioInput').value.trim();
       const newShop = document.getElementById('shopLinkInput').value.trim();
 
-      if (newName) {
-        currentUser = newName;
-        currentBio = newBio;
-        currentShopLink = newShop || 'https://shopee.co.id';
-        currentAvatar = tempAvatarData;
-
-        localStorage.setItem('tikvid_username', currentUser);
-        localStorage.setItem('tikvid_bio', currentBio);
-        localStorage.setItem('tikvid_shoplink', currentShopLink);
-        localStorage.setItem('tikvid_avatar', currentAvatar);
-
-        updateProfileUI();
-        document.getElementById('accountModal').classList.remove('show');
-        showToast('Profil & Toko berhasil disimpan (Saved)!');
-        renderFeed(videos);
+      if (!newName || !newWA) {
+        showToast('Harap isi Nama Akun dan Nomor WhatsApp!');
+        return;
       }
+
+      currentUser = newName;
+      currentWhatsApp = newWA;
+      currentBio = newBio;
+      currentShopLink = newShop || 'https://shopee.co.id';
+      currentAvatar = tempAvatarData;
+
+      localStorage.setItem('tikvid_username', currentUser);
+      localStorage.setItem('tikvid_wa', currentWhatsApp);
+      localStorage.setItem('tikvid_bio', currentBio);
+      localStorage.setItem('tikvid_shoplink', currentShopLink);
+      localStorage.setItem('tikvid_avatar', currentAvatar);
+
+      updateProfileUI();
+      document.getElementById('accountModal').classList.remove('show');
+      showToast(`Akun WA @${currentUser} berhasil didaftarkan!`);
+      renderFeed(videos);
       return;
     }
 
@@ -1115,6 +1177,36 @@
       document.getElementById('shopModalTitle').textContent = `Toko Produk: @${title}`;
       document.getElementById('shopModalLink').href = link;
       document.getElementById('shopModal').classList.add('show');
+      return;
+    }
+
+    // Tombol Share ke WhatsApp / Facebook / Twitter
+    if (e.target.closest('#shareWhatsApp')) {
+      const text = encodeURIComponent(`Tonton video seru ini di TikVid: ${activeShareVideoUrl}`);
+      window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+      document.getElementById('shareModal').classList.remove('show');
+      return;
+    }
+    if (e.target.closest('#shareFacebook')) {
+      const url = encodeURIComponent(activeShareVideoUrl);
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+      document.getElementById('shareModal').classList.remove('show');
+      return;
+    }
+    if (e.target.closest('#shareTwitter')) {
+      const text = encodeURIComponent(`Tonton video menarik ini!`);
+      const url = encodeURIComponent(activeShareVideoUrl);
+      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+      document.getElementById('shareModal').classList.remove('show');
+      return;
+    }
+    if (e.target.closest('#shareCopyLink')) {
+      navigator.clipboard.writeText(activeShareVideoUrl).then(() => {
+        showToast('Link berhasil disalin ke clipboard!');
+        document.getElementById('shareModal').classList.remove('show');
+      }).catch(() => {
+        showToast('Gagal menyalin link');
+      });
       return;
     }
 
@@ -1134,7 +1226,7 @@
     }
 
     const navItem = e.target.closest('.bottom-nav .nav-item[data-nav]');
-    if (navItem && !e.target.closest('#profileTabBtn')) {
+    if (navItem && !e.target.closest('#profileTabBtn') && !e.target.closest('#friendsNavBtn')) {
       document.querySelectorAll('.bottom-nav .nav-item').forEach(i => i.classList.remove('active'));
       navItem.classList.add('active');
       showToast(`Menu: ${navItem.textContent.trim()}`);
@@ -1166,15 +1258,55 @@
         state[idx].followed = !state[idx].followed;
         actionEl.classList.toggle('followed', state[idx].followed);
         actionEl.textContent = state[idx].followed ? '✓' : '+';
-        showToast(state[idx].followed ? 'Mengikuti' : 'Batal mengikuti');
+        showToast(state[idx].followed ? `Mengikuti @${videos[idx].user}` : `Berhenti mengikuti @${videos[idx].user}`);
       } else if (action === 'comment') {
         openComments(idx);
       } else if (action === 'share') {
-        openShare(idx);
+        activeShareVideoUrl = actionEl.dataset.url || window.location.href;
+        document.getElementById('shareModal').classList.add('show');
       }
       return;
     }
   });
+
+  // ============ MODAL TAMBAH TEMAN / FOLLOW ============
+  function openFriendsModal() {
+    const container = document.getElementById('friendsListContainer');
+    container.innerHTML = '';
+    
+    videos.forEach((v, idx) => {
+      const isFollowed = state[idx] && state[idx].followed;
+      const item = document.createElement('div');
+      item.className = 'comment-item';
+      item.style.cssText = 'padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;';
+      item.innerHTML = `
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <div class="comment-avatar" style="background:#ff2d55">${v.user[0].toUpperCase()}</div>
+          <div>
+            <div style="font-weight: bold; font-size: 14px;">@${v.user}</div>
+            <div style="font-size: 11px; opacity: 0.6;">WA: ${v.wa || 'Terverifikasi'}</div>
+          </div>
+        </div>
+        <button class="comment-send" data-action="follow" data-idx="${idx}" style="padding: 6px 14px; font-size: 12px; background: ${isFollowed ? '#2ecc71' : '#fe2c55'};">
+          ${isFollowed ? 'Diikuti ✓' : '+ Tambah Teman'}
+        </button>
+      `;
+      container.appendChild(item);
+    });
+
+    // Tambah event listener khusus untuk tombol di dalam modal teman
+    container.querySelectorAll('[data-action="follow"]').forEach(btn => {
+      btn.addEventListener('click', (ev) => {
+        const idx = parseInt(ev.currentTarget.dataset.idx);
+        state[idx].followed = !state[idx].followed;
+        showToast(state[idx].followed ? `Berhasil berteman dengan @${videos[idx].user}` : `Berhenti mengikuti @${videos[idx].user}`);
+        openFriendsModal(); // Refresh modal
+        renderFeed(videos);
+      });
+    });
+
+    document.getElementById('friendsModal').classList.add('show');
+  }
 
   function openComments(idx) {
     const modal = document.getElementById('commentsModal');
@@ -1199,20 +1331,6 @@
     openComments(idx);
     showToast('Komentar terkirim');
   });
-
-  function openShare(idx) {
-    const modal = document.getElementById('shareModal');
-    const grid = document.getElementById('shareGrid');
-    grid.innerHTML = '';
-    shareOptions.forEach(opt => {
-      const item = document.createElement('div');
-      item.className = 'share-item';
-      item.innerHTML = `<div class="share-icon" style="background:${opt.bg}">${opt.icon}</div><div>${opt.name}</div>`;
-      item.addEventListener('click', () => { modal.classList.remove('show'); showToast(`Membuka ${opt.name}`); });
-      grid.appendChild(item);
-    });
-    modal.classList.add('show');
-  }
 
   let muted = true;
   document.getElementById('muteIndicator').addEventListener('click', () => {
@@ -1257,6 +1375,11 @@
   }
 
   openCameraBtn.addEventListener('click', async () => {
+    if (!currentWhatsApp) {
+      showToast('Silakan daftarkan nomor WhatsApp Anda terlebih dahulu di profil!');
+      document.getElementById('accountModal').classList.add('show');
+      return;
+    }
     isLiveMode = false;
     liveBadge.style.display = 'none';
     camModeToggleBtn.textContent = 'Rekam Panjang';
@@ -1265,6 +1388,11 @@
   });
 
   async function openLiveStudio() {
+    if (!currentWhatsApp) {
+      showToast('Silakan daftarkan nomor WhatsApp Anda terlebih dahulu di profil!');
+      document.getElementById('accountModal').classList.add('show');
+      return;
+    }
     isLiveMode = true;
     liveBadge.style.display = 'block';
     camModeToggleBtn.textContent = 'LIVE Aktif';
@@ -1333,6 +1461,10 @@
   uploadGalleryBtn.addEventListener('click', () => galleryInput.click());
 
   galleryInput.addEventListener('change', (e) => {
+    if (!currentWhatsApp) {
+      showToast('Silakan daftarkan nomor WhatsApp Anda di profil terlebih dahulu.');
+      return;
+    }
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -1356,11 +1488,12 @@
     const newVid = {
       id: Date.now(),
       user: currentUser,
+      wa: currentWhatsApp,
       bio: currentBio,
       avatar: currentAvatar,
       shopLink: currentShopLink,
-      caption: `Video panjang original dengan troli belanja aktif 🚀`,
-      hashtags: ['longformat', 'jualan', 'fyp'],
+      caption: `Video original baru dari @${currentUser} 🚀`,
+      hashtags: ['longformat', 'whatsapp', 'fyp'],
       music: currentSelectedMusic,
       likes: 1, comments: 0, shares: 0, bookmarks: 0,
       durationLabel: durationStr || '02:30',
