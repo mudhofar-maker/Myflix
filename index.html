@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>TikVid - Long Video Edition & LIVE</title>
+<title>TikVid - Multi-User & Long Video Edition</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans@5.0.3/index.css" />
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -59,14 +59,17 @@
     background: #fff;
     border-radius: 2px;
   }
-  .top-bar .search-btn {
-    font-size: 20px;
+  .top-bar .profile-badge {
+    font-size: 13px;
+    background: rgba(255,255,255,0.15);
+    padding: 6px 10px;
+    border-radius: 20px;
     cursor: pointer;
-    padding: 8px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 50%;
-    width: 38px; height: 38px;
-    display: flex; align-items: center; justify-content: center;
+    font-weight: 600;
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   /* Feed */
   .feed {
@@ -86,13 +89,12 @@
     overflow: hidden;
     background: #000;
   }
-  .video-slide canvas, .video-slide video {
+  .video-slide video {
     width: 100%;
     height: 100%;
     display: block;
     object-fit: cover;
   }
-  /* Play/Pause indicator */
   .play-indicator {
     position: absolute;
     top: 50%; left: 50%;
@@ -335,7 +337,7 @@
     cursor: pointer;
     padding: 8px;
   }
-  /* Comments */
+  /* Comments & Forms */
   .comments-list {
     flex: 1;
     overflow-y: auto;
@@ -563,7 +565,7 @@
       <div class="tab" data-tab="following">Mengikuti</div>
       <div class="tab active" data-tab="foryou">Panjang & FYP</div>
     </div>
-    <div class="search-btn" id="searchBtn">🔍</div>
+    <div class="profile-badge" id="openAccountModal" title="Ganti Akun">👤 <span id="currentUsername">Akunku</span></div>
   </div>
 
   <!-- Mute indicator -->
@@ -592,9 +594,24 @@
       <div class="nav-icon">📥</div>
       <div>Kotak Masuk</div>
     </div>
-    <div class="nav-item" data-nav="profil">
+    <div class="nav-item" data-nav="profil" id="profileTabBtn">
       <div class="nav-icon">👤</div>
       <div>Profil</div>
+    </div>
+  </div>
+
+  <!-- Account / Profile Setup Modal -->
+  <div class="modal-overlay" id="accountModal">
+    <div class="modal" style="height: 300px;">
+      <div class="modal-header">
+        Buat / Ganti Akun Pengguna
+        <div class="modal-close" data-close="accountModal">✕</div>
+      </div>
+      <div style="padding-top: 15px;">
+        <label style="font-size: 13px; opacity: 0.8;">Nama Akun / Username:</label>
+        <input type="text" class="comment-input" id="accountInput" placeholder="Contoh: budi_vlog" style="width: 100%; margin: 8px 0 16px 0;" />
+        <button class="comment-send" id="saveAccountBtn" style="width: 100%; border-radius: 20px; padding: 12px;">Simpan Akun Saya</button>
+      </div>
     </div>
   </div>
 
@@ -632,7 +649,7 @@
         <div class="modal-close" data-close="searchModal">✕</div>
       </div>
       <div style="padding-top: 15px;">
-        <input type="text" class="comment-input" id="searchInput" placeholder="Cari durasi panjang atau kreator..." style="width: 100%; margin-bottom: 15px;" />
+        <input type="text" class="comment-input" id="searchInput" placeholder="Cari video atau kreator..." style="width: 100%; margin-bottom: 15px;" />
         <button class="comment-send" id="executeSearch" style="width: 100%; border-radius: 20px; padding: 10px;">Cari</button>
       </div>
     </div>
@@ -682,25 +699,23 @@
 </div>
 
 <script>
-  // Sampel video dengan format durasi panjang
+  // Pengaturan Akun Lokal Aktif
+  let currentUser = localStorage.getItem('tikvid_username') || 'kreator_tamu';
+  document.getElementById('currentUsername').textContent = currentUser;
+
   const defaultVideos = [
-    { id: 1, user: 'cinematic_vlog', displayName: 'Vlog Perjalanan Panjang', avatar: '🏕️', avatarBg: 'linear-gradient(135deg, #ff9966, #ff5e62)', caption: 'Dokumenter perjalanan alam terbuka berdurasi panjang tanpa potongan 🌲✨ Nikmati ketenangannya.', hashtags: ['longvideo', 'vlog', 'alam', 'cinematic'], music: '♪ Cinematic Journey - LongChill', likes: 245000, comments: 4120, shares: 1520, bookmarks: 9800, durationLabel: '03:45', isCustomVideo: false, videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
-    { id: 2, user: 'tech_insight', displayName: 'Wawasan Teknologi', avatar: '💻', avatarBg: 'linear-gradient(135deg, #2193b0, #6dd5ed)', caption: 'Pembahasan mendalam mengenai arsitektur web masa depan dan eksplorasi kode kompleks.', hashtags: ['tech', 'coding', 'longformat', 'education'], music: '♪ Tech Ambient - FutureSound', likes: 182000, comments: 3010, shares: 920, bookmarks: 6400, durationLabel: '05:12', isCustomVideo: false, videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4' },
-    { id: 3, user: 'gourmet_chef', displayName: 'Masterclass Memasak', avatar: '🍳', avatarBg: 'linear-gradient(135deg, #00c9ff, #92fe9d)', caption: 'Resep lengkap rahasia hidangan chef bintang lima dari awal hingga penyajian.', hashtags: ['cooking', 'masterclass', 'food', 'chef'], music: '♪ Kitchen Jazz - SoftBeats', likes: 512000, comments: 9400, shares: 4100, bookmarks: 23000, durationLabel: '04:30', isCustomVideo: false, videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4' }
+    { id: 1, user: 'cinematic_vlog', displayName: 'Vlog Perjalanan', avatar: '🏕️', avatarBg: 'linear-gradient(135deg, #ff9966, #ff5e62)', caption: 'Dokumenter perjalanan alam terbuka berdurasi panjang 🌲✨', hashtags: ['longvideo', 'vlog', 'alam'], music: '♪ Cinematic Journey - LongChill', likes: 245000, comments: 4120, shares: 1520, bookmarks: 9800, durationLabel: '03:45', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
+    { id: 2, user: 'tech_insight', displayName: 'Wawasan Teknologi', avatar: '💻', avatarBg: 'linear-gradient(135deg, #2193b0, #6dd5ed)', caption: 'Pembahasan mendalam mengenai arsitektur web masa depan 💻', hashtags: ['tech', 'coding', 'education'], music: '♪ Tech Ambient - FutureSound', likes: 182000, comments: 3010, shares: 920, bookmarks: 6400, durationLabel: '05:12', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4' }
   ];
 
   let videos = [];
   let currentSelectedMusic = '♪ Lofi Long Session - ChillBeats';
 
-  // Inisialisasi IndexedDB untuk mendukung penyimpanan file video panjang tanpa hilang
   let db;
   function initIndexedDB() {
     return new Promise((resolve) => {
-      const request = indexedDB.open('TikVidLongDatabase', 1);
-      request.onerror = () => {
-        loadVideosFallback();
-        resolve();
-      };
+      const request = indexedDB.open('TikVidMultiUserDB', 1);
+      request.onerror = () => { loadVideosFallback(); resolve(); };
       request.onupgradeneeded = (e) => {
         db = e.target.result;
         if (!db.objectStoreNames.contains('videos')) {
@@ -734,9 +749,7 @@
         callback(result.length ? result : null);
       };
       request.onerror = () => callback(null);
-    } catch (e) {
-      callback(null);
-    }
+    } catch (e) { callback(null); }
   }
 
   function saveVideoToDB(videoObj) {
@@ -758,14 +771,13 @@
   }
 
   function loadVideosFallback() {
-    const saved = localStorage.getItem('tikvid_long_videos');
+    const saved = localStorage.getItem('tikvid_multi_videos');
     videos = saved ? JSON.parse(saved) : [...defaultVideos];
     renderFeed(videos);
   }
 
   const sampleComments = [
-    { user: 'fauzan_a', text: 'Durasi panjang gini jauh lebih puas ditonton! 👍', time: '1j', likes: 145 },
-    { user: 'siti_nur', text: 'Keren banget materinya lengkap ✨', time: '3j', likes: 320 }
+    { user: 'pengunjung', text: 'Video akun ini keren banget! 🔥', time: '1j', likes: 120 }
   ];
 
   const shareOptions = [
@@ -775,13 +787,11 @@
     { name: 'Salin Link', icon: '🔗', bg: '#555' }
   ];
 
-  // Fetch Musik Live dari Jamendo API
   async function fetchViralMusicAPI() {
     const musicListEl = document.getElementById('musicList');
     try {
       const response = await fetch('https://api.jamendo.com/v3.0/tracks/?client_id=5997230b&format=json&limit=15&boost=popularity');
       const data = await response.json();
-      
       if (data && data.results && data.results.length > 0) {
         musicListEl.innerHTML = '';
         data.results.forEach(track => {
@@ -789,22 +799,12 @@
           item.className = 'comment-item';
           item.style.cssText = 'cursor:pointer; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between;';
           item.dataset.music = `♪ ${track.name} - ${track.artist_name}`;
-          item.innerHTML = `
-            <div>
-              <div style="font-weight: 600; font-size: 14px;">🎵 ${track.name}</div>
-              <div style="font-size: 12px; opacity: 0.6;">Artist: ${track.artist_name}</div>
-            </div>
-            <div style="font-size: 12px; color: #25f4ee;">Gunakan</div>
-          `;
+          item.innerHTML = `<div><div style="font-weight: 600; font-size: 14px;">🎵 ${track.name}</div><div style="font-size: 12px; opacity: 0.6;">Artist: ${track.artist_name}</div></div><div style="font-size: 12px; color: #25f4ee;">Gunakan</div>`;
           musicListEl.appendChild(item);
         });
       }
     } catch (err) {
-      musicListEl.innerHTML = `
-        <div class="comment-item" data-music="♪ Cinematic Journey - LongChill" style="cursor:pointer; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">🎵 Cinematic Journey - LongChill</div>
-        <div class="comment-item" data-music="♪ Tech Ambient - FutureSound" style="cursor:pointer; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">🎵 Tech Ambient - FutureSound</div>
-        <div class="comment-item" data-music="♪ Acoustic Longplay Session" style="cursor:pointer; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">🎵 Acoustic Longplay Session</div>
-      `;
+      musicListEl.innerHTML = `<div class="comment-item" data-music="♪ Cinematic Journey - LongChill" style="cursor:pointer; padding: 12px;">🎵 Cinematic Journey - LongChill</div>`;
     }
   }
 
@@ -830,20 +830,13 @@
       const slide = document.createElement('div');
       slide.className = 'video-slide';
       slide.dataset.idx = idx;
-      
-      let mediaContent = '';
-      if (v.isCustomVideo) {
-        mediaContent = `<video src="${v.videoUrl}" loop playsinline controls></video>`;
-      } else {
-        mediaContent = `<video src="${v.videoUrl}" loop playsinline controls></video>`;
-      }
 
       slide.innerHTML = `
-        ${mediaContent}
+        <video src="${v.videoUrl}" loop playsinline controls></video>
         <div class="play-indicator" id="playInd-${idx}">▶</div>
         <div class="sidebar">
           <div class="avatar-wrap">
-            <div class="avatar" style="background:${v.avatarBg}">${v.avatar}</div>
+            <div class="avatar" style="background:${v.avatarBg || '#ff2d55'}">${v.user[0].toUpperCase()}</div>
             <div class="follow-btn" data-action="follow" data-idx="${idx}">+</div>
           </div>
           <div class="action like-btn" data-action="like" data-idx="${idx}">
@@ -891,35 +884,22 @@
   }
 
   const state = [];
-
   function initStates() {
     state.length = 0;
-    videos.forEach(v => {
-      state.push({
-        liked: false,
-        bookmarked: false,
-        followed: false,
-        likes: v.likes,
-        bookmarks: v.bookmarks,
-        comments: [...sampleComments]
-      });
+    videos.forEach(() => {
+      state.push({ liked: false, bookmarked: false, followed: false, likes: 120, bookmarks: 45, comments: [...sampleComments] });
     });
   }
 
-  initIndexedDB().then(() => {
-    initStates();
-  });
+  initIndexedDB().then(() => initStates());
 
-  // Sinkronisasi pemutaran video panjang & progress bar interaktif
   function setupVideoInteractions() {
     const slides = document.querySelectorAll('.video-slide');
-    
     slides.forEach((slide, idx) => {
       const vid = slide.querySelector('video');
       const progressBar = slide.querySelector(`#progress-${idx}`);
       const progressContainer = slide.querySelector(`#progressBar-${idx}`);
       const playInd = slide.querySelector(`#playInd-${idx}`);
-
       if (!vid) return;
 
       vid.addEventListener('timeupdate', () => {
@@ -931,36 +911,25 @@
 
       progressContainer.addEventListener('click', (e) => {
         const rect = progressContainer.getBoundingClientRect();
-        const pos = (e.clientX - rect.left) / rect.width;
-        vid.currentTime = pos * vid.duration;
+        vid.currentTime = ((e.clientX - rect.left) / rect.width) * vid.duration;
       });
 
       vid.addEventListener('click', () => {
-        if (vid.paused) {
-          vid.play();
-          playInd.textContent = '▶';
-        } else {
-          vid.pause();
-          playInd.textContent = '⏸';
-        }
+        if (vid.paused) { vid.play(); playInd.textContent = '▶'; }
+        else { vid.pause(); playInd.textContent = '⏸'; }
         playInd.classList.add('show');
         setTimeout(() => playInd.classList.remove('show'), 500);
       });
     });
 
-    // Auto play video yang sedang aktif di viewport
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         const vid = entry.target.querySelector('video');
         if (!vid) return;
-        if (entry.isIntersecting) {
-          vid.play().catch(() => {});
-        } else {
-          vid.pause();
-        }
+        if (entry.isIntersecting) vid.play().catch(() => {});
+        else vid.pause();
       });
     }, { threshold: 0.6 });
-
     slides.forEach(s => observer.observe(s));
   }
 
@@ -974,18 +943,26 @@
       return;
     }
 
-    if (e.target.closest('#liveBtn')) {
-      openLiveStudio();
+    if (e.target.closest('#liveBtn')) { openLiveStudio(); return; }
+    if (e.target.closest('#searchBtn')) { document.getElementById('searchModal').classList.add('show'); return; }
+    if (e.target.closest('#executeSearch')) { document.getElementById('searchModal').classList.remove('show'); showToast('Pencarian dijalankan'); return; }
+
+    // Akun / Profil Modal
+    if (e.target.closest('#openAccountModal') || e.target.closest('#profileTabBtn')) {
+      document.getElementById('accountInput').value = currentUser;
+      document.getElementById('accountModal').classList.add('show');
       return;
     }
 
-    if (e.target.closest('#searchBtn')) {
-      document.getElementById('searchModal').classList.add('show');
-      return;
-    }
-    if (e.target.closest('#executeSearch')) {
-      document.getElementById('searchModal').classList.remove('show');
-      showToast('Hasil pencarian ditampilkan');
+    if (e.target.closest('#saveAccountBtn')) {
+      const newName = document.getElementById('accountInput').value.trim();
+      if (newName) {
+        currentUser = newName;
+        localStorage.setItem('tikvid_username', currentUser);
+        document.getElementById('currentUsername').textContent = currentUser;
+        document.getElementById('accountModal').classList.remove('show');
+        showToast(`Akun diaktifkan: @${currentUser}`);
+      }
       return;
     }
 
@@ -1005,7 +982,7 @@
     }
 
     const navItem = e.target.closest('.bottom-nav .nav-item[data-nav]');
-    if (navItem) {
+    if (navItem && !e.target.closest('#profileTabBtn')) {
       document.querySelectorAll('.bottom-nav .nav-item').forEach(i => i.classList.remove('active'));
       navItem.classList.add('active');
       showToast(`Menu: ${navItem.textContent.trim()}`);
@@ -1014,8 +991,7 @@
 
     const closeBtn = e.target.closest('[data-close]');
     if (closeBtn) {
-      const modalId = closeBtn.dataset.close;
-      document.getElementById(modalId).classList.remove('show');
+      document.getElementById(closeBtn.dataset.close).classList.remove('show');
       return;
     }
 
@@ -1023,7 +999,6 @@
     if (actionEl) {
       const action = actionEl.dataset.action;
       const idx = parseInt(actionEl.dataset.idx);
-
       if (action === 'like') {
         state[idx].liked = !state[idx].liked;
         state[idx].likes += state[idx].liked ? 1 : -1;
@@ -1039,7 +1014,7 @@
         state[idx].followed = !state[idx].followed;
         actionEl.classList.toggle('followed', state[idx].followed);
         actionEl.textContent = state[idx].followed ? '✓' : '+';
-        showToast(state[idx].followed ? 'Mengikuti kreator' : 'Berhenti mengikuti');
+        showToast(state[idx].followed ? 'Mengikuti' : 'Batal mengikuti');
       } else if (action === 'comment') {
         openComments(idx);
       } else if (action === 'share') {
@@ -1067,7 +1042,7 @@
     if (!text) return;
     const modal = document.getElementById('commentsModal');
     const idx = parseInt(modal.dataset.idx);
-    state[idx].comments.unshift({ user: 'saya', text: text });
+    state[idx].comments.unshift({ user: currentUser, text: text });
     input.value = '';
     openComments(idx);
     showToast('Komentar terkirim');
@@ -1081,10 +1056,7 @@
       const item = document.createElement('div');
       item.className = 'share-item';
       item.innerHTML = `<div class="share-icon" style="background:${opt.bg}">${opt.icon}</div><div>${opt.name}</div>`;
-      item.addEventListener('click', () => {
-        modal.classList.remove('show');
-        showToast(`Membuka ${opt.name}`);
-      });
+      item.addEventListener('click', () => { modal.classList.remove('show'); showToast(`Membuka ${opt.name}`); });
       grid.appendChild(item);
     });
     modal.classList.add('show');
@@ -1095,10 +1067,9 @@
     muted = !muted;
     document.getElementById('muteIcon').textContent = muted ? '🔇' : '🔊';
     document.getElementById('muteText').textContent = muted ? 'Suara Mati' : 'Suara Aktif';
-    showToast(muted ? 'Audio dimatikan' : 'Audio diaktifkan');
   });
 
-  // ============ CAMERA, RECORD & LIVE STUDIO (LONG DURATION) ============
+  // ============ CAMERA, LIVE & UPLOAD LONG VIDEO ============
   const cameraModal = document.getElementById('cameraModal');
   const cameraVideo = document.getElementById('cameraVideo');
   const openCameraBtn = document.getElementById('openCameraModal');
@@ -1121,9 +1092,7 @@
   let secondsElapsed = 0;
 
   async function startCamera(front) {
-    if (mediaStream) {
-      mediaStream.getTracks().forEach(t => t.stop());
-    }
+    if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
     try {
       mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: front ? 'user' : 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -1155,12 +1124,8 @@
   closeCameraBtn.addEventListener('click', () => {
     if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
     cameraModal.classList.remove('show');
-    stopTimer();
-    if (isRecording) {
-      mediaRecorder.stop();
-      isRecording = false;
-      recordShutter.classList.remove('recording');
-    }
+    clearInterval(timerInterval);
+    if (isRecording) { mediaRecorder.stop(); isRecording = false; recordShutter.classList.remove('recording'); }
   });
 
   switchCameraBtn.addEventListener('click', async () => {
@@ -1169,37 +1134,15 @@
     showToast(useFrontCamera ? 'Kamera Depan' : 'Kamera Belakang');
   });
 
-  function startTimer() {
-    secondsElapsed = 0;
-    recordingTimerEl.textContent = '● 00:00';
-    timerInterval = setInterval(() => {
-      secondsElapsed++;
-      const m = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
-      const s = String(secondsElapsed % 60).padStart(2, '0');
-      recordingTimerEl.textContent = `● ${m}:${s}`;
-    }, 1000);
-  }
-
-  function stopTimer() {
-    clearInterval(timerInterval);
-  }
-
   recordShutter.addEventListener('click', () => {
-    if (isLiveMode) {
-      showToast('Siaran LIVE sedang berlangsung.');
-      return;
-    }
+    if (isLiveMode) { showToast('Siaran LIVE sedang berlangsung.'); return; }
 
     if (!isRecording) {
       recordedChunks = [];
       try {
         mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm;codecs=vp9,opus' });
       } catch(e) {
-        try {
-          mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
-        } catch(err) {
-          mediaRecorder = new MediaRecorder(mediaStream);
-        }
+        mediaRecorder = new MediaRecorder(mediaStream);
       }
       mediaRecorder.ondataavailable = e => { if(e.data.size > 0) recordedChunks.push(e.data); };
       mediaRecorder.onstop = () => {
@@ -1209,29 +1152,33 @@
         reader.onloadend = () => {
           const m = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
           const s = String(secondsElapsed % 60).padStart(2, '0');
-          const durationStr = `${m}:${s}`;
-          addNewLongVideoToDB(reader.result, durationStr);
+          addNewLongVideoToDB(reader.result, `${m}:${s}`);
         };
       };
-      mediaRecorder.start(1000); // chunk setiap 1 detik agar aman untuk durasi panjang
+      mediaRecorder.start(1000);
       isRecording = true;
       recordShutter.classList.add('recording');
-      startTimer();
+      secondsElapsed = 0;
+      recordingTimerEl.textContent = '● 00:00';
+      timerInterval = setInterval(() => {
+        secondsElapsed++;
+        const m = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+        const s = String(secondsElapsed % 60).padStart(2, '0');
+        recordingTimerEl.textContent = `● ${m}:${s}`;
+      }, 1000);
       showToast('Perekaman video panjang dimulai...');
     } else {
       mediaRecorder.stop();
       isRecording = false;
-      stopTimer();
+      clearInterval(timerInterval);
       recordShutter.classList.remove('recording');
       cameraModal.classList.remove('show');
       if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
-      showToast('Video panjang berhasil direkam & disimpan ke database!');
+      showToast('Video panjang berhasil disimpan!');
     }
   });
 
-  uploadGalleryBtn.addEventListener('click', () => {
-    galleryInput.click();
-  });
+  uploadGalleryBtn.addEventListener('click', () => galleryInput.click());
 
   galleryInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -1239,17 +1186,15 @@
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onloadend = () => {
-        // Deteksi durasi video galeri secara otomatis
         const tempVideo = document.createElement('video');
         tempVideo.src = reader.result;
         tempVideo.onloadedmetadata = () => {
           const mins = String(Math.floor(tempVideo.duration / 60)).padStart(2, '0');
           const secs = String(Math.floor(tempVideo.duration % 60)).padStart(2, '0');
-          const dur = `${mins}:${secs}`;
-          addNewLongVideoToDB(reader.result, dur);
+          addNewLongVideoToDB(reader.result, `${mins}:${secs}`);
           cameraModal.classList.remove('show');
           if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
-          showToast('Video galeri durasi panjang berhasil diunggah!');
+          showToast('Video galeri berhasil diunggah!');
         };
       };
     }
@@ -1258,16 +1203,15 @@
   function addNewLongVideoToDB(videoDataUrl, durationStr) {
     const newVid = {
       id: Date.now(),
-      user: 'kreator_panjang',
-      displayName: 'Anda',
-      avatar: '🎬',
-      avatarBg: '#ff2d55',
-      caption: 'Karya video berdurasi panjang original saya 🎥✨',
-      hashtags: ['longformat', 'original', 'fyp'],
+      user: currentUser,
+      displayName: currentUser,
+      avatar: '⭐',
+      avatarBg: 'linear-gradient(135deg, #25f4ee, #fe2c55)',
+      caption: `Video panjang original oleh @${currentUser} 🚀`,
+      hashtags: ['longformat', 'kreator', 'fyp'],
       music: currentSelectedMusic,
       likes: 1, comments: 0, shares: 0, bookmarks: 0,
       durationLabel: durationStr || '02:30',
-      isCustomVideo: true,
       videoUrl: videoDataUrl
     };
 
