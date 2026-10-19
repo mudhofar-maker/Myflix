@@ -1,896 +1,1342 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>VideoStream - TikTok Clone</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>TikVid - Video Pendek</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans@5.0.3/index.css" />
 <style>
-  :root{
-    --bg:#000; --surface:#121212; --surface2:#242424;
-    --primary:#fe2c55; --text:#fff; --text-dim:#b0b0b0;
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #000;
+    color: #fff;
+    user-select: none;
   }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;height:100%;overflow:hidden; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
-  
-  /* ============ NAVIGASI BAWAH ============ */
-  .bottom-nav{position:fixed; bottom:0; left:0; right:0; height:60px; background:var(--surface); display:flex; justify-content:space-around; align-items:center; z-index:100; border-top:1px solid #333;}
-  .nav-item{display:flex; flex-direction:column; align-items:center; color:var(--text-dim); font-size:11px; cursor:pointer; gap:4px; width:60px;}
-  .nav-item.active{color:var(--text);}
-  .nav-item .icon{font-size:22px;}
-  .btn-plus{position:relative; top:-15px; width:46px; height:32px; background:var(--text); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold; font-size:20px; border-left:3px solid var(--primary); border-right:3px solid #25f4ee; box-shadow:0 2px 10px rgba(0,0,0,0.5);}
-
-  /* ============ SCREENS ============ */
-  .screen{display:none; height:100%; width:100%; position:absolute; top:0; left:0;}
-  .screen.active{display:block;}
-  
-  /* ============ BERANDA (FEED) ============ */
-  #screen-home{background:#000;}
-  .feed-container{height:100%; width:100%; overflow-y:scroll; scroll-snap-type:y mandatory;}
-  .video-card{height:100%; width:100%; position:relative; scroll-snap-align:start; background:#000;}
-  .video-card video{width:100%; height:100%; object-fit:contain;}
-  
-  /* Tombol Suara di Feed */
-  .volume-btn {
-    position:absolute; top:20px; right:20px; z-index:20;
-    background:rgba(0,0,0,0.6); color:#fff; border:none; border-radius:50%;
-    width:44px; height:44px; font-size:20px; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
+  #app {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    background: #000;
+    overflow: hidden;
   }
-  .volume-btn.pulse { animation: pulse 1.5s infinite; }
-  @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); background:rgba(254,44,85,0.8); } 100% { transform: scale(1); } }
-
-  .video-info{position:absolute; bottom:70px; left:15px; right:70px; z-index:10;}
-  .video-info .username{font-weight:bold; font-size:16px; margin-bottom:6px;}
-  .video-info .desc{font-size:14px; line-height:1.3; margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
-  .video-info .music{font-size:13px; display:flex; align-items:center; gap:6px;}
-  .side-actions{position:absolute; bottom:80px; right:10px; display:flex; flex-direction:column; gap:20px; align-items:center; z-index:10;}
-  .action-btn-side{display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12px; cursor:pointer;}
-  .action-btn-side .icon{font-size:32px; background:rgba(0,0,0,0.4); border-radius:50%; padding:8px;}
-  .empty-feed{display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--text-dim);}
-
-  /* ============ CAMERA & EDITOR ============ */
-  #screen-camera, #screen-editor{background:#000; z-index:150;}
-  .top-bar{display:flex; justify-content:space-between; padding:15px; position:absolute; top:0; left:0; right:0; z-index:10;}
-  .icon-btn{background:rgba(0,0,0,0.5); border:none; color:#fff; width:40px; height:40px; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;}
-  
-  .cam-preview-wrap{width:100%; height:100%; display:flex; align-items:center; justify-content:center;}
-  #camPreview{width:100%; height:100%; object-fit:cover;}
-  
-  .cam-controls{position:absolute; bottom:0; left:0; right:0; height:140px; display:flex; align-items:center; justify-content:space-around; padding-bottom:20px; z-index:10;}
-  .rec-btn{width:70px; height:70px; border-radius:50%; border:4px solid #fff; background:transparent; cursor:pointer; position:relative; transition:all .2s;}
-  .rec-btn::after{content:""; position:absolute; inset:6px; border-radius:50%; background:var(--primary); transition:all .2s;}
-  .rec-btn.recording::after{inset:18px; border-radius:8px;}
-  
-  .rec-timer{position:absolute; top:-30px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); color:#fff; padding:4px 12px; border-radius:20px; font-size:13px; display:none; align-items:center; gap:6px;}
-  .rec-timer.show{display:flex;}
-  .rec-dot{width:8px;height:8px;background:var(--primary);border-radius:50%;animation:blink 1s infinite;}
-  @keyframes blink{50%{opacity:0.2;}}
-
-  /* Editor Panel */
-  .editor-panel{position:absolute; bottom:0; left:0; right:0; background:var(--surface); padding:16px; border-radius:20px 20px 0 0; z-index:20;}
-  .trim-track{position:relative; height:36px; background:#333; border-radius:6px; margin-bottom:10px; overflow:hidden;}
-  .trim-selection{position:absolute; top:0; bottom:0; background:rgba(254,44,85,0.3); border-left:3px solid var(--primary); border-right:3px solid var(--primary); pointer-events:none;}
-  .trim-handle{position:absolute; top:0; width:20px; height:100%; background:var(--primary); cursor:ew-resize; z-index:2; display:flex; align-items:center; justify-content:center;}
-  .trim-handle::after{content:""; width:3px; height:16px; background:rgba(255,255,255,0.7); border-radius:2px;}
-  .trim-handle.left{left:0; border-radius:6px 0 0 6px;}
-  .trim-handle.right{right:0; border-radius:0 6px 6px 0;}
-  
-  .editor-actions{display:flex; gap:10px; margin-bottom:10px; overflow-x:auto;}
-  .btn-action{background:var(--surface2); border:none; color:#fff; padding:8px 12px; border-radius:8px; font-size:13px; cursor:pointer; white-space:nowrap;}
-  .btn-publish{width:100%; padding:14px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:bold; font-size:16px; cursor:pointer;}
-
-  /* Overlay Text Preview */
-  .text-overlay{position:absolute; color:#fff; font-weight:bold; text-shadow:2px 2px 4px rgba(0,0,0,0.9); white-space:nowrap; user-select:none; cursor:move; transform:translate(-50%,-50%); padding:4px; border:1px dashed transparent; z-index:5;}
-  .text-overlay:hover{border-color:rgba(255,255,255,0.5);}
-
-  /* ============ PROFIL ============ */
-  #screen-profile{padding:20px; padding-top:60px; overflow-y:auto;}
-  .profile-header{display:flex; flex-direction:column; align-items:center; margin-bottom:20px;}
-  .avatar{width:80px; height:80px; border-radius:50%; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:40px; margin-bottom:10px;}
-  .grid-videos{display:grid; grid-template-columns:repeat(3, 1fr); gap:2px;}
-  .grid-item{aspect-ratio:9/16; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:24px; overflow:hidden;}
-  .grid-item video{width:100%; height:100%; object-fit:cover;}
-
-  /* ============ MODALS ============ */
-  .modal-bg{position:fixed; inset:0; background:rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; z-index:200; padding:20px;}
-  .modal-bg.show{display:flex;}
-  .modal{background:var(--surface); border-radius:16px; padding:20px; width:100%; max-width:400px; max-height:80vh; overflow-y:auto;}
-  .form-group{margin-bottom:12px;}
-  .form-group label{display:block; font-size:12px; color:var(--text-dim); margin-bottom:4px;}
-  .form-group input, .form-group select, .form-group textarea{width:100%; padding:10px; background:var(--surface2); border:1px solid #444; border-radius:8px; color:#fff; outline:none;}
-  .color-picker{display:flex; gap:8px; flex-wrap:wrap;}
-  .color-swatch{width:32px; height:32px; border-radius:50%; cursor:pointer; border:2px solid transparent;}
-  .color-swatch.selected{border-color:#fff;}
-  .modal-actions{display:flex; gap:10px; margin-top:15px;}
-  .modal-actions button{flex:1; padding:12px; border-radius:8px; border:none; font-weight:bold; cursor:pointer;}
-  .btn-cancel{background:var(--surface2); color:#fff;}
-  .btn-ok{background:var(--primary); color:#fff;}
-  
-  /* List Musik */
-  .music-item{display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--surface2); border-radius:8px; margin-bottom:8px; cursor:pointer; border:2px solid transparent;}
-  .music-item:active{background:#333;}
-  .music-item.selected{border-color:var(--primary); background:rgba(254,44,85,0.1);}
-  .music-ctrl{display:flex; align-items:center; gap:10px;}
-  .music-play-btn{background:none; border:none; color:#fff; font-size:20px; cursor:pointer;}
-
-  /* Toast & Loader */
-  .toast{position:fixed; top:50px; left:50%; transform:translateX(-50%) translateY(-100px); background:var(--surface2); padding:10px 20px; border-radius:20px; font-size:13px; z-index:300; transition:transform 0.3s;}
-  .toast.show{transform:translateX(-50%) translateY(0);}
-  .loader-overlay{position:fixed; inset:0; background:rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; z-index:400; flex-direction:column; gap:15px;}
-  .loader-overlay.show{display:flex;}
-  .spinner{width:40px; height:40px; border:4px solid var(--surface2); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite;}
-  @keyframes spin{100%{transform:rotate(360deg);}}
+  /* Top Bar */
+  .top-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 50;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.55), transparent);
+  }
+  .top-bar .live-btn {
+    font-size: 14px; font-weight: 600;
+    opacity: 0.85;
+  }
+  .top-bar .tabs {
+    display: flex;
+    gap: 20px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .top-bar .tab { opacity: 0.6; cursor: pointer; position: relative; padding: 4px 2px; }
+  .top-bar .tab.active { opacity: 1; }
+  .top-bar .tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 50%;
+    transform: translateX(-50%);
+    width: 18px; height: 3px;
+    background: #fff;
+    border-radius: 2px;
+  }
+  .top-bar .search-btn {
+    font-size: 22px;
+    cursor: pointer;
+  }
+  /* Feed */
+  .feed {
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+  }
+  .feed::-webkit-scrollbar { display: none; }
+  .video-slide {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    overflow: hidden;
+    background: #000;
+  }
+  .video-slide canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  /* Play/Pause indicator */
+  .play-indicator {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    font-size: 80px;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+    z-index: 20;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  .play-indicator.show {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.9;
+  }
+  /* Double tap heart */
+  .double-tap-heart {
+    position: absolute;
+    font-size: 100px;
+    color: #ff2d55;
+    pointer-events: none;
+    z-index: 25;
+    animation: heartPop 1s ease-out forwards;
+    transform: translate(-50%, -50%);
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+  }
+  @keyframes heartPop {
+    0% { transform: translate(-50%, -50%) scale(0) rotate(-15deg); opacity: 0; }
+    20% { transform: translate(-50%, -50%) scale(1.3) rotate(10deg); opacity: 1; }
+    40% { transform: translate(-50%, -50%) scale(1) rotate(-5deg); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1.1) rotate(0); opacity: 0; }
+  }
+  /* Sidebar */
+  .sidebar {
+    position: absolute;
+    right: 10px;
+    bottom: 110px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    z-index: 10;
+  }
+  .sidebar .avatar-wrap {
+    position: relative;
+    margin-bottom: 8px;
+  }
+  .sidebar .avatar {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background: linear-gradient(135deg, #ff2d55, #ff9500);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    overflow: hidden;
+  }
+  .sidebar .follow-btn {
+    position: absolute;
+    bottom: -10px; left: 50%;
+    transform: translateX(-50%);
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #ff2d55;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 2px solid #000;
+    transition: transform 0.2s;
+  }
+  .sidebar .follow-btn.followed {
+    background: #2ecc71;
+    transform: translateX(-50%) scale(0.9);
+  }
+  .sidebar .action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+  .sidebar .action .icon {
+    width: 44px; height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    transition: transform 0.15s;
+  }
+  .sidebar .action:active .icon { transform: scale(0.85); }
+  .sidebar .action .count {
+    font-size: 12px;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  }
+  .sidebar .like-btn.liked .icon { color: #ff2d55; }
+  .sidebar .like-btn.liked .icon svg { fill: #ff2d55; }
+  .sidebar .bookmark-btn.bookmarked .icon svg { fill: #ffd700; }
+  /* Bottom Info */
+  .bottom-info {
+    position: absolute;
+    left: 12px;
+    right: 80px;
+    bottom: 80px;
+    z-index: 10;
+    background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+    padding: 30px 0 10px;
+    margin: 0 -12px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .bottom-info .username {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+  .bottom-info .caption {
+    font-size: 14px;
+    line-height: 1.4;
+    margin-bottom: 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .bottom-info .caption .hashtag { font-weight: 600; }
+  .bottom-info .music {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    overflow: hidden;
+  }
+  .bottom-info .music .marquee {
+    overflow: hidden;
+    white-space: nowrap;
+    flex: 1;
+    mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+  }
+  .bottom-info .music .marquee span {
+    display: inline-block;
+    padding-right: 40px;
+    animation: marquee 12s linear infinite;
+  }
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  /* Progress bar */
+  .progress-bar {
+    position: absolute;
+    bottom: 60px;
+    left: 0; right: 0;
+    height: 2px;
+    background: rgba(255,255,255,0.2);
+    z-index: 15;
+  }
+  .progress-bar .progress {
+    height: 100%;
+    background: #fff;
+    width: 0%;
+    transition: width 0.1s linear;
+  }
+  /* Bottom Nav */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: #000;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 40;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .bottom-nav .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 10px;
+    color: #fff;
+    opacity: 0.6;
+    cursor: pointer;
+    padding: 6px 0;
+    transition: opacity 0.2s;
+  }
+  .bottom-nav .nav-item.active { opacity: 1; }
+  .bottom-nav .nav-item .nav-icon {
+    font-size: 22px;
+    line-height: 1;
+  }
+  .bottom-nav .upload-btn {
+    width: 44px; height: 30px;
+    background: linear-gradient(90deg, #25f4ee, #fff, #fe2c55);
+    border-radius: 8px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bottom-nav .upload-btn::before {
+    content: '+';
+    position: absolute;
+    inset: 0;
+    background: #000;
+    border-radius: 6px;
+    margin: 2px 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 22px;
+    font-weight: 300;
+  }
+  /* Modal */
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    display: none;
+    align-items: flex-end;
+    animation: fadeIn 0.25s ease;
+  }
+  .modal-overlay.show { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal {
+    width: 100%;
+    max-height: 70%;
+    background: #1c1c1e;
+    border-radius: 16px 16px 0 0;
+    padding: 16px;
+    animation: slideUp 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-header {
+    text-align: center;
+    font-weight: 700;
+    font-size: 15px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    position: relative;
+  }
+  .modal-close {
+    position: absolute;
+    right: 0; top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  /* Comments */
+  .comments-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 0;
+    max-height: 400px;
+  }
+  .comment-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px 0;
+  }
+  .comment-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .comment-body { flex: 1; }
+  .comment-user {
+    font-size: 13px;
+    opacity: 0.6;
+    margin-bottom: 2px;
+  }
+  .comment-text {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .comment-meta {
+    font-size: 12px;
+    opacity: 0.5;
+    margin-top: 4px;
+    display: flex;
+    gap: 14px;
+  }
+  .comment-input-wrap {
+    display: flex;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .comment-input {
+    flex: 1;
+    background: #2c2c2e;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 16px;
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+  }
+  .comment-send {
+    background: #fe2c55;
+    border: none;
+    color: #fff;
+    padding: 0 18px;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  /* Share */
+  .share-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 16px 0;
+  }
+  .share-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .share-icon {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+  /* Toast */
+  .toast {
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    z-index: 200;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  /* Mute indicator */
+  .mute-indicator {
+    position: absolute;
+    top: 60px;
+    right: 16px;
+    background: rgba(0,0,0,0.5);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 30;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
-
-<!-- ============ LOADER ============ -->
-<div class="loader-overlay" id="loader">
-  <div class="spinner"></div>
-  <div id="loaderText">Memuat...</div>
-</div>
-
-<!-- ============ BERANDA (FEED) ============ -->
-<div class="screen active" id="screen-home">
-  <div class="feed-container" id="feedContainer">
-    <div class="empty-feed" id="emptyFeed">
-      <div style="font-size:60px; margin-bottom:10px;">🎬</div>
-      <div>Belum ada video</div>
-      <div style="font-size:12px; margin-top:5px;">Ketuk tombol + untuk merekam</div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ PROFIL ============ -->
-<div class="screen" id="screen-profile">
-  <div class="profile-header">
-    <div class="avatar">👤</div>
-    <div style="font-weight:bold; font-size:18px;">@user_stream</div>
-    <div style="color:var(--text-dim); font-size:13px;" id="profileCount">0 Video</div>
-  </div>
-  <div class="grid-videos" id="profileGrid"></div>
-</div>
-
-<!-- ============ NAVIGASI BAWAH ============ -->
-<div class="bottom-nav">
-  <div class="nav-item active" onclick="switchTab('home')"><span class="icon">🏠</span> Beranda</div>
-  <div class="nav-item" onclick="openCamera()"><div class="btn-plus">+</div></div>
-  <div class="nav-item" onclick="switchTab('profile')"><span class="icon">👤</span> Profil</div>
-</div>
-
-<!-- ============ KAMERA ============ -->
-<div class="screen" id="screen-camera">
+<div id="app">
+  <!-- Top Bar -->
   <div class="top-bar">
-    <button class="icon-btn" onclick="stopCamera(); switchTab('home')">✕</button>
-    <button class="icon-btn" onclick="toggleCameraFacing()">🔄</button>
+    <div class="live-btn">📺 LIVE</div>
+    <div class="tabs">
+      <div class="tab" data-tab="following">Mengikuti</div>
+      <div class="tab active" data-tab="foryou">Untuk Kamu</div>
+    </div>
+    <div class="search-btn">🔍</div>
   </div>
-  <div class="cam-preview-wrap">
-    <video id="camPreview" autoplay playsinline muted></video>
-  </div>
-  <div class="cam-controls">
-    <div class="rec-timer" id="recTimer"><span class="rec-dot"></span><span id="recTimerText">00:00</span></div>
-    <button class="icon-btn" onclick="pickFromGallery()" style="width:50px;height:50px;font-size:24px;">🖼️</button>
-    <button class="rec-btn" id="recBtn" onclick="toggleRecording()"></button>
-    <button class="icon-btn" onclick="toggleCamMute()" id="camMuteBtn" style="width:50px;height:50px;font-size:24px;">🔊</button>
-  </div>
-  <input type="file" id="galleryInput" accept="video/*" style="display:none">
-</div>
 
-<!-- ============ EDITOR ============ -->
-<div class="screen" id="screen-editor">
-  <div class="top-bar">
-    <button class="icon-btn" onclick="goBackFromEditor()">←</button>
-    <button class="icon-btn" onclick="publishVideo()" style="background:var(--primary);">✓</button>
+  <!-- Mute indicator -->
+  <div class="mute-indicator" id="muteIndicator">
+    <span id="muteIcon">🔇</span>
+    <span id="muteText">Ketik untuk bunyi</span>
   </div>
-  <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; position:relative;">
-    <video id="editVideo" playsinline controls style="max-width:100%; max-height:100%; object-fit:contain;"></video>
-    <div id="overlayLayer" style="position:absolute; inset:0; pointer-events:none;"></div>
-  </div>
-  
-  <div class="editor-panel">
-    <div class="trim-track" id="trimTrack">
-      <div class="trim-selection" id="trimSelection"></div>
-      <div class="trim-handle left" id="trimLeft" style="left:0;"></div>
-      <div class="trim-handle right" id="trimRight" style="right:0;"></div>
-    </div>
-    <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-dim); margin-bottom:15px;">
-      <span id="trimCurrent">00:00 - 00:00</span>
-      <span id="trimDur">Durasi: 00:00</span>
-    </div>
-    
-    <div class="editor-actions">
-      <button class="btn-action" onclick="openTextModal()">📝 Text</button>
-      <button class="btn-action" onclick="openMusicModal()">🎵 Musik</button>
-    </div>
-    
-    <div id="overlayList" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
-    <button class="btn-publish" onclick="publishVideo()">Posting Video</button>
-  </div>
-</div>
 
-<!-- ============ MODAL TEXT ============ -->
-<div class="modal-bg" id="textModal">
-  <div class="modal">
-    <h3 style="margin-top:0;">Tambah Text</h3>
-    <div class="form-group"><label>Teks</label><input type="text" id="txtContent" placeholder="Tulis..."></div>
-    <div class="form-group"><label>Ukuran</label><input type="number" id="txtSize" value="28"></div>
-    <div class="form-group"><label>Warna</label><div class="color-picker" id="txtColors"></div></div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('textModal')">Batal</button>
-      <button class="btn-ok" onclick="addTextOverlay()">Tambah</button>
+  <!-- Feed -->
+  <div class="feed" id="feed"></div>
+
+  <!-- Bottom Nav -->
+  <div class="bottom-nav">
+    <div class="nav-item active">
+      <div class="nav-icon">🏠</div>
+      <div>Beranda</div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon">🧭</div>
+      <div>Jelajahi</div>
+    </div>
+    <div class="nav-item">
+      <div class="upload-btn"></div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon">📥</div>
+      <div>Kotak Masuk</div>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon">👤</div>
+      <div>Profil</div>
     </div>
   </div>
-</div>
 
-<!-- ============ MODAL MUSIK ============ -->
-<div class="modal-bg" id="musicModal">
-  <div class="modal">
-    <h3 style="margin-top:0;">🎵 Lagu Viral & No Royalty</h3>
-    <p style="font-size:12px; color:var(--text-dim); margin-bottom:15px;">Pilih musik latar untuk video Anda.</p>
-    <div id="musicList"></div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeMusicModal()">Tutup</button>
+  <!-- Comments Modal -->
+  <div class="modal-overlay" id="commentsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span id="commentsCount">0 Komentar</span>
+        <div class="modal-close" data-close="commentsModal">✕</div>
+      </div>
+      <div class="comments-list" id="commentsList"></div>
+      <div class="comment-input-wrap">
+        <input type="text" class="comment-input" id="commentInput" placeholder="Tambah komentar..." />
+        <button class="comment-send" id="commentSend">Kirim</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ============ MODAL PUBLISH ============ -->
-<div class="modal-bg" id="publishModal">
-  <div class="modal">
-    <h3 style="margin-top:0;">Posting Video</h3>
-    <div class="form-group"><label>Judul Video</label><input type="text" id="pubTitle" placeholder="Judul menarik..."></div>
-    <div class="form-group"><label>Deskripsi</label><textarea id="pubDesc" rows="3" placeholder="Deskripsi..."></textarea></div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('publishModal')">Batal</button>
-      <button class="btn-ok" onclick="confirmPublish()">Posting</button>
+  <!-- Share Modal -->
+  <div class="modal-overlay" id="shareModal">
+    <div class="modal">
+      <div class="modal-header">
+        Bagikan ke
+        <div class="modal-close" data-close="shareModal">✕</div>
+      </div>
+      <div class="share-grid" id="shareGrid"></div>
     </div>
   </div>
-</div>
 
-<div class="toast" id="toast"></div>
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+</div>
 
 <script>
-/* ============================================================
-   KATALOG MUSIK BEBAS ROYALTI / VIRAL (URL MP3 LANGSUNG)
-   ============================================================ */
-const MUSIC_CATALOG = [
-  { id: 'none', name: 'Tanpa Musik', url: null },
-  { id: 'viral-funk', name: 'Viral Funk (Upbeat)', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
-  { id: 'viral-chill', name: 'Chill Viral Beat', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' },
-  { id: 'viral-epic', name: 'Epic Trend', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' },
-  { id: 'lofi-vibe', name: 'Lofi Study Vibe', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3' }
-];
+  // ============ DATA ============
+  const videos = [
+    {
+      id: 1,
+      user: 'sunset_lover',
+      displayName: 'Pecinta Senja',
+      avatar: '🌅',
+      avatarBg: 'linear-gradient(135deg, #ff9966, #ff5e62)',
+      caption: 'Senja hari ini benar-benar memukau 🌇 Siapa yang setuju?',
+      hashtags: ['senja', 'sunset', 'indonesia', 'fyp'],
+      music: '♪ Lofi Sunset Vibes - ChillBeats',
+      likes: 128400,
+      comments: 2341,
+      shares: 892,
+      bookmarks: 4521,
+      theme: 'sunset'
+    },
+    {
+      id: 2,
+      user: 'ocean_dreamer',
+      displayName: 'Pemimpi Laut',
+      avatar: '🌊',
+      avatarBg: 'linear-gradient(135deg, #2193b0, #6dd5ed)',
+      caption: 'Gelombang laut menenangkan pikiran 🌊✨',
+      hashtags: ['ocean', 'waves', 'calm', 'nature'],
+      music: '♪ Ocean Waves - Nature Sounds',
+      likes: 89200,
+      comments: 1203,
+      shares: 456,
+      bookmarks: 2310,
+      theme: 'ocean'
+    },
+    {
+      id: 3,
+      user: 'aurora_north',
+      displayName: 'Cahaya Utara',
+      avatar: '✨',
+      avatarBg: 'linear-gradient(135deg, #00c9ff, #92fe9d)',
+      caption: 'Aurora borealis di malam ini 💚💙 Masya Allah indahnya',
+      hashtags: ['aurora', 'northernlights', 'sky', 'magic'],
+      music: '♪ Northern Lights - Ambient',
+      likes: 456700,
+      comments: 8921,
+      shares: 3421,
+      bookmarks: 12300,
+      theme: 'aurora'
+    },
+    {
+      id: 4,
+      user: 'city_nights',
+      displayName: 'Malam Kota',
+      avatar: '🌃',
+      avatarBg: 'linear-gradient(135deg, #ff0099, #493240)',
+      caption: 'Kota tidak pernah tidur 🌃 Lampu-lampu kota yang indah',
+      hashtags: ['city', 'night', 'urban', 'lights'],
+      music: '♪ City Lights - Synthwave',
+      likes: 67800,
+      comments: 892,
+      shares: 234,
+      bookmarks: 1890,
+      theme: 'city'
+    },
+    {
+      id: 5,
+      user: 'forest_magic',
+      displayName: 'Hutan Ajaib',
+      avatar: '🌲',
+      avatarBg: 'linear-gradient(135deg, #134e5e, #71b280)',
+      caption: 'Kunang-kunang di hutan malam 🌲✨ Keajaiban alam',
+      hashtags: ['forest', 'fireflies', 'nature', 'magical'],
+      music: '♪ Forest Night - Nature',
+      likes: 234500,
+      comments: 4521,
+      shares: 1234,
+      bookmarks: 8900,
+      theme: 'forest'
+    },
+    {
+      id: 6,
+      user: 'space_explorer',
+      displayName: 'Penjelajah Angkasa',
+      avatar: '🚀',
+      avatarBg: 'linear-gradient(135deg, #0f0c29, #302b63, #24243e)',
+      caption: 'Menjelajah galaksi yang tak terhingga 🌌✨ #SpaceLovers',
+      hashtags: ['space', 'galaxy', 'stars', 'universe'],
+      music: '♪ Cosmic Journey - Electronic',
+      likes: 789200,
+      comments: 12340,
+      shares: 5670,
+      bookmarks: 23400,
+      theme: 'space'
+    }
+  ];
 
-let previewAudio = null; 
-let bgAudio = null; 
+  const sampleComments = [
+    { user: 'dina_k', text: 'Keren banget kak! 🔥', time: '2j', likes: 234 },
+    { user: 'rizky.m', text: 'Indahnya ya Allah 😍', time: '3j', likes: 567 },
+    { user: 'sari_99', text: 'Ini dimana kak? Pengen kesana', time: '5j', likes: 89 },
+    { user: 'budi_art', text: 'Editannya mantap 👏', time: '6j', likes: 145 },
+    { user: 'maya.p', text: 'Vibesnya enak banget', time: '8j', likes: 78 },
+    { user: 'andi_x', text: 'FYP memang tidak pernah bohong', time: '12j', likes: 321 }
+  ];
 
-/* ============================================================
-   DATABASE INDEXEDDB
-   ============================================================ */
-let db;
-const DB_NAME = 'VideoStreamDB';
-const DB_VERSION = 1;
+  const shareOptions = [
+    { name: 'WhatsApp', icon: '💬', bg: '#25D366' },
+    { name: 'Instagram', icon: '📷', bg: 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)' },
+    { name: 'Facebook', icon: '📘', bg: '#1877F2' },
+    { name: 'Twitter', icon: '🐦', bg: '#1DA1F2' },
+    { name: 'Telegram', icon: '✈️', bg: '#0088cc' },
+    { name: 'Salin Link', icon: '🔗', bg: '#555' },
+    { name: 'Email', icon: '📧', bg: '#EA4335' },
+    { name: 'Lainnya', icon: '•••', bg: '#333' }
+  ];
 
-function initDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = e => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains('videos')) db.createObjectStore('videos', { keyPath: 'id' });
-    };
-    req.onsuccess = e => { db = e.target.result; resolve(); };
-    req.onerror = e => reject(e.target.error);
-  });
-}
-
-function saveVideoToDB(video) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('videos', 'readwrite');
-    const req = tx.objectStore('videos').put(video);
-    req.onsuccess = () => resolve();
-    req.onerror = e => reject(e.target.error);
-  });
-}
-
-function getAllVideosFromDB() {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('videos', 'readonly');
-    const req = tx.objectStore('videos').getAll();
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = e => reject(e.target.error);
-  });
-}
-
-/* ============================================================
-   STATE GLOBAL
-   ============================================================ */
-const state = {
-  currentTab: 'home',
-  videos: [],
-  camStream: null,
-  camFacing: 'environment',
-  mediaRecorder: null,
-  recordedChunks: [],
-  isRecording: false,
-  recordingStartTime: 0,
-  recTimerInterval: null,
-  camMuted: false, // KUNCI PERBAIKAN: Default UNMUTED agar mikrofon menyala
-  videoBlob: null,
-  videoURL: null,
-  videoDuration: 0,
-  trimStart: 0,
-  trimEnd: 0,
-  textOverlays: [],
-  selectedMusicTrack: MUSIC_CATALOG[0]
-};
-
-/* ============================================================
-   NAVIGASI & TABS
-   ============================================================ */
-function switchTab(tab) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  stopAllAudio(); // Pause audio saat pindah menu
-
-  if (tab === 'home') {
-    document.getElementById('screen-home').classList.add('active');
-    document.querySelectorAll('.nav-item')[0].classList.add('active');
-    renderFeed();
-  } else if (tab === 'profile') {
-    document.getElementById('screen-profile').classList.add('active');
-    document.querySelectorAll('.nav-item')[2].classList.add('active');
-    renderProfile();
+  // ============ UTILS ============
+  function formatCount(n) {
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+    return n.toString();
   }
-  state.currentTab = tab;
-}
 
-function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
-}
-
-function stopAllAudio() {
-  if (bgAudio) { bgAudio.pause(); bgAudio.currentTime = 0; }
-  if (previewAudio) { previewAudio.pause(); previewAudio.currentTime = 0; }
-}
-
-/* ============================================================
-   TOAST & LOADER
-   ============================================================ */
-let toastTimer;
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast show';
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
-}
-function showLoader(msg) {
-  document.getElementById('loaderText').textContent = msg;
-  document.getElementById('loader').classList.add('show');
-}
-function hideLoader() { document.getElementById('loader').classList.remove('show'); }
-
-/* ============================================================
-   FEED BERANDA
-   ============================================================ */
-function renderFeed() {
-  const container = document.getElementById('feedContainer');
-  const empty = document.getElementById('emptyFeed');
-  Array.from(container.children).forEach(c => { if (c.id !== 'emptyFeed') c.remove(); });
-
-  if (state.videos.length === 0) {
-    empty.style.display = 'flex';
-    return;
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toast.classList.remove('show'), 1800);
   }
-  empty.style.display = 'none';
 
-  state.videos.forEach(videoData => {
-    const card = document.createElement('div');
-    card.className = 'video-card';
-    
-    const vid = document.createElement('video');
-    vid.src = URL.createObjectURL(videoData.blob);
-    vid.loop = true;
-    vid.playsInline = true;
-    vid.muted = true; // Wajib mute saat autoplay
-    
-    // Tombol Volume
-    const volBtn = document.createElement('button');
-    volBtn.className = 'volume-btn pulse';
-    volBtn.innerHTML = '🔇'; // Ikon mute (karena belum diklik)
+  // ============ BUILD FEED ============
+  const feed = document.getElementById('feed');
+  videos.forEach((v, idx) => {
+    const slide = document.createElement('div');
+    slide.className = 'video-slide';
+    slide.dataset.idx = idx;
+    slide.innerHTML = `
+      <canvas></canvas>
+      <div class="play-indicator" id="playInd-${idx}">▶</div>
+      <div class="sidebar">
+        <div class="avatar-wrap">
+          <div class="avatar" style="background:${v.avatarBg}">${v.avatar}</div>
+          <div class="follow-btn" data-follow="${idx}">+</div>
+        </div>
+        <div class="action like-btn" data-like="${idx}">
+          <div class="icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+          </div>
+          <div class="count" id="likeCount-${idx}">${formatCount(v.likes)}</div>
+        </div>
+        <div class="action comment-btn" data-comment="${idx}">
+          <div class="icon">💬</div>
+          <div class="count">${formatCount(v.comments)}</div>
+        </div>
+        <div class="action bookmark-btn" data-bookmark="${idx}">
+          <div class="icon">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="white">
+              <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+            </svg>
+          </div>
+          <div class="count" id="bookmarkCount-${idx}">${formatCount(v.bookmarks)}</div>
+        </div>
+        <div class="action share-btn" data-share="${idx}">
+          <div class="icon">↗</div>
+          <div class="count">${formatCount(v.shares)}</div>
+        </div>
+        <div class="action" style="margin-top: 4px;">
+          <div class="icon" style="width:40px;height:40px;border-radius:50%;background:${v.avatarBg};font-size:20px;animation:spin 4s linear infinite;">${v.avatar}</div>
+        </div>
+      </div>
+      <div class="bottom-info">
+        <div class="username">@${v.user}</div>
+        <div class="caption">${v.caption} ${v.hashtags.map(h => `<span class="hashtag">#${h}</span>`).join(' ')}</div>
+        <div class="music">
+          <span>🎵</span>
+          <div class="marquee"><span>${v.music} &nbsp;&nbsp;&nbsp; ${v.music} &nbsp;&nbsp;&nbsp; </span></div>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress" id="progress-${idx}"></div></div>
+    `;
+    feed.appendChild(slide);
+  });
 
-    // Fungsi Toggle Suara
-    const toggleVolume = (e) => {
-      if(e) e.stopPropagation();
-      vid.muted = !vid.muted;
-      if (vid.muted) {
-        volBtn.innerHTML = '🔇';
-        volBtn.classList.add('pulse');
-        if (bgAudio) bgAudio.pause();
-      } else {
-        volBtn.innerHTML = '🔊';
-        volBtn.classList.remove('pulse');
-        // Nyalakan musik latar jika ada
-        if (videoData.musicUrl) {
-          if (!bgAudio) bgAudio = new Audio(videoData.musicUrl);
-          else if (bgAudio.src !== videoData.musicUrl) { bgAudio.pause(); bgAudio = new Audio(videoData.musicUrl); }
-          bgAudio.loop = true;
-          bgAudio.volume = 0.5;
-          bgAudio.play().catch(e => console.log("Musik gagal:", e));
+  // Add spin animation
+  const styleEl = document.createElement('style');
+  styleEl.textContent = `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
+  document.head.appendChild(styleEl);
+
+  // ============ CANVAS ANIMATIONS ============
+  const canvases = document.querySelectorAll('.video-slide canvas');
+  const animations = [];
+
+  function createAnimation(canvas, theme, idx) {
+    const ctx = canvas.getContext('2d');
+    let w, h;
+    let particles = [];
+    let t = 0;
+    let paused = false;
+    let startTime = performance.now();
+    const duration = 15000; // 15s loop
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      w = rect.width;
+      h = rect.height;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Init particles based on theme
+    if (theme === 'sunset') {
+      for (let i = 0; i < 60; i++) {
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: Math.random() * 2 + 0.5,
+          vy: -Math.random() * 0.5 - 0.2,
+          vx: (Math.random() - 0.5) * 0.3,
+          a: Math.random() * 0.8 + 0.2
+        });
+      }
+    } else if (theme === 'ocean') {
+      for (let i = 0; i < 40; i++) {
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: Math.random() * 3 + 1,
+          vy: Math.random() * 0.3 + 0.1,
+          vx: (Math.random() - 0.5) * 0.5,
+          a: Math.random() * 0.5 + 0.3
+        });
+      }
+    } else if (theme === 'aurora') {
+      for (let i = 0; i < 80; i++) {
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h * 0.7,
+          r: Math.random() * 1.5 + 0.3,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.3,
+          a: Math.random() * 0.8 + 0.2,
+          hue: Math.random() * 120 + 120
+        });
+      }
+    } else if (theme === 'city') {
+      for (let i = 0; i < 100; i++) {
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: Math.random() * 1.5 + 0.3,
+          a: Math.random(),
+          flicker: Math.random() * 0.05,
+          color: ['#ff0099', '#ffcc00', '#00ffff', '#ff6600', '#ffffff'][Math.floor(Math.random() * 5)]
+        });
+      }
+    } else if (theme === 'forest') {
+      for (let i = 0; i < 50; i++) {
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: Math.random() * 2 + 1,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: (Math.random() - 0.5) * 0.4,
+          a: Math.random(),
+          phase: Math.random() * Math.PI * 2
+        });
+      }
+    } else if (theme === 'space') {
+      for (let i = 0; i < 200; i++) {
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: Math.random() * 1.8 + 0.2,
+          a: Math.random(),
+          twinkle: Math.random() * 0.05 + 0.01,
+          color: Math.random() > 0.7 ? '#aaddff' : '#ffffff'
+        });
+      }
+    }
+
+    function draw() {
+      if (paused) {
+        animations[idx].raf = requestAnimationFrame(draw);
+        return;
+      }
+      t += 0.016;
+      const progress = ((performance.now() - startTime) % duration) / duration;
+      const progressBar = document.getElementById(`progress-${idx}`);
+      if (progressBar) progressBar.style.width = (progress * 100) + '%';
+
+      if (theme === 'sunset') {
+        const grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, '#2c1810');
+        grad.addColorStop(0.3, '#ff6b35');
+        grad.addColorStop(0.6, '#f7931e');
+        grad.addColorStop(0.8, '#ffcc70');
+        grad.addColorStop(1, '#4a2c2a');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+        // Sun
+        const sunY = h * 0.55 + Math.sin(t * 0.3) * 10;
+        const sunGrad = ctx.createRadialGradient(w/2, sunY, 0, w/2, sunY, 120);
+        sunGrad.addColorStop(0, 'rgba(255, 240, 180, 1)');
+        sunGrad.addColorStop(0.3, 'rgba(255, 180, 100, 0.8)');
+        sunGrad.addColorStop(1, 'rgba(255, 100, 50, 0)');
+        ctx.fillStyle = sunGrad;
+        ctx.fillRect(0, 0, w, h);
+        // Sun disk
+        ctx.beginPath();
+        ctx.arc(w/2, sunY, 50, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff4d6';
+        ctx.fill();
+        // Horizon line / water
+        ctx.fillStyle = 'rgba(30, 20, 40, 0.6)';
+        ctx.fillRect(0, h * 0.7, w, h * 0.3);
+        // Particles (dust)
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.y < 0) { p.y = h; p.x = Math.random() * w; }
+          if (p.x < 0) p.x = w;
+          if (p.x > w) p.x = 0;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 220, 150, ${p.a * 0.6})`;
+          ctx.fill();
+        });
+      } else if (theme === 'ocean') {
+        const grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, '#0a2540');
+        grad.addColorStop(0.5, '#1e5799');
+        grad.addColorStop(1, '#2989d8');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+        // Waves
+        for (let layer = 0; layer < 5; layer++) {
+          ctx.beginPath();
+          const yBase = h * 0.4 + layer * 40;
+          ctx.moveTo(0, yBase);
+          for (let x = 0; x <= w; x += 10) {
+            const y = yBase + Math.sin((x * 0.02) + t * (1 + layer * 0.3) + layer) * (15 - layer * 2);
+            ctx.lineTo(x, y);
+          }
+          ctx.lineTo(w, h);
+          ctx.lineTo(0, h);
+          ctx.closePath();
+          ctx.fillStyle = `rgba(${100 + layer * 20}, ${180 + layer * 10}, 230, ${0.3 + layer * 0.1})`;
+          ctx.fill();
+        }
+        // Bubbles
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.y > h) { p.y = 0; p.x = Math.random() * w; }
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${p.a * 0.5})`;
+          ctx.fill();
+        });
+      } else if (theme === 'aurora') {
+        ctx.fillStyle = '#050520';
+        ctx.fillRect(0, 0, w, h);
+        // Aurora bands
+        for (let i = 0; i < 4; i++) {
+          ctx.beginPath();
+          ctx.moveTo(0, h * 0.3 + i * 30);
+          for (let x = 0; x <= w; x += 20) {
+            const y = h * 0.3 + i * 30 + Math.sin(x * 0.01 + t * 0.5 + i) * 40 + Math.cos(x * 0.02 + t * 0.3) * 20;
+            ctx.lineTo(x, y);
+          }
+          ctx.lineTo(w, 0);
+          ctx.lineTo(0, 0);
+          ctx.closePath();
+          const grad = ctx.createLinearGradient(0, 0, 0, h);
+          grad.addColorStop(0, `rgba(0, 255, 150, ${0.1 - i * 0.02})`);
+          grad.addColorStop(0.5, `rgba(100, 200, 255, ${0.15 - i * 0.02})`);
+          grad.addColorStop(1, 'rgba(0, 0, 50, 0)');
+          ctx.fillStyle = grad;
+          ctx.fill();
+        }
+        // Stars
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < 0) p.x = w;
+          if (p.x > w) p.x = 0;
+          if (p.y < 0) p.y = h * 0.7;
+          if (p.y > h * 0.7) p.y = 0;
+          const flicker = 0.5 + Math.sin(t * 3 + p.x) * 0.5;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${p.hue}, 100%, 70%, ${p.a * flicker})`;
+          ctx.fill();
+        });
+        // Ground silhouette
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.moveTo(0, h);
+        ctx.lineTo(0, h * 0.85);
+        for (let x = 0; x <= w; x += 20) {
+          ctx.lineTo(x, h * 0.85 + Math.sin(x * 0.05) * 10);
+        }
+        ctx.lineTo(w, h);
+        ctx.closePath();
+        ctx.fill();
+      } else if (theme === 'city') {
+        const grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, '#1a0033');
+        grad.addColorStop(0.5, '#4a0e4e');
+        grad.addColorStop(1, '#0f0524');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+        // Buildings silhouette
+        ctx.fillStyle = '#000';
+        const buildings = [
+          {x: 0, w: 60, h: 200}, {x: 60, w: 40, h: 280},
+          {x: 100, w: 70, h: 240}, {x: 170, w: 50, h: 320},
+          {x: 220, w: 80, h: 260}, {x: 300, w: 60, h: 300},
+          {x: 360, w: 70, h: 220}, {x: 430, w: 50, h: 280}
+        ];
+        buildings.forEach(b => {
+          const scale = w / 480;
+          ctx.fillRect(b.x * scale, h - b.h, b.w * scale, b.h);
+        });
+        // Windows
+        buildings.forEach(b => {
+          const scale = w / 480;
+          for (let wy = h - b.h + 10; wy < h - 10; wy += 15) {
+            for (let wx = b.x * scale + 5; wx < (b.x + b.w) * scale - 5; wx += 10) {
+              if (Math.random() > 0.3) {
+                const flicker = Math.sin(t * 3 + wx + wy) > 0 ? 1 : 0.3;
+                ctx.fillStyle = `rgba(255, 220, 100, ${flicker * 0.8})`;
+                ctx.fillRect(wx, wy, 4, 6);
+              }
+            }
+          }
+        });
+        // Neon lights
+        particles.forEach(p => {
+          const flicker = 0.5 + Math.sin(t * 5 + p.x) * 0.5;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r * 2, 0, Math.PI * 2);
+          ctx.fillStyle = p.color.replace(')', `, ${p.a * flicker})`).replace('rgb', 'rgba');
+          if (!p.color.startsWith('rgba')) {
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.a * flicker;
+          }
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        });
+      } else if (theme === 'forest') {
+        const grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, '#0a1f0a');
+        grad.addColorStop(0.5, '#1a3a1a');
+        grad.addColorStop(1, '#0a1a0a');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+        // Trees silhouettes
+        ctx.fillStyle = '#000';
+        for (let i = 0; i < 8; i++) {
+          const tx = (i * w / 8) + Math.sin(i) * 20;
+          const th = 200 + Math.sin(i * 2) * 80;
+          ctx.beginPath();
+          ctx.moveTo(tx, h);
+          ctx.lineTo(tx - 30, h - th);
+          ctx.lineTo(tx + 30, h - th);
+          ctx.closePath();
+          ctx.fill();
+        }
+        // Fireflies
+        particles.forEach(p => {
+          p.x += p.vx + Math.sin(t + p.phase) * 0.3;
+          p.y += p.vy + Math.cos(t + p.phase) * 0.3;
+          if (p.x < 0) p.x = w;
+          if (p.x > w) p.x = 0;
+          if (p.y < 0) p.y = h;
+          if (p.y > h) p.y = 0;
+          const glow = 0.5 + Math.sin(t * 2 + p.phase) * 0.5;
+          // Glow
+          const glowGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 6);
+          glowGrad.addColorStop(0, `rgba(255, 255, 150, ${p.a * glow * 0.6})`);
+          glowGrad.addColorStop(1, 'rgba(255, 255, 150, 0)');
+          ctx.fillStyle = glowGrad;
+          ctx.fillRect(p.x - p.r * 6, p.y - p.r * 6, p.r * 12, p.r * 12);
+          // Core
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 200, ${p.a * glow})`;
+          ctx.fill();
+        });
+      } else if (theme === 'space') {
+        ctx.fillStyle = '#000010';
+        ctx.fillRect(0, 0, w, h);
+        // Nebula
+        const nebGrad = ctx.createRadialGradient(w * 0.3, h * 0.4, 0, w * 0.3, h * 0.4, w * 0.6);
+        nebGrad.addColorStop(0, 'rgba(150, 50, 200, 0.3)');
+        nebGrad.addColorStop(0.5, 'rgba(50, 100, 200, 0.15)');
+        nebGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = nebGrad;
+        ctx.fillRect(0, 0, w, h);
+        const nebGrad2 = ctx.createRadialGradient(w * 0.7, h * 0.6, 0, w * 0.7, h * 0.6, w * 0.5);
+        nebGrad2.addColorStop(0, 'rgba(200, 100, 150, 0.25)');
+        nebGrad2.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = nebGrad2;
+        ctx.fillRect(0, 0, w, h);
+        // Stars
+        particles.forEach(p => {
+          const twinkle = 0.5 + Math.sin(t * p.twinkle * 60 + p.x) * 0.5;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = p.a * twinkle;
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        });
+        // Shooting star occasionally
+        if (Math.sin(t * 0.5) > 0.98) {
+          const sx = (t * 100) % w;
+          const sy = (t * 50) % (h * 0.5);
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(sx, sy);
+          ctx.lineTo(sx - 40, sy - 20);
+          ctx.stroke();
         }
       }
-    };
 
-    volBtn.onclick = toggleVolume;
-    
-    // Klik area video juga men-toggle suara
-    vid.onclick = (e) => {
-      if (vid.paused) vid.play();
-      toggleVolume(e);
-    };
+      animations[idx].raf = requestAnimationFrame(draw);
+    }
+    draw();
 
-    // Overlay Text
-    const overlayContainer = document.createElement('div');
-    overlayContainer.style.position = 'absolute'; overlayContainer.style.inset = '0'; overlayContainer.style.pointerEvents = 'none';
-    videoData.texts.forEach(t => {
-      const textEl = document.createElement('div');
-      textEl.className = 'text-overlay';
-      textEl.textContent = t.text;
-      textEl.style.left = (t.x * 100) + '%';
-      textEl.style.top = (t.y * 100) + '%';
-      textEl.style.fontSize = t.size + 'px';
-      textEl.style.color = t.color;
-      overlayContainer.appendChild(textEl);
+    return {
+      pause: () => { paused = true; },
+      resume: () => { paused = false; },
+      isPaused: () => paused,
+      raf: null
+    };
+  }
+
+  canvases.forEach((canvas, idx) => {
+    animations[idx] = createAnimation(canvas, videos[idx].theme, idx);
+  });
+
+  // ============ INTERACTIONS ============
+  // Track state
+  const state = videos.map(v => ({
+    liked: false,
+    bookmarked: false,
+    followed: false,
+    likes: v.likes,
+    bookmarks: v.bookmarks,
+    comments: [...sampleComments]
+  }));
+
+  // Play/Pause on tap
+  let lastTap = 0;
+  let tapTimeout = null;
+  document.querySelectorAll('.video-slide').forEach(slide => {
+    slide.addEventListener('click', (e) => {
+      // Ignore if clicked on interactive elements
+      if (e.target.closest('.sidebar') || e.target.closest('.bottom-info') || e.target.closest('.top-bar')) return;
+      const idx = parseInt(slide.dataset.idx);
+      const now = Date.now();
+      if (now - lastTap < 300) {
+        // Double tap - like
+        clearTimeout(tapTimeout);
+        const rect = slide.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const heart = document.createElement('div');
+        heart.className = 'double-tap-heart';
+        heart.textContent = '❤';
+        heart.style.left = x + 'px';
+        heart.style.top = y + 'px';
+        slide.appendChild(heart);
+        setTimeout(() => heart.remove(), 1000);
+        if (!state[idx].liked) {
+          toggleLike(idx);
+        }
+      } else {
+        tapTimeout = setTimeout(() => {
+          // Single tap - pause/play
+          const anim = animations[idx];
+          const indicator = document.getElementById(`playInd-${idx}`);
+          if (anim.isPaused()) {
+            anim.resume();
+            indicator.textContent = '▶';
+          } else {
+            anim.pause();
+            indicator.textContent = '❚❚';
+          }
+          indicator.classList.add('show');
+          setTimeout(() => indicator.classList.remove('show'), 500);
+        }, 300);
+      }
+      lastTap = now;
     });
+  });
 
-    const info = document.createElement('div');
-    info.className = 'video-info';
-    info.innerHTML = `
-      <div class="username">@user_stream</div>
-      <div class="desc">${escapeHtml(videoData.desc)}</div>
-      <div class="music">🎵 ${videoData.musicName}</div>
-    `;
+  // Like button
+  function toggleLike(idx) {
+    state[idx].liked = !state[idx].liked;
+    state[idx].likes += state[idx].liked ? 1 : -1;
+    const btn = document.querySelector(`[data-like="${idx}"]`);
+    btn.classList.toggle('liked', state[idx].liked);
+    document.getElementById(`likeCount-${idx}`).textContent = formatCount(state[idx].likes);
+    if (state[idx].liked) {
+      btn.querySelector('.icon').animate([
+        { transform: 'scale(1)' },
+        { transform: 'scale(1.4)' },
+        { transform: 'scale(1)' }
+      ], { duration: 300 });
+    }
+  }
+  document.querySelectorAll('[data-like]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleLike(parseInt(btn.dataset.like));
+    });
+  });
 
-    const actions = document.createElement('div');
-    actions.className = 'side-actions';
-    actions.innerHTML = `
-      <div class="action-btn-side"><span class="icon">❤️</span>12K</div>
-      <div class="action-btn-side"><span class="icon">💬</span>345</div>
-      <div class="action-btn-side"><span class="icon">↗️</span>Share</div>
-    `;
+  // Bookmark
+  document.querySelectorAll('[data-bookmark]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.bookmark);
+      state[idx].bookmarked = !state[idx].bookmarked;
+      state[idx].bookmarks += state[idx].bookmarked ? 1 : -1;
+      btn.classList.toggle('bookmarked', state[idx].bookmarked);
+      document.getElementById(`bookmarkCount-${idx}`).textContent = formatCount(state[idx].bookmarks);
+      showToast(state[idx].bookmarked ? '✓ Disimpan ke favorit' : 'Dihapus dari favorit');
+    });
+  });
 
-    card.appendChild(vid);
-    card.appendChild(volBtn);
-    card.appendChild(overlayContainer);
-    card.appendChild(info);
-    card.appendChild(actions);
-    container.appendChild(card);
+  // Follow
+  document.querySelectorAll('[data-follow]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.follow);
+      state[idx].followed = !state[idx].followed;
+      btn.classList.toggle('followed', state[idx].followed);
+      btn.textContent = state[idx].followed ? '✓' : '+';
+      showToast(state[idx].followed ? `Mengikuti @${videos[idx].user}` : 'Berhenti mengikuti');
+    });
+  });
 
-    // Observer: Play saat terlihat, Pause saat tidak terlihat
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) { 
-          vid.play().catch(e=>{}); 
-        } else { 
-          vid.pause(); 
-          vid.muted = true; // Kembalikan ke mute saat scroll
-          volBtn.innerHTML = '🔇';
-          volBtn.classList.add('pulse');
-          if (bgAudio) bgAudio.pause();
+  // Comments
+  document.querySelectorAll('[data-comment]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.comment);
+      openComments(idx);
+    });
+  });
+
+  function openComments(idx) {
+    const modal = document.getElementById('commentsModal');
+    const list = document.getElementById('commentsList');
+    document.getElementById('commentsCount').textContent = `${formatCount(state[idx].comments.length)} Komentar`;
+    list.innerHTML = '';
+    state[idx].comments.forEach(c => {
+      const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a8e6cf', '#ff8b94', '#95e1d3'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const item = document.createElement('div');
+      item.className = 'comment-item';
+      item.innerHTML = `
+        <div class="comment-avatar" style="background:${color}">${c.user[0].toUpperCase()}</div>
+        <div class="comment-body">
+          <div class="comment-user">@${c.user}</div>
+          <div class="comment-text">${c.text}</div>
+          <div class="comment-meta">
+            <span>${c.time}</span>
+            <span>♡ ${c.likes}</span>
+            <span>Balas</span>
+          </div>
+        </div>
+      `;
+      list.appendChild(item);
+    });
+    modal.classList.add('show');
+    modal.dataset.idx = idx;
+  }
+
+  // Send comment
+  document.getElementById('commentSend').addEventListener('click', () => {
+    const input = document.getElementById('commentInput');
+    const text = input.value.trim();
+    if (!text) return;
+    const idx = parseInt(document.getElementById('commentsModal').dataset.idx);
+    state[idx].comments.unshift({
+      user: 'saya',
+      text: text,
+      time: 'baru saja',
+      likes: 0
+    });
+    input.value = '';
+    openComments(idx);
+    showToast('Komentar terkirim');
+  });
+
+  document.getElementById('commentInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') document.getElementById('commentSend').click();
+  });
+
+  // Share
+  document.querySelectorAll('[data-share]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openShare(parseInt(btn.dataset.share));
+    });
+  });
+
+  function openShare(idx) {
+    const modal = document.getElementById('shareModal');
+    const grid = document.getElementById('shareGrid');
+    grid.innerHTML = '';
+    shareOptions.forEach(opt => {
+      const item = document.createElement('div');
+      item.className = 'share-item';
+      item.innerHTML = `
+        <div class="share-icon" style="background:${opt.bg}">${opt.icon}</div>
+        <div>${opt.name}</div>
+      `;
+      item.addEventListener('click', () => {
+        modal.classList.remove('show');
+        if (opt.name === 'Salin Link') {
+          showToast('Link disalin ke clipboard');
+        } else {
+          showToast(`Membuka ${opt.name}...`);
         }
       });
-    }, { threshold: 0.6 });
-    observer.observe(card);
-  });
-}
-
-/* ============================================================
-   PROFIL
-   ============================================================ */
-function renderProfile() {
-  const grid = document.getElementById('profileGrid');
-  grid.innerHTML = '';
-  document.getElementById('profileCount').textContent = state.videos.length + ' Video';
-  if (state.videos.length === 0) {
-    grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#666;">Belum ada video</div>';
-    return;
-  }
-  state.videos.forEach(v => {
-    const item = document.createElement('div');
-    item.className = 'grid-item';
-    const vid = document.createElement('video');
-    vid.src = URL.createObjectURL(v.blob);
-    vid.muted = true;
-    vid.playsInline = true;
-    vid.onmouseenter = () => vid.play();
-    vid.onmouseleave = () => { vid.pause(); vid.currentTime = 0; };
-    item.appendChild(vid);
-    grid.appendChild(item);
-  });
-}
-
-/* ============================================================
-   KAMERA
-   ============================================================ */
-async function openCamera() {
-  showScreen('camera');
-  await startCamera();
-}
-
-async function startCamera() {
-  try {
-    if (state.camStream) state.camStream.getTracks().forEach(t => t.stop());
-    
-    // Paksa minta audio jika tidak di-mute
-    state.camStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: state.camFacing, width: { ideal: 1280 }, height: { ideal: 720 } },
-      audio: !state.camMuted 
+      grid.appendChild(item);
     });
-    
-    const video = document.getElementById('camPreview');
-    video.srcObject = state.camStream;
-    video.muted = true; // Preview tetap mute agar tidak feedback
-    await video.play();
-    document.getElementById('camMuteBtn').textContent = state.camMuted ? '🔇' : '🔊';
-  } catch (err) {
-    showToast('Gagal kamera/mic: ' + err.message);
-    switchTab('home');
+    modal.classList.add('show');
   }
-}
 
-function stopCamera() {
-  if (state.camStream) { state.camStream.getTracks().forEach(t => t.stop()); state.camStream = null; }
-  if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') state.mediaRecorder.stop();
-  clearInterval(state.recTimerInterval);
-  state.isRecording = false;
-  document.getElementById('recBtn').classList.remove('recording');
-  document.getElementById('recTimer').classList.remove('show');
-}
-
-async function toggleCameraFacing() {
-  if (state.isRecording) return;
-  state.camFacing = state.camFacing === 'environment' ? 'user' : 'environment';
-  await startCamera();
-}
-
-function toggleCamMute() {
-  state.camMuted = !state.camMuted;
-  document.getElementById('camMuteBtn').textContent = state.camMuted ? '🔇' : '🔊';
-  if (!state.isRecording) startCamera();
-}
-
-function toggleRecording() {
-  if (state.isRecording) {
-    if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') state.mediaRecorder.stop();
-    state.isRecording = false;
-    clearInterval(state.recTimerInterval);
-    document.getElementById('recBtn').classList.remove('recording');
-    document.getElementById('recTimer').classList.remove('show');
-  } else {
-    if (!state.camStream) return;
-    state.recordedChunks = [];
-    
-    // Cek apakah ada track audio di stream
-    const hasAudio = state.camStream.getAudioTracks().length > 0;
-    const mime = hasAudio ? 'video/webm;codecs=vp9,opus' : 'video/webm;codecs=vp9';
-    
-    try {
-      state.mediaRecorder = new MediaRecorder(state.camStream, { mimeType: mime });
-    } catch (e) {
-      state.mediaRecorder = new MediaRecorder(state.camStream); // Fallback
-    }
-    
-    state.mediaRecorder.ondataavailable = e => { if (e.data.size > 0) state.recordedChunks.push(e.data); };
-    state.mediaRecorder.onstop = () => {
-      const blob = new Blob(state.recordedChunks, { type: 'video/webm' });
-      handleNewVideo(blob, 'rekaman.webm');
-    };
-    state.mediaRecorder.start();
-    state.isRecording = true;
-    state.recordingStartTime = Date.now();
-    document.getElementById('recBtn').classList.add('recording');
-    document.getElementById('recTimer').classList.add('show');
-    state.recTimerInterval = setInterval(() => {
-      const s = Math.floor((Date.now() - state.recordingStartTime) / 1000);
-      document.getElementById('recTimerText').textContent = formatTime(s);
-    }, 250);
-  }
-}
-
-function pickFromGallery() {
-  const input = document.getElementById('galleryInput');
-  input.value = '';
-  input.onchange = e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    handleNewVideo(file, file.name);
-  };
-  input.click();
-}
-
-/* ============================================================
-   EDITOR
-   ============================================================ */
-function handleNewVideo(blob, filename) {
-  stopCamera();
-  if (state.videoURL) URL.revokeObjectURL(state.videoURL);
-  state.videoBlob = blob;
-  state.videoURL = URL.createObjectURL(blob);
-  state.textOverlays = [];
-  state.selectedMusicTrack = MUSIC_CATALOG[0];
-  
-  const v = document.getElementById('editVideo');
-  v.src = state.videoURL;
-  v.muted = false; // Pastikan tidak mute di editor
-  v.onloadedmetadata = () => {
-    state.videoDuration = v.duration;
-    state.trimStart = 0;
-    state.trimEnd = v.duration;
-    initTrimUI();
-    renderOverlays();
-    showScreen('editor');
-    v.currentTime = 0;
-    v.play();
-  };
-}
-
-function initTrimUI() {
-  const track = document.getElementById('trimTrack');
-  const sel = document.getElementById('trimSelection');
-  const left = document.getElementById('trimLeft');
-  const right = document.getElementById('trimRight');
-
-  function updateSelection() {
-    const w = track.clientWidth;
-    const s = (state.trimStart / state.videoDuration) * w;
-    const e = (state.trimEnd / state.videoDuration) * w;
-    sel.style.left = s + 'px';
-    sel.style.width = Math.max(0, e - s) + 'px';
-    document.getElementById('trimCurrent').textContent = formatTime(state.trimStart) + ' - ' + formatTime(state.trimEnd);
-    document.getElementById('trimDur').textContent = 'Durasi: ' + formatTime(state.trimEnd - state.trimStart);
-  }
-  updateSelection();
-
-  let dragging = null;
-  const onStart = side => e => { e.preventDefault(); dragging = side; };
-  const onMove = e => {
-    if (!dragging) return;
-    e.preventDefault();
-    const rect = track.getBoundingClientRect();
-    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-    const ratio = Math.max(0, Math.min(1, x / rect.width));
-    const time = ratio * state.videoDuration;
-    const minDur = 3;
-
-    if (dragging === 'left') {
-      state.trimStart = Math.min(Math.max(0, time), state.trimEnd - minDur);
-    } else {
-      state.trimEnd = Math.max(Math.min(state.videoDuration, time), state.trimStart + minDur);
-    }
-    updateSelection();
-  };
-  const onEnd = () => { dragging = null; };
-
-  left.onmousedown = left.ontouchstart = onStart('left');
-  right.onmousedown = right.ontouchstart = onStart('right');
-  document.onmousemove = onMove;
-  document.ontouchmove = onMove;
-  document.onmouseup = onEnd;
-  document.ontouchend = onEnd;
-}
-
-/* Text Overlay Logic */
-let selectedColor = '#ffffff';
-function openTextModal() {
-  document.getElementById('txtContent').value = '';
-  const colors = ['#ffffff', '#ffff00', '#ff5252', '#00e5ff', '#69f0ae', '#ff4081'];
-  const wrap = document.getElementById('txtColors');
-  wrap.innerHTML = '';
-  colors.forEach(c => {
-    const sw = document.createElement('div');
-    sw.className = 'color-swatch' + (c === '#ffffff' ? ' selected' : '');
-    sw.style.background = c;
-    sw.onclick = () => {
-      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
-      sw.classList.add('selected');
-      selectedColor = c;
-    };
-    wrap.appendChild(sw);
-  });
-  document.getElementById('textModal').classList.add('show');
-}
-
-function addTextOverlay() {
-  const text = document.getElementById('txtContent').value.trim();
-  if (!text) return;
-  const size = parseInt(document.getElementById('txtSize').value) || 28;
-  state.textOverlays.push({ id: Date.now(), text, size, color: selectedColor, x: 0.5, y: 0.5 });
-  closeModal('textModal');
-  renderOverlays();
-}
-
-function renderOverlays() {
-  const layer = document.getElementById('overlayLayer');
-  layer.innerHTML = '';
-  state.textOverlays.forEach((t, idx) => {
-    const el = document.createElement('div');
-    el.className = 'text-overlay';
-    el.textContent = t.text;
-    el.style.left = (t.x * 100) + '%';
-    el.style.top = (t.y * 100) + '%';
-    el.style.fontSize = t.size + 'px';
-    el.style.color = t.color;
-    el.style.pointerEvents = 'auto';
-    
-    let drag = false;
-    const parent = document.getElementById('editVideo').parentElement;
-    el.onmousedown = el.ontouchstart = (e) => { e.preventDefault(); drag = true; };
-    document.addEventListener('mousemove', (e) => {
-      if (!drag) return;
-      const rect = parent.getBoundingClientRect();
-      const cx = (e.touches ? e.touches[0].clientX : e.clientX);
-      const cy = (e.touches ? e.touches[0].clientY : e.clientY);
-      let x = (cx - rect.left) / rect.width;
-      let y = (cy - rect.top) / rect.height;
-      state.textOverlays[idx].x = Math.max(0, Math.min(1, x));
-      state.textOverlays[idx].y = Math.max(0, Math.min(1, y));
-      el.style.left = (state.textOverlays[idx].x * 100) + '%';
-      el.style.top = (state.textOverlays[idx].y * 100) + '%';
+  // Close modals
+  document.querySelectorAll('.modal-close').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById(btn.dataset.close).classList.remove('show');
     });
-    document.addEventListener('mouseup', () => drag = false);
-    document.addEventListener('touchend', () => drag = false);
-    
-    layer.appendChild(el);
   });
-  
-  const list = document.getElementById('overlayList');
-  list.innerHTML = '';
-  state.textOverlays.forEach((t, i) => {
-    const chip = document.createElement('div');
-    chip.style.cssText = 'background:#333; padding:4px 8px; border-radius:10px; font-size:12px;';
-    chip.innerHTML = `${t.text} <span style="color:red; cursor:pointer;" onclick="removeOverlay(${i})">✕</span>`;
-    list.appendChild(chip);
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.classList.remove('show');
+    });
   });
-}
 
-function removeOverlay(idx) {
-  state.textOverlays.splice(idx, 1);
-  renderOverlays();
-}
+  // Tabs
+  document.querySelectorAll('.top-bar .tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.top-bar .tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      showToast(`Beralih ke ${tab.textContent}`);
+    });
+  });
 
-/* ============================================================
-   KATALOG MUSIK
-   ============================================================ */
-function openMusicModal() {
-  const list = document.getElementById('musicList');
-  list.innerHTML = '';
-  
-  MUSIC_CATALOG.forEach(track => {
-    const item = document.createElement('div');
-    item.className = 'music-item' + (state.selectedMusicTrack.id === track.id ? ' selected' : '');
-    
-    const playBtn = document.createElement('button');
-    playBtn.className = 'music-play-btn';
-    playBtn.textContent = '▶️';
-    playBtn.onclick = (e) => {
-      e.stopPropagation();
-      if (previewAudio && !previewAudio.paused) {
-        previewAudio.pause();
-        previewAudio.currentTime = 0;
-        playBtn.textContent = '▶️';
+  // Bottom nav
+  document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.bottom-nav .nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+
+  // Mute toggle
+  let muted = true;
+  document.getElementById('muteIndicator').addEventListener('click', () => {
+    muted = !muted;
+    document.getElementById('muteIcon').textContent = muted ? '🔇' : '🔊';
+    document.getElementById('muteText').textContent = muted ? 'Ketik untuk bunyi' : 'Suara aktif';
+    showToast(muted ? 'Audio dimatikan' : 'Audio diaktifkan');
+  });
+
+  // Pause videos not in view
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const idx = parseInt(entry.target.dataset.idx);
+      if (entry.isIntersecting && entry.intersectionRatio > 0.7) {
+        animations[idx].resume();
       } else {
-        if (previewAudio) previewAudio.pause();
-        if (track.id !== 'none' && track.url) {
-          previewAudio = new Audio(track.url);
-          previewAudio.play();
-          playBtn.textContent = '⏸️';
-          previewAudio.onended = () => { playBtn.textContent = '▶️'; };
-        }
+        animations[idx].pause();
       }
-    };
+    });
+  }, { threshold: [0, 0.7, 1] });
 
-    const name = document.createElement('span');
-    name.textContent = track.name;
-    
-    const ctrl = document.createElement('div');
-    ctrl.className = 'music-ctrl';
-    ctrl.appendChild(name);
-    if (track.id !== 'none') ctrl.appendChild(playBtn);
-    
-    item.appendChild(ctrl);
-    
-    item.onclick = () => {
-      state.selectedMusicTrack = track;
-      if (previewAudio) { previewAudio.pause(); previewAudio = null; }
-      closeMusicModal();
-      showToast('Musik dipilih: ' + track.name);
-    };
-    
-    list.appendChild(item);
-  });
-  
-  document.getElementById('musicModal').classList.add('show');
-}
-
-function closeMusicModal() {
-  if (previewAudio) { previewAudio.pause(); previewAudio = null; }
-  document.getElementById('musicModal').classList.remove('show');
-}
-
-/* ============================================================
-   PUBLISH & SIMPAN
-   ============================================================ */
-function publishVideo() {
-  const v = document.getElementById('editVideo');
-  v.pause();
-  if (previewAudio) { previewAudio.pause(); previewAudio = null; }
-  document.getElementById('publishModal').classList.add('show');
-}
-
-async function confirmPublish() {
-  const title = document.getElementById('pubTitle').value.trim();
-  const desc = document.getElementById('pubDesc').value.trim();
-  if (!title) { showToast('Judul wajib diisi!'); return; }
-  
-  const newVideo = {
-    id: Date.now().toString(),
-    title: title,
-    desc: title + (desc ? ' ' + desc : ''),
-    musicId: state.selectedMusicTrack.id,
-    musicName: state.selectedMusicTrack.name,
-    musicUrl: state.selectedMusicTrack.url,
-    texts: [...state.textOverlays],
-    blob: state.videoBlob,
-    timestamp: Date.now()
-  };
-  
-  closeModal('publishModal');
-  showLoader('Menyimpan video...');
-  
-  try {
-    await saveVideoToDB(newVideo);
-    state.videos.unshift(newVideo);
-    state.videoBlob = null;
-    state.videoURL = null;
-    state.textOverlays = [];
-    state.selectedMusicTrack = MUSIC_CATALOG[0];
-    
-    hideLoader();
-    showToast('Video berhasil disimpan & diposting! 🎉');
-    switchTab('home');
-  } catch (err) {
-    hideLoader();
-    showToast('Gagal menyimpan: ' + err.message);
-  }
-}
-
-/* ============================================================
-   UTIL
-   ============================================================ */
-function formatTime(sec) {
-  sec = Math.max(0, Math.floor(sec));
-  return `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
-}
-function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-/* ============================================================
-   INISIALISASI
-   ============================================================ */
-window.addEventListener('load', async () => {
-  showLoader('Memuat aplikasi...');
-  try {
-    await initDB();
-    state.videos = await getAllVideosFromDB();
-    state.videos.sort((a, b) => b.timestamp - a.timestamp);
-    switchTab('home');
-  } catch (err) {
-    showToast('Gagal memuat database: ' + err.message);
-  } finally {
-    hideLoader();
-  }
-});
+  document.querySelectorAll('.video-slide').forEach(slide => observer.observe(slide));
 </script>
 </body>
 </html>
