@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>TikVid - Video Pendek & Database IndexedDB</title>
+<title>TikVid - Long Video Edition & LIVE</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans@5.0.3/index.css" />
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -108,23 +108,6 @@
     transform: translate(-50%, -50%) scale(1);
     opacity: 0.9;
   }
-  /* Double tap heart */
-  .double-tap-heart {
-    position: absolute;
-    font-size: 100px;
-    color: #ff2d55;
-    pointer-events: none;
-    z-index: 25;
-    animation: heartPop 1s ease-out forwards;
-    transform: translate(-50%, -50%);
-    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
-  }
-  @keyframes heartPop {
-    0% { transform: translate(-50%, -50%) scale(0) rotate(-15deg); opacity: 0; }
-    20% { transform: translate(-50%, -50%) scale(1.3) rotate(10deg); opacity: 1; }
-    40% { transform: translate(-50%, -50%) scale(1) rotate(-5deg); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(1.1) rotate(0); opacity: 0; }
-  }
   /* Sidebar */
   .sidebar {
     position: absolute;
@@ -206,6 +189,17 @@
     font-weight: 700;
     font-size: 16px;
     margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .long-badge {
+    background: #ff9500;
+    color: #000;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 800;
   }
   .bottom-info .caption {
     font-size: 14px;
@@ -243,13 +237,14 @@
     position: absolute;
     bottom: 60px;
     left: 0; right: 0;
-    height: 2px;
+    height: 3px;
     background: rgba(255,255,255,0.2);
     z-index: 15;
+    cursor: pointer;
   }
   .progress-bar .progress {
     height: 100%;
-    background: #fff;
+    background: #ff2d55;
     width: 0%;
   }
   /* Bottom Nav */
@@ -566,7 +561,7 @@
     <div class="live-btn" id="liveBtn">🔴 LIVE</div>
     <div class="tabs">
       <div class="tab" data-tab="following">Mengikuti</div>
-      <div class="tab active" data-tab="foryou">Untuk Kamu</div>
+      <div class="tab active" data-tab="foryou">Panjang & FYP</div>
     </div>
     <div class="search-btn" id="searchBtn">🔍</div>
   </div>
@@ -637,7 +632,7 @@
         <div class="modal-close" data-close="searchModal">✕</div>
       </div>
       <div style="padding-top: 15px;">
-        <input type="text" class="comment-input" id="searchInput" placeholder="Cari tag atau kreator..." style="width: 100%; margin-bottom: 15px;" />
+        <input type="text" class="comment-input" id="searchInput" placeholder="Cari durasi panjang atau kreator..." style="width: 100%; margin-bottom: 15px;" />
         <button class="comment-send" id="executeSearch" style="width: 100%; border-radius: 20px; padding: 10px;">Cari</button>
       </div>
     </div>
@@ -651,7 +646,7 @@
         <div class="modal-close" data-close="musicModal">✕</div>
       </div>
       <div class="comments-list" id="musicList">
-        <div class="comment-item" style="padding: 14px; text-align:center; opacity:0.6;">Memuat musik viral dari API...</div>
+        <div class="comment-item" style="padding: 14px; text-align:center; opacity:0.6;">Memuat musik dari API...</div>
       </div>
     </div>
   </div>
@@ -664,19 +659,19 @@
     <div class="live-indicator-badge" id="liveBadge">LIVE STREAMING</div>
     <div class="camera-top-bar">
       <div style="cursor: pointer; padding: 10px;" id="closeCamera">✕ Tutup</div>
-      <div id="recordingTimer" style="color: #fe2c55; display: none;">● 00:00</div>
+      <div id="recordingTimer" style="color: #fe2c55; font-weight: bold;">● 00:00</div>
       <div style="cursor: pointer; padding: 10px;" id="switchCameraBtn">🔄 Putar Kamera</div>
     </div>
     <div class="camera-controls">
       <div class="music-picker" id="openMusicModal">
-        <span id="selectedMusicLabel">🎵 ♪ Lofi Sunset Vibes - ChillBeats</span>
+        <span id="selectedMusicLabel">🎵 ♪ Lofi Long Session - ChillBeats</span>
       </div>
       <div class="camera-actions-row">
-        <button class="cam-btn" id="uploadGalleryBtn">📁 Galeri</button>
+        <button class="cam-btn" id="uploadGalleryBtn">📁 Galeri (Durasi Panjang)</button>
         <div class="record-shutter" id="recordShutter">
           <div class="record-shutter-inner"></div>
         </div>
-        <button class="cam-btn" id="camModeToggleBtn">Rekam</button>
+        <button class="cam-btn" id="camModeToggleBtn">Rekam Panjang</button>
       </div>
     </div>
     <input type="file" id="galleryInput" accept="video/*" style="display: none;" />
@@ -687,20 +682,21 @@
 </div>
 
 <script>
+  // Sampel video dengan format durasi panjang
   const defaultVideos = [
-    { id: 1, user: 'sunset_lover', displayName: 'Pecinta Senja', avatar: '🌅', avatarBg: 'linear-gradient(135deg, #ff9966, #ff5e62)', caption: 'Senja hari ini benar-benar memukau 🌇 Siapa yang setuju?', hashtags: ['senja', 'sunset', 'indonesia', 'fyp'], music: '♪ Lofi Sunset Vibes - ChillBeats', likes: 128400, comments: 2341, shares: 892, bookmarks: 4521, theme: 'sunset' },
-    { id: 2, user: 'ocean_dreamer', displayName: 'Pemimpi Laut', avatar: '🌊', avatarBg: 'linear-gradient(135deg, #2193b0, #6dd5ed)', caption: 'Gelombang laut menenangkan pikiran 🌊✨', hashtags: ['ocean', 'waves', 'calm', 'nature'], music: '♪ Ocean Waves - Nature Sounds', likes: 89200, comments: 1203, shares: 456, bookmarks: 2310, theme: 'ocean' },
-    { id: 3, user: 'aurora_north', displayName: 'Cahaya Utara', avatar: '✨', avatarBg: 'linear-gradient(135deg, #00c9ff, #92fe9d)', caption: 'Aurora borealis di malam ini 💚💙', hashtags: ['aurora', 'northernlights', 'sky'], music: '♪ Northern Lights - Ambient', likes: 456700, comments: 8921, shares: 3421, bookmarks: 12300, theme: 'aurora' }
+    { id: 1, user: 'cinematic_vlog', displayName: 'Vlog Perjalanan Panjang', avatar: '🏕️', avatarBg: 'linear-gradient(135deg, #ff9966, #ff5e62)', caption: 'Dokumenter perjalanan alam terbuka berdurasi panjang tanpa potongan 🌲✨ Nikmati ketenangannya.', hashtags: ['longvideo', 'vlog', 'alam', 'cinematic'], music: '♪ Cinematic Journey - LongChill', likes: 245000, comments: 4120, shares: 1520, bookmarks: 9800, durationLabel: '03:45', isCustomVideo: false, videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
+    { id: 2, user: 'tech_insight', displayName: 'Wawasan Teknologi', avatar: '💻', avatarBg: 'linear-gradient(135deg, #2193b0, #6dd5ed)', caption: 'Pembahasan mendalam mengenai arsitektur web masa depan dan eksplorasi kode kompleks.', hashtags: ['tech', 'coding', 'longformat', 'education'], music: '♪ Tech Ambient - FutureSound', likes: 182000, comments: 3010, shares: 920, bookmarks: 6400, durationLabel: '05:12', isCustomVideo: false, videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4' },
+    { id: 3, user: 'gourmet_chef', displayName: 'Masterclass Memasak', avatar: '🍳', avatarBg: 'linear-gradient(135deg, #00c9ff, #92fe9d)', caption: 'Resep lengkap rahasia hidangan chef bintang lima dari awal hingga penyajian.', hashtags: ['cooking', 'masterclass', 'food', 'chef'], music: '♪ Kitchen Jazz - SoftBeats', likes: 512000, comments: 9400, shares: 4100, bookmarks: 23000, durationLabel: '04:30', isCustomVideo: false, videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4' }
   ];
 
   let videos = [];
-  let currentSelectedMusic = '♪ Lofi Sunset Vibes - ChillBeats';
+  let currentSelectedMusic = '♪ Lofi Long Session - ChillBeats';
 
-  // Inisialisasi IndexedDB (Database khusus penyimpanan video tanpa batas lokal yang mudah hilang)
+  // Inisialisasi IndexedDB untuk mendukung penyimpanan file video panjang tanpa hilang
   let db;
   function initIndexedDB() {
     return new Promise((resolve) => {
-      const request = indexedDB.open('TikVidDatabase', 1);
+      const request = indexedDB.open('TikVidLongDatabase', 1);
       request.onerror = () => {
         loadVideosFallback();
         resolve();
@@ -734,7 +730,6 @@
       const store = transaction.objectStore('videos');
       const request = store.getAll();
       request.onsuccess = () => {
-        // Urutkan dari yang terbaru
         const result = request.result.sort((a, b) => b.id - a.id);
         callback(result.length ? result : null);
       };
@@ -750,9 +745,7 @@
       const transaction = db.transaction(['videos'], 'readwrite');
       const store = transaction.objectStore('videos');
       store.put(videoObj);
-    } catch (e) {
-      console.error('Gagal menyimpan ke IndexedDB:', e);
-    }
+    } catch (e) {}
   }
 
   function saveAllVideosToDB(list) {
@@ -765,14 +758,14 @@
   }
 
   function loadVideosFallback() {
-    const saved = localStorage.getItem('tikvid_custom_videos');
+    const saved = localStorage.getItem('tikvid_long_videos');
     videos = saved ? JSON.parse(saved) : [...defaultVideos];
     renderFeed(videos);
   }
 
   const sampleComments = [
-    { user: 'dina_k', text: 'Keren banget kak! 🔥', time: '2j', likes: 234 },
-    { user: 'rizky.m', text: 'Indahnya ya Allah 😍', time: '3j', likes: 567 }
+    { user: 'fauzan_a', text: 'Durasi panjang gini jauh lebih puas ditonton! 👍', time: '1j', likes: 145 },
+    { user: 'siti_nur', text: 'Keren banget materinya lengkap ✨', time: '3j', likes: 320 }
   ];
 
   const shareOptions = [
@@ -782,7 +775,7 @@
     { name: 'Salin Link', icon: '🔗', bg: '#555' }
   ];
 
-  // Fetch Music dari Jamendo API
+  // Fetch Musik Live dari Jamendo API
   async function fetchViralMusicAPI() {
     const musicListEl = document.getElementById('musicList');
     try {
@@ -808,9 +801,9 @@
       }
     } catch (err) {
       musicListEl.innerHTML = `
-        <div class="comment-item" data-music="♪ Lofi Sunset Vibes - ChillBeats" style="cursor:pointer; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">🎵 Lofi Sunset Vibes - ChillBeats</div>
-        <div class="comment-item" data-music="♪ Ocean Waves - Nature Sounds" style="cursor:pointer; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">🎵 Ocean Waves - Nature Sounds</div>
-        <div class="comment-item" data-music="♪ TikTok Viral Remix 2026" style="cursor:pointer; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">🎵 TikTok Viral Remix 2026</div>
+        <div class="comment-item" data-music="♪ Cinematic Journey - LongChill" style="cursor:pointer; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">🎵 Cinematic Journey - LongChill</div>
+        <div class="comment-item" data-music="♪ Tech Ambient - FutureSound" style="cursor:pointer; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">🎵 Tech Ambient - FutureSound</div>
+        <div class="comment-item" data-music="♪ Acoustic Longplay Session" style="cursor:pointer; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">🎵 Acoustic Longplay Session</div>
       `;
     }
   }
@@ -838,9 +831,11 @@
       slide.className = 'video-slide';
       slide.dataset.idx = idx;
       
-      let mediaContent = `<canvas></canvas>`;
+      let mediaContent = '';
       if (v.isCustomVideo) {
-        mediaContent = `<video src="${v.videoUrl}" autoplay loop playsinline></video>`;
+        mediaContent = `<video src="${v.videoUrl}" loop playsinline controls></video>`;
+      } else {
+        mediaContent = `<video src="${v.videoUrl}" loop playsinline controls></video>`;
       }
 
       slide.innerHTML = `
@@ -877,52 +872,97 @@
           </div>
         </div>
         <div class="bottom-info">
-          <div class="username">@${v.user}</div>
+          <div class="username">
+            @${v.user}
+            <span class="long-badge">⏳ ${v.durationLabel || '02:00'}</span>
+          </div>
           <div class="caption">${v.caption} ${(v.hashtags || []).map(h => `<span class="hashtag">#${h}</span>`).join(' ')}</div>
           <div class="music">
             <span>🎵</span>
             <div class="marquee"><span>${v.music} &nbsp;&nbsp;&nbsp; </span></div>
           </div>
         </div>
-        <div class="progress-bar"><div class="progress" id="progress-${idx}"></div></div>
+        <div class="progress-bar" id="progressBar-${idx}"><div class="progress" id="progress-${idx}"></div></div>
       `;
       feed.appendChild(slide);
     });
+
+    setupVideoInteractions();
   }
 
-  const state = videos.map(v => ({
-    liked: false,
-    bookmarked: false,
-    followed: false,
-    likes: v.likes,
-    bookmarks: v.bookmarks,
-    comments: [...sampleComments]
-  }));
+  const state = [];
 
-  // Jalankan inisialisasi database
-  initIndexedDB();
+  function initStates() {
+    state.length = 0;
+    videos.forEach(v => {
+      state.push({
+        liked: false,
+        bookmarked: false,
+        followed: false,
+        likes: v.likes,
+        bookmarks: v.bookmarks,
+        comments: [...sampleComments]
+      });
+    });
+  }
 
-  // Canvas background animations
-  document.querySelectorAll('.video-slide').forEach((slide, idx) => {
-    const canvas = slide.querySelector('canvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let t = 0;
-
-    function draw() {
-      t += 0.03;
-      ctx.fillStyle = idx % 2 === 0 ? '#ff6b35' : '#2193b0';
-      ctx.fillRect(0, 0, canvas.width || 300, canvas.height || 500);
-      ctx.fillStyle = 'rgba(255,255,255,0.4)';
-      for(let i=0; i<15; i++) {
-        let px = (i * 40 + t * 20) % 400;
-        let py = (i * 70 + Math.sin(t+i)*30) % 700;
-        ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI*2); ctx.fill();
-      }
-      requestAnimationFrame(draw);
-    }
-    draw();
+  initIndexedDB().then(() => {
+    initStates();
   });
+
+  // Sinkronisasi pemutaran video panjang & progress bar interaktif
+  function setupVideoInteractions() {
+    const slides = document.querySelectorAll('.video-slide');
+    
+    slides.forEach((slide, idx) => {
+      const vid = slide.querySelector('video');
+      const progressBar = slide.querySelector(`#progress-${idx}`);
+      const progressContainer = slide.querySelector(`#progressBar-${idx}`);
+      const playInd = slide.querySelector(`#playInd-${idx}`);
+
+      if (!vid) return;
+
+      vid.addEventListener('timeupdate', () => {
+        if (vid.duration) {
+          const pct = (vid.currentTime / vid.duration) * 100;
+          if (progressBar) progressBar.style.width = pct + '%';
+        }
+      });
+
+      progressContainer.addEventListener('click', (e) => {
+        const rect = progressContainer.getBoundingClientRect();
+        const pos = (e.clientX - rect.left) / rect.width;
+        vid.currentTime = pos * vid.duration;
+      });
+
+      vid.addEventListener('click', () => {
+        if (vid.paused) {
+          vid.play();
+          playInd.textContent = '▶';
+        } else {
+          vid.pause();
+          playInd.textContent = '⏸';
+        }
+        playInd.classList.add('show');
+        setTimeout(() => playInd.classList.remove('show'), 500);
+      });
+    });
+
+    // Auto play video yang sedang aktif di viewport
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const vid = entry.target.querySelector('video');
+        if (!vid) return;
+        if (entry.isIntersecting) {
+          vid.play().catch(() => {});
+        } else {
+          vid.pause();
+        }
+      });
+    }, { threshold: 0.6 });
+
+    slides.forEach(s => observer.observe(s));
+  }
 
   // ============ GLOBAL EVENT LISTENER ============
   document.addEventListener('click', (e) => {
@@ -1058,7 +1098,7 @@
     showToast(muted ? 'Audio dimatikan' : 'Audio diaktifkan');
   });
 
-  // ============ CAMERA, LIVE & INDEXEDDB STORAGE ============
+  // ============ CAMERA, RECORD & LIVE STUDIO (LONG DURATION) ============
   const cameraModal = document.getElementById('cameraModal');
   const cameraVideo = document.getElementById('cameraVideo');
   const openCameraBtn = document.getElementById('openCameraModal');
@@ -1069,6 +1109,7 @@
   const galleryInput = document.getElementById('galleryInput');
   const liveBadge = document.getElementById('liveBadge');
   const camModeToggleBtn = document.getElementById('camModeToggleBtn');
+  const recordingTimerEl = document.getElementById('recordingTimer');
 
   let mediaStream = null;
   let mediaRecorder = null;
@@ -1076,6 +1117,8 @@
   let isRecording = false;
   let useFrontCamera = true;
   let isLiveMode = false;
+  let timerInterval = null;
+  let secondsElapsed = 0;
 
   async function startCamera(front) {
     if (mediaStream) {
@@ -1083,7 +1126,7 @@
     }
     try {
       mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: front ? 'user' : 'environment' },
+        video: { facingMode: front ? 'user' : 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: true
       });
       cameraVideo.srcObject = mediaStream;
@@ -1095,7 +1138,7 @@
   openCameraBtn.addEventListener('click', async () => {
     isLiveMode = false;
     liveBadge.style.display = 'none';
-    camModeToggleBtn.textContent = 'Rekam';
+    camModeToggleBtn.textContent = 'Rekam Panjang';
     cameraModal.classList.add('show');
     await startCamera(useFrontCamera);
   });
@@ -1106,12 +1149,13 @@
     camModeToggleBtn.textContent = 'LIVE Aktif';
     cameraModal.classList.add('show');
     await startCamera(useFrontCamera);
-    showToast('Memulai Siaran LIVE via Kamera Perangkat...');
+    showToast('Memulai Siaran LIVE Berdurasi Panjang...');
   }
 
   closeCameraBtn.addEventListener('click', () => {
     if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
     cameraModal.classList.remove('show');
+    stopTimer();
     if (isRecording) {
       mediaRecorder.stop();
       isRecording = false;
@@ -1125,18 +1169,37 @@
     showToast(useFrontCamera ? 'Kamera Depan' : 'Kamera Belakang');
   });
 
+  function startTimer() {
+    secondsElapsed = 0;
+    recordingTimerEl.textContent = '● 00:00';
+    timerInterval = setInterval(() => {
+      secondsElapsed++;
+      const m = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+      const s = String(secondsElapsed % 60).padStart(2, '0');
+      recordingTimerEl.textContent = `● ${m}:${s}`;
+    }, 1000);
+  }
+
+  function stopTimer() {
+    clearInterval(timerInterval);
+  }
+
   recordShutter.addEventListener('click', () => {
     if (isLiveMode) {
-      showToast('Anda sedang dalam siaran LIVE.');
+      showToast('Siaran LIVE sedang berlangsung.');
       return;
     }
 
     if (!isRecording) {
       recordedChunks = [];
       try {
-        mediaRecorder = new MediaRecorder(mediaStream);
+        mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm;codecs=vp9,opus' });
       } catch(e) {
-        mediaRecorder = new MediaRecorder(mediaStream, {mimeType: 'video/webm'});
+        try {
+          mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
+        } catch(err) {
+          mediaRecorder = new MediaRecorder(mediaStream);
+        }
       }
       mediaRecorder.ondataavailable = e => { if(e.data.size > 0) recordedChunks.push(e.data); };
       mediaRecorder.onstop = () => {
@@ -1144,20 +1207,25 @@
         const reader = new FileReader();
         reader.readAsDataURL(blob);
         reader.onloadend = () => {
-          addNewVideoToDB(reader.result);
+          const m = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+          const s = String(secondsElapsed % 60).padStart(2, '0');
+          const durationStr = `${m}:${s}`;
+          addNewLongVideoToDB(reader.result, durationStr);
         };
       };
-      mediaRecorder.start();
+      mediaRecorder.start(1000); // chunk setiap 1 detik agar aman untuk durasi panjang
       isRecording = true;
       recordShutter.classList.add('recording');
-      showToast('Perekaman video dimulai...');
+      startTimer();
+      showToast('Perekaman video panjang dimulai...');
     } else {
       mediaRecorder.stop();
       isRecording = false;
+      stopTimer();
       recordShutter.classList.remove('recording');
       cameraModal.classList.remove('show');
       if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
-      showToast('Video berhasil direkam & disimpan ke Database IndexedDB!');
+      showToast('Video panjang berhasil direkam & disimpan ke database!');
     }
   });
 
@@ -1171,33 +1239,40 @@
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onloadend = () => {
-        addNewVideoToDB(reader.result);
-        cameraModal.classList.remove('show');
-        if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
-        showToast('Video galeri diunggah ke Database!');
+        // Deteksi durasi video galeri secara otomatis
+        const tempVideo = document.createElement('video');
+        tempVideo.src = reader.result;
+        tempVideo.onloadedmetadata = () => {
+          const mins = String(Math.floor(tempVideo.duration / 60)).padStart(2, '0');
+          const secs = String(Math.floor(tempVideo.duration % 60)).padStart(2, '0');
+          const dur = `${mins}:${secs}`;
+          addNewLongVideoToDB(reader.result, dur);
+          cameraModal.classList.remove('show');
+          if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+          showToast('Video galeri durasi panjang berhasil diunggah!');
+        };
       };
     }
   });
 
-  function addNewVideoToDB(videoDataUrl) {
+  function addNewLongVideoToDB(videoDataUrl, durationStr) {
     const newVid = {
       id: Date.now(),
-      user: 'kreator_db',
+      user: 'kreator_panjang',
       displayName: 'Anda',
-      avatar: '💾',
+      avatar: '🎬',
       avatarBg: '#ff2d55',
-      caption: 'Video tersimpan aman di Database IndexedDB 🚀',
-      hashtags: ['fyp', 'database', 'viral'],
+      caption: 'Karya video berdurasi panjang original saya 🎥✨',
+      hashtags: ['longformat', 'original', 'fyp'],
       music: currentSelectedMusic,
       likes: 1, comments: 0, shares: 0, bookmarks: 0,
+      durationLabel: durationStr || '02:30',
       isCustomVideo: true,
       videoUrl: videoDataUrl
     };
 
     videos.unshift(newVid);
-    state.unshift({ liked: false, bookmarked: false, followed: true, likes: 1, bookmarks: 0, comments: [] });
-    
-    // Simpan permanen ke IndexedDB
+    initStates();
     saveVideoToDB(newVid);
     renderFeed(videos);
   }
