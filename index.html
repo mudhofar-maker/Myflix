@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>TikVid - Multi-User & Long Video Edition</title>
+<title>TikVid - Profil, Bio & Troli Belanja Terintegrasi</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans@5.0.3/index.css" />
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -66,10 +66,16 @@
     border-radius: 20px;
     cursor: pointer;
     font-weight: 600;
-    max-width: 110px;
+    max-width: 120px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .top-bar .profile-badge img {
+    width: 20px; height: 20px; border-radius: 50%; object-fit: cover;
   }
   /* Feed */
   .feed {
@@ -137,6 +143,9 @@
     font-size: 18px;
     overflow: hidden;
   }
+  .sidebar .avatar img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
   .sidebar .follow-btn {
     position: absolute;
     bottom: -8px; left: 50%;
@@ -176,6 +185,30 @@
   .sidebar .like-btn.liked .icon { color: #ff2d55; }
   .sidebar .like-btn.liked .icon svg { fill: #ff2d55; }
   .sidebar .bookmark-btn.bookmarked .icon svg { fill: #ffd700; }
+
+  /* Troli Kuning Terang */
+  .shop-cart-btn {
+    position: absolute;
+    right: 12px;
+    top: 140px;
+    background: #ffcc00;
+    color: #000;
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 204, 0, 0.5);
+    z-index: 15;
+    animation: bounceCart 2s infinite;
+  }
+  @keyframes bounceCart {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
   /* Bottom Info */
   .bottom-info {
     position: absolute;
@@ -190,7 +223,7 @@
   .bottom-info .username {
     font-weight: 700;
     font-size: 16px;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -202,6 +235,12 @@
     padding: 2px 6px;
     border-radius: 4px;
     font-weight: 800;
+  }
+  .bottom-info .user-bio {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-bottom: 6px;
+    font-style: italic;
   }
   .bottom-info .caption {
     font-size: 14px;
@@ -314,7 +353,7 @@
   .modal-overlay.show { display: flex; }
   .modal {
     width: 100%;
-    max-height: 70%;
+    max-height: 75%;
     background: #1c1c1e;
     border-radius: 16px 16px 0 0;
     padding: 16px;
@@ -337,7 +376,7 @@
     cursor: pointer;
     padding: 8px;
   }
-  /* Comments & Forms */
+  /* Forms & Inputs */
   .comments-list {
     flex: 1;
     overflow-y: auto;
@@ -358,17 +397,12 @@
     justify-content: center;
     font-weight: 700;
     font-size: 14px;
+    overflow: hidden;
   }
+  .comment-avatar img { width: 100%; height: 100%; object-fit: cover; }
   .comment-body { flex: 1; }
-  .comment-user {
-    font-size: 13px;
-    opacity: 0.6;
-    margin-bottom: 2px;
-  }
-  .comment-text {
-    font-size: 14px;
-    line-height: 1.4;
-  }
+  .comment-user { font-size: 13px; opacity: 0.6; margin-bottom: 2px; }
+  .comment-text { font-size: 14px; line-height: 1.4; }
   .comment-input-wrap {
     display: flex;
     gap: 10px;
@@ -394,7 +428,7 @@
     font-weight: 600;
     cursor: pointer;
   }
-  /* Share */
+  /* Share Grid */
   .share-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -471,11 +505,7 @@
     z-index: 1;
     overflow: hidden;
   }
-  #cameraVideo {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+  #cameraVideo { width: 100%; height: 100%; object-fit: cover; }
   .camera-top-bar {
     position: relative;
     z-index: 5;
@@ -490,7 +520,7 @@
     z-index: 5;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     align-items: center;
     padding-bottom: 20px;
   }
@@ -527,21 +557,15 @@
     transition: all 0.2s;
   }
   .record-shutter.recording .record-shutter-inner {
-    width: 30px; height: 30px;
-    border-radius: 4px;
+    width: 30px; height: 30px; border-radius: 4px;
   }
   .live-indicator-badge {
     position: absolute;
-    top: 70px;
-    left: 20px;
-    background: #ff2d55;
-    color: #fff;
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: bold;
-    display: none;
-    z-index: 5;
+    top: 70px; left: 20px;
+    background: #ff2d55; color: #fff;
+    padding: 4px 10px; border-radius: 4px;
+    font-size: 12px; font-weight: bold;
+    display: none; z-index: 5;
   }
   .music-picker {
     background: rgba(0,0,0,0.7);
@@ -554,6 +578,16 @@
     gap: 6px;
     border: 1px solid rgba(255,255,255,0.2);
   }
+  /* Avatar Upload Preview Box */
+  .avatar-upload-box {
+    width: 80px; height: 80px; border-radius: 50%;
+    border: 2px dashed #ff2d55;
+    margin: 0 auto 15px auto;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; cursor: pointer; position: relative;
+    background: #2c2c2e;
+  }
+  .avatar-upload-box img { width: 100%; height: 100%; object-fit: cover; }
 </style>
 </head>
 <body>
@@ -565,7 +599,10 @@
       <div class="tab" data-tab="following">Mengikuti</div>
       <div class="tab active" data-tab="foryou">Panjang & FYP</div>
     </div>
-    <div class="profile-badge" id="openAccountModal" title="Ganti Akun">👤 <span id="currentUsername">Akunku</span></div>
+    <div class="profile-badge" id="openAccountModal" title="Pengaturan Profil">
+      <img id="navProfileAvatar" src="" alt="" style="display:none;" />
+      <span id="currentUsername">Akunku</span>
+    </div>
   </div>
 
   <!-- Mute indicator -->
@@ -600,17 +637,47 @@
     </div>
   </div>
 
-  <!-- Account / Profile Setup Modal -->
+  <!-- Account & Profile Settings Modal -->
   <div class="modal-overlay" id="accountModal">
-    <div class="modal" style="height: 300px;">
+    <div class="modal" style="height: 440px;">
       <div class="modal-header">
-        Buat / Ganti Akun Pengguna
+        Pengaturan Profil & Toko Penjual
         <div class="modal-close" data-close="accountModal">✕</div>
       </div>
-      <div style="padding-top: 15px;">
-        <label style="font-size: 13px; opacity: 0.8;">Nama Akun / Username:</label>
-        <input type="text" class="comment-input" id="accountInput" placeholder="Contoh: budi_vlog" style="width: 100%; margin: 8px 0 16px 0;" />
-        <button class="comment-send" id="saveAccountBtn" style="width: 100%; border-radius: 20px; padding: 12px;">Simpan Akun Saya</button>
+      <div style="padding-top: 12px; overflow-y: auto; flex:1;">
+        <!-- Upload Foto Profil -->
+        <div class="avatar-upload-box" id="triggerAvatarUpload" title="Ketuk untuk ganti foto profil">
+          <span id="avatarPlaceholderText" style="font-size: 24px;">📷</span>
+          <img id="previewAvatarImg" src="" alt="" style="display:none;" />
+        </div>
+        <input type="file" id="avatarFileInput" accept="image/*" style="display: none;" />
+        <div style="text-align: center; font-size: 11px; opacity: 0.6; margin-bottom: 12px;">Ketuk lingkaran untuk unggah foto profil</div>
+
+        <label style="font-size: 12px; opacity: 0.8;">Nama Akun / Username:</label>
+        <input type="text" class="comment-input" id="accountInput" placeholder="Contoh: toko_budi" style="width: 100%; margin: 6px 0 12px 0;" />
+
+        <label style="font-size: 12px; opacity: 0.8;">Bio Profil:</label>
+        <textarea class="comment-input" id="bioInput" placeholder="Tulis bio profil Anda di sini..." style="width: 100%; height: 60px; border-radius: 12px; resize: none; margin: 6px 0 12px 0; padding: 10px;"></textarea>
+
+        <label style="font-size: 12px; opacity: 0.8;">Link Jualan / Toko (Affiliate / Marketplace):</label>
+        <input type="text" class="comment-input" id="shopLinkInput" placeholder="https://shopee.co.id/namatoko atau link produk" style="width: 100%; margin: 6px 0 16px 0;" />
+
+        <button class="comment-send" id="saveAccountBtn" style="width: 100%; border-radius: 20px; padding: 12px; background: #fe2c55; font-weight: bold;">Simpan Profil (Save)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shopping Cart Modal (Troli Belanja Terintegrasi) -->
+  <div class="modal-overlay" id="shopModal">
+    <div class="modal" style="height: 280px;">
+      <div class="modal-header">
+        🛒 Keranjang Belanja Produk
+        <div class="modal-close" data-close="shopModal">✕</div>
+      </div>
+      <div style="padding: 20px; text-align: center; display: flex; flex-direction: column; gap: 15px; justify-content: center; flex:1;">
+        <div style="font-size: 15px; font-weight: bold;" id="shopModalTitle">Produk Pilihan Kreator</div>
+        <div style="font-size: 13px; opacity: 0.7;">Dapatkan penawaran menarik dan produk original langsung dari video ini.</div>
+        <a id="shopModalLink" href="#" target="_blank" style="background: #ffcc00; color: #000; padding: 12px 20px; border-radius: 25px; font-weight: bold; text-decoration: none; display: block;">Kunjungi Link Jualan ↗</a>
       </div>
     </div>
   </div>
@@ -699,13 +766,26 @@
 </div>
 
 <script>
-  // Pengaturan Akun Lokal Aktif
-  let currentUser = localStorage.getItem('tikvid_username') || 'kreator_tamu';
-  document.getElementById('currentUsername').textContent = currentUser;
+  let currentUser = localStorage.getItem('tikvid_username') || 'kreator_hebat';
+  let currentBio = localStorage.getItem('tikvid_bio') || 'Selamat datang di profil resmi saya! Jelajahi video & produk terbaik.';
+  let currentAvatar = localStorage.getItem('tikvid_avatar') || '';
+  let currentShopLink = localStorage.getItem('tikvid_shoplink') || 'https://shopee.co.id';
+
+  function updateProfileUI() {
+    document.getElementById('currentUsername').textContent = currentUser;
+    const navImg = document.getElementById('navProfileAvatar');
+    if (currentAvatar) {
+      navImg.src = currentAvatar;
+      navImg.style.display = 'block';
+    } else {
+      navImg.style.display = 'none';
+    }
+  }
+  updateProfileUI();
 
   const defaultVideos = [
-    { id: 1, user: 'cinematic_vlog', displayName: 'Vlog Perjalanan', avatar: '🏕️', avatarBg: 'linear-gradient(135deg, #ff9966, #ff5e62)', caption: 'Dokumenter perjalanan alam terbuka berdurasi panjang 🌲✨', hashtags: ['longvideo', 'vlog', 'alam'], music: '♪ Cinematic Journey - LongChill', likes: 245000, comments: 4120, shares: 1520, bookmarks: 9800, durationLabel: '03:45', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
-    { id: 2, user: 'tech_insight', displayName: 'Wawasan Teknologi', avatar: '💻', avatarBg: 'linear-gradient(135deg, #2193b0, #6dd5ed)', caption: 'Pembahasan mendalam mengenai arsitektur web masa depan 💻', hashtags: ['tech', 'coding', 'education'], music: '♪ Tech Ambient - FutureSound', likes: 182000, comments: 3010, shares: 920, bookmarks: 6400, durationLabel: '05:12', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4' }
+    { id: 1, user: 'cinematic_vlog', bio: 'Pecinta alam & videografi perjalanan.', avatar: '', shopLink: 'https://shopee.co.id', caption: 'Dokumenter perjalanan alam terbuka berdurasi panjang 🌲✨', hashtags: ['longvideo', 'vlog', 'alam'], music: '♪ Cinematic Journey - LongChill', likes: 245000, comments: 4120, shares: 1520, bookmarks: 9800, durationLabel: '03:45', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
+    { id: 2, user: 'tech_insight', bio: 'Berbagi wawasan teknologi dan pemrograman web masa depan.', avatar: '', shopLink: 'https://tokopedia.com', caption: 'Pembahasan mendalam mengenai arsitektur web masa depan 💻', hashtags: ['tech', 'coding', 'education'], music: '♪ Tech Ambient - FutureSound', likes: 182000, comments: 3010, shares: 920, bookmarks: 6400, durationLabel: '05:12', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4' }
   ];
 
   let videos = [];
@@ -714,7 +794,7 @@
   let db;
   function initIndexedDB() {
     return new Promise((resolve) => {
-      const request = indexedDB.open('TikVidMultiUserDB', 1);
+      const request = indexedDB.open('TikVidShopProfileDB', 1);
       request.onerror = () => { loadVideosFallback(); resolve(); };
       request.onupgradeneeded = (e) => {
         db = e.target.result;
@@ -771,13 +851,13 @@
   }
 
   function loadVideosFallback() {
-    const saved = localStorage.getItem('tikvid_multi_videos');
+    const saved = localStorage.getItem('tikvid_shop_videos');
     videos = saved ? JSON.parse(saved) : [...defaultVideos];
     renderFeed(videos);
   }
 
   const sampleComments = [
-    { user: 'pengunjung', text: 'Video akun ini keren banget! 🔥', time: '1j', likes: 120 }
+    { user: 'pengunjung', text: 'Keren banget videonya! 👍', time: '1j', likes: 120 }
   ];
 
   const shareOptions = [
@@ -831,12 +911,21 @@
       slide.className = 'video-slide';
       slide.dataset.idx = idx;
 
+      let avatarHtml = `<div class="avatar" style="background:#ff2d55">${v.user[0].toUpperCase()}</div>`;
+      if (v.avatar) {
+        avatarHtml = `<div class="avatar"><img src="${v.avatar}" alt="" /></div>`;
+      }
+
       slide.innerHTML = `
         <video src="${v.videoUrl}" loop playsinline controls></video>
         <div class="play-indicator" id="playInd-${idx}">▶</div>
+        
+        <!-- Tombol Troli Belanja Kuning Terang -->
+        <div class="shop-cart-btn" data-action="shop" data-link="${v.shopLink || 'https://shopee.co.id'}" data-title="${v.user}">🛒</div>
+
         <div class="sidebar">
           <div class="avatar-wrap">
-            <div class="avatar" style="background:${v.avatarBg || '#ff2d55'}">${v.user[0].toUpperCase()}</div>
+            ${avatarHtml}
             <div class="follow-btn" data-action="follow" data-idx="${idx}">+</div>
           </div>
           <div class="action like-btn" data-action="like" data-idx="${idx}">
@@ -869,6 +958,7 @@
             @${v.user}
             <span class="long-badge">⏳ ${v.durationLabel || '02:00'}</span>
           </div>
+          <div class="user-bio">${v.bio || ''}</div>
           <div class="caption">${v.caption} ${(v.hashtags || []).map(h => `<span class="hashtag">#${h}</span>`).join(' ')}</div>
           <div class="music">
             <span>🎵</span>
@@ -933,6 +1023,36 @@
     slides.forEach(s => observer.observe(s));
   }
 
+  // ============ UPLOAD FOTO PROFIL DALAM MODAL ============
+  const triggerAvatarUpload = document.getElementById('triggerAvatarUpload');
+  const avatarFileInput = document.getElementById('avatarFileInput');
+  const previewAvatarImg = document.getElementById('previewAvatarImg');
+  const avatarPlaceholderText = document.getElementById('avatarPlaceholderText');
+  let tempAvatarData = currentAvatar;
+
+  if (currentAvatar) {
+    previewAvatarImg.src = currentAvatar;
+    previewAvatarImg.style.display = 'block';
+    avatarPlaceholderText.style.display = 'none';
+  }
+
+  triggerAvatarUpload.addEventListener('click', () => avatarFileInput.click());
+
+  avatarFileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        tempAvatarData = reader.result;
+        previewAvatarImg.src = tempAvatarData;
+        previewAvatarImg.style.display = 'block';
+        avatarPlaceholderText.style.display = 'none';
+        showToast('Foto profil dipilih');
+      };
+    }
+  });
+
   // ============ GLOBAL EVENT LISTENER ============
   document.addEventListener('click', (e) => {
     const tab = e.target.closest('.tab');
@@ -947,22 +1067,54 @@
     if (e.target.closest('#searchBtn')) { document.getElementById('searchModal').classList.add('show'); return; }
     if (e.target.closest('#executeSearch')) { document.getElementById('searchModal').classList.remove('show'); showToast('Pencarian dijalankan'); return; }
 
-    // Akun / Profil Modal
+    // Buka Modal Profil & Toko
     if (e.target.closest('#openAccountModal') || e.target.closest('#profileTabBtn')) {
       document.getElementById('accountInput').value = currentUser;
+      document.getElementById('bioInput').value = currentBio;
+      document.getElementById('shopLinkInput').value = currentShopLink;
+      tempAvatarData = currentAvatar;
+      if (currentAvatar) {
+        previewAvatarImg.src = currentAvatar;
+        previewAvatarImg.style.display = 'block';
+        avatarPlaceholderText.style.display = 'none';
+      }
       document.getElementById('accountModal').classList.add('show');
       return;
     }
 
+    // Tombol Save Profil
     if (e.target.closest('#saveAccountBtn')) {
       const newName = document.getElementById('accountInput').value.trim();
+      const newBio = document.getElementById('bioInput').value.trim();
+      const newShop = document.getElementById('shopLinkInput').value.trim();
+
       if (newName) {
         currentUser = newName;
+        currentBio = newBio;
+        currentShopLink = newShop || 'https://shopee.co.id';
+        currentAvatar = tempAvatarData;
+
         localStorage.setItem('tikvid_username', currentUser);
-        document.getElementById('currentUsername').textContent = currentUser;
+        localStorage.setItem('tikvid_bio', currentBio);
+        localStorage.setItem('tikvid_shoplink', currentShopLink);
+        localStorage.setItem('tikvid_avatar', currentAvatar);
+
+        updateProfileUI();
         document.getElementById('accountModal').classList.remove('show');
-        showToast(`Akun diaktifkan: @${currentUser}`);
+        showToast('Profil & Toko berhasil disimpan (Saved)!');
+        renderFeed(videos);
       }
+      return;
+    }
+
+    // Klik Troli Kuning Belanja
+    const shopBtn = e.target.closest('[data-action="shop"]');
+    if (shopBtn) {
+      const link = shopBtn.dataset.link;
+      const title = shopBtn.dataset.title;
+      document.getElementById('shopModalTitle').textContent = `Toko Produk: @${title}`;
+      document.getElementById('shopModalLink').href = link;
+      document.getElementById('shopModal').classList.add('show');
       return;
     }
 
@@ -1204,11 +1356,11 @@
     const newVid = {
       id: Date.now(),
       user: currentUser,
-      displayName: currentUser,
-      avatar: '⭐',
-      avatarBg: 'linear-gradient(135deg, #25f4ee, #fe2c55)',
-      caption: `Video panjang original oleh @${currentUser} 🚀`,
-      hashtags: ['longformat', 'kreator', 'fyp'],
+      bio: currentBio,
+      avatar: currentAvatar,
+      shopLink: currentShopLink,
+      caption: `Video panjang original dengan troli belanja aktif 🚀`,
+      hashtags: ['longformat', 'jualan', 'fyp'],
       music: currentSelectedMusic,
       likes: 1, comments: 0, shares: 0, bookmarks: 0,
       durationLabel: durationStr || '02:30',
