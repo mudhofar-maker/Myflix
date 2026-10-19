@@ -37,7 +37,8 @@
   }
   .top-bar .live-btn {
     font-size: 14px; font-weight: 600;
-    opacity: 0.85; cursor: pointer;
+    opacity: 0.85; cursor: pointer; padding: 6px 10px;
+    background: rgba(255,0,0,0.3); border-radius: 12px;
   }
   .top-bar .tabs {
     display: flex;
@@ -45,20 +46,25 @@
     font-size: 16px;
     font-weight: 600;
   }
-  .top-bar .tab { opacity: 0.6; cursor: pointer; position: relative; padding: 4px 2px; }
+  .top-bar .tab { opacity: 0.6; cursor: pointer; position: relative; padding: 6px 4px; }
   .top-bar .tab.active { opacity: 1; }
   .top-bar .tab.active::after {
     content: '';
     position: absolute;
-    bottom: -4px; left: 50%;
+    bottom: 0px; left: 50%;
     transform: translateX(-50%);
     width: 18px; height: 3px;
     background: #fff;
     border-radius: 2px;
   }
   .top-bar .search-btn {
-    font-size: 22px;
+    font-size: 20px;
     cursor: pointer;
+    padding: 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
   }
   /* Feed */
   .feed {
@@ -125,12 +131,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 18px;
+    gap: 16px;
     z-index: 10;
   }
   .sidebar .avatar-wrap {
     position: relative;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
   .sidebar .avatar {
     width: 48px; height: 48px;
@@ -146,41 +152,37 @@
   }
   .sidebar .follow-btn {
     position: absolute;
-    bottom: -10px; left: 50%;
+    bottom: -8px; left: 50%;
     transform: translateX(-50%);
-    width: 22px; height: 22px;
+    width: 20px; height: 20px;
     border-radius: 50%;
     background: #ff2d55;
     color: #fff;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     border: 2px solid #000;
-    transition: transform 0.2s;
   }
   .sidebar .follow-btn.followed {
     background: #2ecc71;
-    transform: translateX(-50%) scale(0.9);
   }
   .sidebar .action {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
     cursor: pointer;
   }
   .sidebar .action .icon {
-    width: 44px; height: 44px;
+    width: 42px; height: 42px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 30px;
-    transition: transform 0.15s;
+    font-size: 28px;
   }
-  .sidebar .action:active .icon { transform: scale(0.85); }
   .sidebar .action .count {
     font-size: 12px;
     font-weight: 600;
@@ -196,11 +198,9 @@
     right: 80px;
     bottom: 80px;
     z-index: 10;
-    background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
-    padding: 30px 0 10px;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    padding: 30px 12px 10px;
     margin: 0 -12px;
-    padding-left: 12px;
-    padding-right: 12px;
   }
   .bottom-info .username {
     font-weight: 700;
@@ -210,7 +210,7 @@
   .bottom-info .caption {
     font-size: 14px;
     line-height: 1.4;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -228,12 +228,11 @@
     overflow: hidden;
     white-space: nowrap;
     flex: 1;
-    mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
   }
   .bottom-info .music .marquee span {
     display: inline-block;
     padding-right: 40px;
-    animation: marquee 12s linear infinite;
+    animation: marquee 10s linear infinite;
   }
   @keyframes marquee {
     0% { transform: translateX(0); }
@@ -252,7 +251,6 @@
     height: 100%;
     background: #fff;
     width: 0%;
-    transition: width 0.1s linear;
   }
   /* Bottom Nav */
   .bottom-nav {
@@ -276,8 +274,7 @@
     color: #fff;
     opacity: 0.6;
     cursor: pointer;
-    padding: 6px 0;
-    transition: opacity 0.2s;
+    padding: 8px 0;
   }
   .bottom-nav .nav-item.active { opacity: 1; }
   .bottom-nav .nav-item .nav-icon {
@@ -308,29 +305,25 @@
     font-size: 22px;
     font-weight: 300;
   }
-  /* Modal */
+  /* Modals */
   .modal-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.6);
     z-index: 100;
     display: none;
     align-items: flex-end;
-    animation: fadeIn 0.25s ease;
   }
   .modal-overlay.show { display: flex; }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   .modal {
     width: 100%;
     max-height: 70%;
     background: #1c1c1e;
     border-radius: 16px 16px 0 0;
     padding: 16px;
-    animation: slideUp 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
     display: flex;
     flex-direction: column;
   }
-  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   .modal-header {
     text-align: center;
     font-weight: 700;
@@ -343,16 +336,16 @@
     position: absolute;
     right: 0; top: 50%;
     transform: translateY(-50%);
-    font-size: 20px;
+    font-size: 18px;
     cursor: pointer;
-    padding: 4px 8px;
+    padding: 8px;
   }
   /* Comments */
   .comments-list {
     flex: 1;
     overflow-y: auto;
     padding: 12px 0;
-    max-height: 400px;
+    max-height: 320px;
   }
   .comment-item {
     display: flex;
@@ -378,13 +371,6 @@
   .comment-text {
     font-size: 14px;
     line-height: 1.4;
-  }
-  .comment-meta {
-    font-size: 12px;
-    opacity: 0.5;
-    margin-top: 4px;
-    display: flex;
-    gap: 14px;
   }
   .comment-input-wrap {
     display: flex;
@@ -416,7 +402,7 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
-    padding: 16px 0;
+    padding: 20px 0;
   }
   .share-item {
     display: flex;
@@ -440,12 +426,12 @@
     top: 80px;
     left: 50%;
     transform: translateX(-50%) translateY(-20px);
-    background: rgba(0,0,0,0.85);
+    background: rgba(0,0,0,0.9);
     color: #fff;
     padding: 10px 20px;
     border-radius: 20px;
     font-size: 13px;
-    z-index: 200;
+    z-index: 400;
     opacity: 0;
     transition: all 0.3s;
     pointer-events: none;
@@ -459,7 +445,7 @@
     position: absolute;
     top: 60px;
     right: 16px;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.6);
     padding: 6px 12px;
     border-radius: 20px;
     font-size: 12px;
@@ -469,8 +455,7 @@
     z-index: 30;
     cursor: pointer;
   }
-
-  /* --- CAMERA / UPLOAD STUDIO MODAL --- */
+  /* Camera Modal */
   .camera-modal {
     position: absolute;
     inset: 0;
@@ -500,7 +485,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 20px;
+    font-size: 16px;
+    font-weight: 600;
   }
   .camera-controls {
     position: relative;
@@ -508,20 +494,17 @@
     display: flex;
     justify-content: space-around;
     align-items: center;
-    padding-bottom: 30px;
+    padding-bottom: 20px;
   }
   .cam-btn {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.25);
     border: none;
     color: #fff;
     padding: 12px 18px;
     border-radius: 30px;
     font-weight: 600;
     cursor: pointer;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    font-size: 13px;
   }
   .record-shutter {
     width: 70px; height: 70px;
@@ -532,7 +515,6 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    position: relative;
   }
   .record-shutter-inner {
     width: 54px; height: 54px;
@@ -561,7 +543,7 @@
   <!-- Mute indicator -->
   <div class="mute-indicator" id="muteIndicator">
     <span id="muteIcon">🔇</span>
-    <span id="muteText">Ketik untuk bunyi</span>
+    <span id="muteText">Suara Mati</span>
   </div>
 
   <!-- Feed -->
@@ -618,14 +600,14 @@
 
   <!-- Search Modal -->
   <div class="modal-overlay" id="searchModal">
-    <div class="modal" style="height: 300px;">
+    <div class="modal" style="height: 240px;">
       <div class="modal-header">
-        Cari Video / Akun
+        Pencarian TikVid
         <div class="modal-close" data-close="searchModal">✕</div>
       </div>
       <div style="padding-top: 15px;">
-        <input type="text" class="comment-input" id="searchInput" placeholder="Cari tag, musik, atau kreator..." style="width: 100%; margin-bottom: 15px;" />
-        <button class="comment-send" id="executeSearch" style="width: 100%; border-radius: 20px; padding: 10px;">Cari Sekarang</button>
+        <input type="text" class="comment-input" id="searchInput" placeholder="Cari tag atau kreator..." style="width: 100%; margin-bottom: 15px;" />
+        <button class="comment-send" id="executeSearch" style="width: 100%; border-radius: 20px; padding: 10px;">Cari</button>
       </div>
     </div>
   </div>
@@ -636,16 +618,16 @@
       <video id="cameraVideo" autoplay playsinline muted></video>
     </div>
     <div class="camera-top-bar">
-      <div style="cursor: pointer;" id="closeCamera">✕ Batal</div>
-      <div id="recordingTimer" style="font-weight: 700; color: #fe2c55; display: none;">● 00:00</div>
-      <div style="cursor: pointer;" id="switchCameraBtn">🔄 Putar Kamera</div>
+      <div style="cursor: pointer; padding: 10px;" id="closeCamera">✕ Batal</div>
+      <div id="recordingTimer" style="color: #fe2c55; display: none;">● 00:00</div>
+      <div style="cursor: pointer; padding: 10px;" id="switchCameraBtn">🔄 Putar Kamera</div>
     </div>
     <div class="camera-controls">
       <button class="cam-btn" id="uploadGalleryBtn">📁 Galeri</button>
       <div class="record-shutter" id="recordShutter">
         <div class="record-shutter-inner"></div>
       </div>
-      <button class="cam-btn" id="flipCamText">Kamera</button>
+      <button class="cam-btn" id="camStatusBtn">Kamera Siap</button>
     </div>
     <input type="file" id="galleryInput" accept="video/*" style="display: none;" />
   </div>
@@ -655,121 +637,24 @@
 </div>
 
 <script>
-  // ============ DATA ============
   const videos = [
-    {
-      id: 1,
-      user: 'sunset_lover',
-      displayName: 'Pecinta Senja',
-      avatar: '🌅',
-      avatarBg: 'linear-gradient(135deg, #ff9966, #ff5e62)',
-      caption: 'Senja hari ini benar-benar memukau 🌇 Siapa yang setuju?',
-      hashtags: ['senja', 'sunset', 'indonesia', 'fyp'],
-      music: '♪ Lofi Sunset Vibes - ChillBeats',
-      likes: 128400,
-      comments: 2341,
-      shares: 892,
-      bookmarks: 4521,
-      theme: 'sunset'
-    },
-    {
-      id: 2,
-      user: 'ocean_dreamer',
-      displayName: 'Pemimpi Laut',
-      avatar: '🌊',
-      avatarBg: 'linear-gradient(135deg, #2193b0, #6dd5ed)',
-      caption: 'Gelombang laut menenangkan pikiran 🌊✨',
-      hashtags: ['ocean', 'waves', 'calm', 'nature'],
-      music: '♪ Ocean Waves - Nature Sounds',
-      likes: 89200,
-      comments: 1203,
-      shares: 456,
-      bookmarks: 2310,
-      theme: 'ocean'
-    },
-    {
-      id: 3,
-      user: 'aurora_north',
-      displayName: 'Cahaya Utara',
-      avatar: '✨',
-      avatarBg: 'linear-gradient(135deg, #00c9ff, #92fe9d)',
-      caption: 'Aurora borealis di malam ini 💚💙 Masya Allah indahnya',
-      hashtags: ['aurora', 'northernlights', 'sky', 'magic'],
-      music: '♪ Northern Lights - Ambient',
-      likes: 456700,
-      comments: 8921,
-      shares: 3421,
-      bookmarks: 12300,
-      theme: 'aurora'
-    },
-    {
-      id: 4,
-      user: 'city_nights',
-      displayName: 'Malam Kota',
-      avatar: '🌃',
-      avatarBg: 'linear-gradient(135deg, #ff0099, #493240)',
-      caption: 'Kota tidak pernah tidur 🌃 Lampu-lampu kota yang indah',
-      hashtags: ['city', 'night', 'urban', 'lights'],
-      music: '♪ City Lights - Synthwave',
-      likes: 67800,
-      comments: 892,
-      shares: 234,
-      bookmarks: 1890,
-      theme: 'city'
-    },
-    {
-      id: 5,
-      user: 'forest_magic',
-      displayName: 'Hutan Ajaib',
-      avatar: '🌲',
-      avatarBg: 'linear-gradient(135deg, #134e5e, #71b280)',
-      caption: 'Kunang-kunang di hutan malam 🌲✨ Keajaiban alam',
-      hashtags: ['forest', 'fireflies', 'nature', 'magical'],
-      music: '♪ Forest Night - Nature',
-      likes: 234500,
-      comments: 4521,
-      shares: 1234,
-      bookmarks: 8900,
-      theme: 'forest'
-    },
-    {
-      id: 6,
-      user: 'space_explorer',
-      displayName: 'Penjelajah Angkasa',
-      avatar: '🚀',
-      avatarBg: 'linear-gradient(135deg, #0f0c29, #302b63, #24243e)',
-      caption: 'Menjelajah galaksi yang tak terhingga 🌌✨ #SpaceLovers',
-      hashtags: ['space', 'galaxy', 'stars', 'universe'],
-      music: '♪ Cosmic Journey - Electronic',
-      likes: 789200,
-      comments: 12340,
-      shares: 5670,
-      bookmarks: 23400,
-      theme: 'space'
-    }
+    { id: 1, user: 'sunset_lover', displayName: 'Pecinta Senja', avatar: '🌅', avatarBg: 'linear-gradient(135deg, #ff9966, #ff5e62)', caption: 'Senja hari ini benar-benar memukau 🌇 Siapa yang setuju?', hashtags: ['senja', 'sunset', 'indonesia', 'fyp'], music: '♪ Lofi Sunset Vibes - ChillBeats', likes: 128400, comments: 2341, shares: 892, bookmarks: 4521, theme: 'sunset' },
+    { id: 2, user: 'ocean_dreamer', displayName: 'Pemimpi Laut', avatar: '🌊', avatarBg: 'linear-gradient(135deg, #2193b0, #6dd5ed)', caption: 'Gelombang laut menenangkan pikiran 🌊✨', hashtags: ['ocean', 'waves', 'calm', 'nature'], music: '♪ Ocean Waves - Nature Sounds', likes: 89200, comments: 1203, shares: 456, bookmarks: 2310, theme: 'ocean' },
+    { id: 3, user: 'aurora_north', displayName: 'Cahaya Utara', avatar: '✨', avatarBg: 'linear-gradient(135deg, #00c9ff, #92fe9d)', caption: 'Aurora borealis di malam ini 💚💙', hashtags: ['aurora', 'northernlights', 'sky'], music: '♪ Northern Lights - Ambient', likes: 456700, comments: 8921, shares: 3421, bookmarks: 12300, theme: 'aurora' }
   ];
 
   const sampleComments = [
     { user: 'dina_k', text: 'Keren banget kak! 🔥', time: '2j', likes: 234 },
-    { user: 'rizky.m', text: 'Indahnya ya Allah 😍', time: '3j', likes: 567 },
-    { user: 'sari_99', text: 'Ini dimana kak? Pengen kesana', time: '5j', likes: 89 },
-    { user: 'budi_art', text: 'Editannya mantap 👏', time: '6j', likes: 145 },
-    { user: 'maya.p', text: 'Vibesnya enak banget', time: '8j', likes: 78 },
-    { user: 'andi_x', text: 'FYP memang tidak pernah bohong', time: '12j', likes: 321 }
+    { user: 'rizky.m', text: 'Indahnya ya Allah 😍', time: '3j', likes: 567 }
   ];
 
   const shareOptions = [
     { name: 'WhatsApp', icon: '💬', bg: '#25D366' },
-    { name: 'Instagram', icon: '📷', bg: 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)' },
+    { name: 'Instagram', icon: '📷', bg: '#dc2743' },
     { name: 'Facebook', icon: '📘', bg: '#1877F2' },
-    { name: 'Twitter', icon: '🐦', bg: '#1DA1F2' },
-    { name: 'Telegram', icon: '✈️', bg: '#0088cc' },
-    { name: 'Salin Link', icon: '🔗', bg: '#555' },
-    { name: 'Email', icon: '📧', bg: '#EA4335' },
-    { name: 'Lainnya', icon: '•••', bg: '#333' }
+    { name: 'Salin Link', icon: '🔗', bg: '#555' }
   ];
 
-  // ============ UTILS ============
   function formatCount(n) {
     if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
     if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
@@ -784,9 +669,8 @@
     showToast._t = setTimeout(() => toast.classList.remove('show'), 1800);
   }
 
-  // ============ BUILD FEED ============
   const feed = document.getElementById('feed');
-  
+
   function renderFeed(list) {
     feed.innerHTML = '';
     list.forEach((v, idx) => {
@@ -805,9 +689,9 @@
         <div class="sidebar">
           <div class="avatar-wrap">
             <div class="avatar" style="background:${v.avatarBg}">${v.avatar}</div>
-            <div class="follow-btn" data-follow="${idx}">+</div>
+            <div class="follow-btn" data-action="follow" data-idx="${idx}">+</div>
           </div>
-          <div class="action like-btn" data-like="${idx}">
+          <div class="action like-btn" data-action="like" data-idx="${idx}">
             <div class="icon">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -815,11 +699,11 @@
             </div>
             <div class="count" id="likeCount-${idx}">${formatCount(v.likes)}</div>
           </div>
-          <div class="action comment-btn" data-comment="${idx}">
+          <div class="action comment-btn" data-action="comment" data-idx="${idx}">
             <div class="icon">💬</div>
             <div class="count">${formatCount(v.comments)}</div>
           </div>
-          <div class="action bookmark-btn" data-bookmark="${idx}">
+          <div class="action bookmark-btn" data-action="bookmark" data-idx="${idx}">
             <div class="icon">
               <svg width="30" height="30" viewBox="0 0 24 24" fill="white">
                 <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
@@ -827,12 +711,9 @@
             </div>
             <div class="count" id="bookmarkCount-${idx}">${formatCount(v.bookmarks)}</div>
           </div>
-          <div class="action share-btn" data-share="${idx}">
+          <div class="action share-btn" data-action="share" data-idx="${idx}">
             <div class="icon">↗</div>
             <div class="count">${formatCount(v.shares)}</div>
-          </div>
-          <div class="action" style="margin-top: 4px;">
-            <div class="icon" style="width:40px;height:40px;border-radius:50%;background:${v.avatarBg};font-size:20px;animation:spin 4s linear infinite;">${v.avatar}</div>
           </div>
         </div>
         <div class="bottom-info">
@@ -840,7 +721,7 @@
           <div class="caption">${v.caption} ${v.hashtags.map(h => `<span class="hashtag">#${h}</span>`).join(' ')}</div>
           <div class="music">
             <span>🎵</span>
-            <div class="marquee"><span>${v.music} &nbsp;&nbsp;&nbsp; ${v.music} &nbsp;&nbsp;&nbsp; </span></div>
+            <div class="marquee"><span>${v.music} &nbsp;&nbsp;&nbsp; </span></div>
           </div>
         </div>
         <div class="progress-bar"><div class="progress" id="progress-${idx}"></div></div>
@@ -849,135 +730,6 @@
     });
   }
 
-  renderFeed(videos);
-
-  // Add spin animation style
-  const styleEl = document.createElement('style');
-  styleEl.textContent = `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
-  document.head.appendChild(styleEl);
-
-  // ============ CANVAS ANIMATIONS ============
-  const animations = [];
-
-  function initAnimations() {
-    animations.length = 0;
-    const slides = document.querySelectorAll('.video-slide');
-    slides.forEach((slide, idx) => {
-      const canvas = slide.querySelector('canvas');
-      if (!canvas) return;
-      const theme = videos[idx].theme;
-      animations[idx] = createAnimation(canvas, theme, idx);
-    });
-  }
-
-  function createAnimation(canvas, theme, idx) {
-    const ctx = canvas.getContext('2d');
-    let w, h;
-    let particles = [];
-    let t = 0;
-    let paused = false;
-    let startTime = performance.now();
-    const duration = 15000;
-
-    function resize() {
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      w = rect.width;
-      h = rect.height;
-    }
-    resize();
-
-    // Particle setup
-    if (theme === 'sunset') {
-      for (let i = 0; i < 60; i++) particles.push({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 2 + 0.5, vy: -Math.random() * 0.5 - 0.2, vx: (Math.random() - 0.5) * 0.3, a: Math.random() * 0.8 + 0.2 });
-    } else if (theme === 'ocean') {
-      for (let i = 0; i < 40; i++) particles.push({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 3 + 1, vy: Math.random() * 0.3 + 0.1, vx: (Math.random() - 0.5) * 0.5, a: Math.random() * 0.5 + 0.3 });
-    } else if (theme === 'aurora') {
-      for (let i = 0; i < 80; i++) particles.push({ x: Math.random() * w, y: Math.random() * h * 0.7, r: Math.random() * 1.5 + 0.3, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.3, a: Math.random() * 0.8 + 0.2, hue: Math.random() * 120 + 120 });
-    } else if (theme === 'city') {
-      for (let i = 0; i < 100; i++) particles.push({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1.5 + 0.3, a: Math.random(), color: ['#ff0099', '#ffcc00', '#00ffff', '#ff6600', '#ffffff'][Math.floor(Math.random() * 5)] });
-    } else if (theme === 'forest') {
-      for (let i = 0; i < 50; i++) particles.push({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 2 + 1, vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4, a: Math.random(), phase: Math.random() * Math.PI * 2 });
-    } else if (theme === 'space') {
-      for (let i = 0; i < 200; i++) particles.push({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1.8 + 0.2, a: Math.random(), twinkle: Math.random() * 0.05 + 0.01, color: Math.random() > 0.7 ? '#aaddff' : '#ffffff' });
-    }
-
-    function draw() {
-      if (paused) {
-        animations[idx].raf = requestAnimationFrame(draw);
-        return;
-      }
-      t += 0.016;
-      const progress = ((performance.now() - startTime) % duration) / duration;
-      const progressBar = document.getElementById(`progress-${idx}`);
-      if (progressBar) progressBar.style.width = (progress * 100) + '%';
-
-      if (theme === 'sunset') {
-        const grad = ctx.createLinearGradient(0, 0, 0, h);
-        grad.addColorStop(0, '#2c1810'); grad.addColorStop(0.3, '#ff6b35'); grad.addColorStop(0.6, '#f7931e'); grad.addColorStop(0.8, '#ffcc70'); grad.addColorStop(1, '#4a2c2a');
-        ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
-        const sunY = h * 0.55 + Math.sin(t * 0.3) * 10;
-        ctx.beginPath(); ctx.arc(w/2, sunY, 50, 0, Math.PI * 2); ctx.fillStyle = '#fff4d6'; ctx.fill();
-        ctx.fillStyle = 'rgba(30, 20, 40, 0.6)'; ctx.fillRect(0, h * 0.7, w, h * 0.3);
-        particles.forEach(p => {
-          p.x += p.vx; p.y += p.vy;
-          if (p.y < 0) { p.y = h; p.x = Math.random() * w; }
-          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = `rgba(255, 220, 150, ${p.a * 0.6})`; ctx.fill();
-        });
-      } else if (theme === 'ocean') {
-        const grad = ctx.createLinearGradient(0, 0, 0, h);
-        grad.addColorStop(0, '#0a2540'); grad.addColorStop(0.5, '#1e5799'); grad.addColorStop(1, '#2989d8');
-        ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
-        for (let layer = 0; layer < 5; layer++) {
-          ctx.beginPath(); const yBase = h * 0.4 + layer * 40; ctx.moveTo(0, yBase);
-          for (let x = 0; x <= w; x += 10) { const y = yBase + Math.sin((x * 0.02) + t * (1 + layer * 0.3) + layer) * (15 - layer * 2); ctx.lineTo(x, y); }
-          ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
-          ctx.fillStyle = `rgba(${100 + layer * 20}, ${180 + layer * 10}, 230, ${0.3 + layer * 0.1})`; ctx.fill();
-        }
-      } else if (theme === 'aurora') {
-        ctx.fillStyle = '#050520'; ctx.fillRect(0, 0, w, h);
-        particles.forEach(p => {
-          p.x += p.vx; p.y += p.vy;
-          if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
-          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = `hsla(${p.hue}, 100%, 70%, ${p.a})`; ctx.fill();
-        });
-      } else if (theme === 'city') {
-        ctx.fillStyle = '#1a0033'; ctx.fillRect(0, 0, w, h);
-        particles.forEach(p => {
-          ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 2, 0, Math.PI * 2); ctx.fillStyle = p.color; ctx.globalAlpha = p.a; ctx.fill(); ctx.globalAlpha = 1;
-        });
-      } else if (theme === 'forest') {
-        ctx.fillStyle = '#0a1f0a'; ctx.fillRect(0, 0, w, h);
-        particles.forEach(p => {
-          p.x += p.vx; p.y += p.vy;
-          if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
-          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = `rgba(255, 255, 200, ${p.a})`; ctx.fill();
-        });
-      } else if (theme === 'space') {
-        ctx.fillStyle = '#000010'; ctx.fillRect(0, 0, w, h);
-        particles.forEach(p => {
-          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = p.color; ctx.globalAlpha = p.a; ctx.fill(); ctx.globalAlpha = 1;
-        });
-      }
-
-      animations[idx].raf = requestAnimationFrame(draw);
-    }
-    draw();
-
-    return {
-      pause: () => { paused = true; },
-      resume: () => { paused = false; },
-      isPaused: () => paused,
-      raf: null
-    };
-  }
-
-  initAnimations();
-
-  // ============ INTERACTIONS & EVENT LISTENERS ============
   const state = videos.map(v => ({
     liked: false,
     bookmarked: false,
@@ -987,123 +739,114 @@
     comments: [...sampleComments]
   }));
 
-  // Tap feed for play/pause or double tap like
-  let lastTap = 0;
-  let tapTimeout = null;
-  feed.addEventListener('click', (e) => {
-    if (e.target.closest('.sidebar') || e.target.closest('.bottom-info') || e.target.closest('.top-bar')) return;
-    const slide = e.target.closest('.video-slide');
-    if (!slide) return;
-    const idx = parseInt(slide.dataset.idx);
-    const now = Date.now();
-    if (now - lastTap < 300) {
-      clearTimeout(tapTimeout);
-      const rect = slide.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const heart = document.createElement('div');
-      heart.className = 'double-tap-heart';
-      heart.textContent = '❤';
-      heart.style.left = x + 'px';
-      heart.style.top = y + 'px';
-      slide.appendChild(heart);
-      setTimeout(() => heart.remove(), 1000);
-      if (!state[idx].liked) toggleLike(idx);
-    } else {
-      tapTimeout = setTimeout(() => {
-        const anim = animations[idx];
-        const indicator = document.getElementById(`playInd-${idx}`);
-        if (anim) {
-          if (anim.isPaused()) {
-            anim.resume();
-            indicator.textContent = '▶';
-          } else {
-            anim.pause();
-            indicator.textContent = '❚❚';
-          }
-          indicator.classList.add('show');
-          setTimeout(() => indicator.classList.remove('show'), 500);
-        }
-      }, 300);
+  renderFeed(videos);
+
+  // Canvas animations
+  document.querySelectorAll('.video-slide').forEach((slide, idx) => {
+    const canvas = slide.querySelector('canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let t = 0;
+
+    function draw() {
+      t += 0.03;
+      ctx.fillStyle = idx % 2 === 0 ? '#ff6b35' : '#2193b0';
+      ctx.fillRect(0, 0, canvas.width || 300, canvas.height || 500);
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      for(let i=0; i<15; i++) {
+        let px = (i * 40 + t * 20) % 400;
+        let py = (i * 70 + Math.sin(t+i)*30) % 700;
+        ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI*2); ctx.fill();
+      }
+      requestAnimationFrame(draw);
     }
-    lastTap = now;
+    draw();
   });
 
-  // Action Delegation
-  feed.addEventListener('click', (e) => {
-    const likeBtn = e.target.closest('[data-like]');
-    if (likeBtn) {
-      e.stopPropagation();
-      toggleLike(parseInt(likeBtn.dataset.like));
+  // ============ GLOBAL EVENT LISTENER (MENJAMIN SEMUA TOMBOL BERFUNGSI) ============
+  document.addEventListener('click', (e) => {
+    // Top Tabs
+    const tab = e.target.closest('.tab');
+    if (tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      showToast(`Tab: ${tab.textContent}`);
       return;
     }
-    const bookmarkBtn = e.target.closest('[data-bookmark]');
-    if (bookmarkBtn) {
-      e.stopPropagation();
-      const idx = parseInt(bookmarkBtn.dataset.bookmark);
-      state[idx].bookmarked = !state[idx].bookmarked;
-      state[idx].bookmarks += state[idx].bookmarked ? 1 : -1;
-      bookmarkBtn.classList.toggle('bookmarked', state[idx].bookmarked);
-      document.getElementById(`bookmarkCount-${idx}`).textContent = formatCount(state[idx].bookmarks);
-      showToast(state[idx].bookmarked ? '✓ Disimpan ke favorit' : 'Dihapus dari favorit');
+
+    // Live Button
+    if (e.target.closest('#liveBtn')) {
+      showToast('Menghubungkan ke LIVE...');
       return;
     }
-    const followBtn = e.target.closest('[data-follow]');
-    if (followBtn) {
-      e.stopPropagation();
-      const idx = parseInt(followBtn.dataset.follow);
-      state[idx].followed = !state[idx].followed;
-      followBtn.classList.toggle('followed', state[idx].followed);
-      followBtn.textContent = state[idx].followed ? '✓' : '+';
-      showToast(state[idx].followed ? `Mengikuti @${videos[idx].user}` : 'Berhenti mengikuti');
+
+    // Search Button & Search Action
+    if (e.target.closest('#searchBtn')) {
+      document.getElementById('searchModal').classList.add('show');
       return;
     }
-    const commentBtn = e.target.closest('[data-comment]');
-    if (commentBtn) {
-      e.stopPropagation();
-      openComments(parseInt(commentBtn.dataset.comment));
+    if (e.target.closest('#executeSearch')) {
+      document.getElementById('searchModal').classList.remove('show');
+      showToast('Hasil pencarian ditampilkan');
       return;
     }
-    const shareBtn = e.target.closest('[data-share]');
-    if (shareBtn) {
-      e.stopPropagation();
-      openShare(parseInt(shareBtn.dataset.share));
+
+    // Bottom Navigation
+    const navItem = e.target.closest('.bottom-nav .nav-item[data-nav]');
+    if (navItem) {
+      document.querySelectorAll('.bottom-nav .nav-item').forEach(i => i.classList.remove('active'));
+      navItem.classList.add('active');
+      showToast(`Menu: ${navItem.textContent.trim()}`);
+      return;
+    }
+
+    // Modal Close Buttons
+    const closeBtn = e.target.closest('[data-close]');
+    if (closeBtn) {
+      const modalId = closeBtn.dataset.close;
+      document.getElementById(modalId).classList.remove('show');
+      return;
+    }
+
+    // Feed Actions (Like, Bookmark, Follow, Comment, Share)
+    const actionEl = e.target.closest('[data-action]');
+    if (actionEl) {
+      const action = actionEl.dataset.action;
+      const idx = parseInt(actionEl.dataset.idx);
+
+      if (action === 'like') {
+        state[idx].liked = !state[idx].liked;
+        state[idx].likes += state[idx].liked ? 1 : -1;
+        actionEl.classList.toggle('liked', state[idx].liked);
+        document.getElementById(`likeCount-${idx}`).textContent = formatCount(state[idx].likes);
+      } else if (action === 'bookmark') {
+        state[idx].bookmarked = !state[idx].bookmarked;
+        state[idx].bookmarks += state[idx].bookmarked ? 1 : -1;
+        actionEl.classList.toggle('bookmarked', state[idx].bookmarked);
+        document.getElementById(`bookmarkCount-${idx}`).textContent = formatCount(state[idx].bookmarks);
+        showToast(state[idx].bookmarked ? 'Disimpan ke favorit' : 'Dihapus dari favorit');
+      } else if (action === 'follow') {
+        state[idx].followed = !state[idx].followed;
+        actionEl.classList.toggle('followed', state[idx].followed);
+        actionEl.textContent = state[idx].followed ? '✓' : '+';
+        showToast(state[idx].followed ? 'Mengikuti kreator' : 'Berhenti mengikuti');
+      } else if (action === 'comment') {
+        openComments(idx);
+      } else if (action === 'share') {
+        openShare(idx);
+      }
       return;
     }
   });
 
-  function toggleLike(idx) {
-    state[idx].liked = !state[idx].liked;
-    state[idx].likes += state[idx].liked ? 1 : -1;
-    const btn = document.querySelector(`[data-like="${idx}"]`);
-    if (btn) {
-      btn.classList.toggle('liked', state[idx].liked);
-      document.getElementById(`likeCount-${idx}`).textContent = formatCount(state[idx].likes);
-    }
-  }
-
-  // Comments System
+  // Comments Management
   function openComments(idx) {
     const modal = document.getElementById('commentsModal');
     const list = document.getElementById('commentsList');
-    document.getElementById('commentsCount').textContent = `${formatCount(state[idx].comments.length)} Komentar`;
+    document.getElementById('commentsCount').textContent = `${state[idx].comments.length} Komentar`;
     list.innerHTML = '';
     state[idx].comments.forEach(c => {
-      const item = document.createElement('div');
-      item.className = 'comment-item';
-      item.innerHTML = `
-        <div class="comment-avatar" style="background:#ff6b6b">${c.user[0].toUpperCase()}</div>
-        <div class="comment-body">
-          <div class="comment-user">@${c.user}</div>
-          <div class="comment-text">${c.text}</div>
-          <div class="comment-meta">
-            <span>${c.time}</span>
-            <span>♡ ${c.likes}</span>
-            <span>Balas</span>
-          </div>
-        </div>
-      `;
-      list.appendChild(item);
+      list.innerHTML += `<div class="comment-item"><div class="comment-avatar" style="background:#ff6b6b">${c.user[0]}</div><div class="comment-body"><div class="comment-user">@${c.user}</div><div class="comment-text">${c.text}</div></div></div>`;
     });
     modal.classList.add('show');
     modal.dataset.idx = idx;
@@ -1115,13 +858,13 @@
     if (!text) return;
     const modal = document.getElementById('commentsModal');
     const idx = parseInt(modal.dataset.idx);
-    state[idx].comments.unshift({ user: 'saya', text: text, time: 'baru saja', likes: 0 });
+    state[idx].comments.unshift({ user: 'saya', text: text });
     input.value = '';
     openComments(idx);
     showToast('Komentar terkirim');
   });
 
-  // Share System
+  // Share Modal Management
   function openShare(idx) {
     const modal = document.getElementById('shareModal');
     const grid = document.getElementById('shareGrid');
@@ -1129,79 +872,32 @@
     shareOptions.forEach(opt => {
       const item = document.createElement('div');
       item.className = 'share-item';
-      item.innerHTML = `
-        <div class="share-icon" style="background:${opt.bg}">${opt.icon}</div>
-        <div>${opt.name}</div>
-      `;
+      item.innerHTML = `<div class="share-icon" style="background:${opt.bg}">${opt.icon}</div><div>${opt.name}</div>`;
       item.addEventListener('click', () => {
         modal.classList.remove('show');
-        showToast(opt.name === 'Salin Link' ? 'Link disalin ke clipboard' : `Membuka ${opt.name}...`);
+        showToast(`Membuka ${opt.name}`);
       });
       grid.appendChild(item);
     });
     modal.classList.add('show');
   }
 
-  // Search & Top Bar
-  document.getElementById('searchBtn').addEventListener('click', () => {
-    document.getElementById('searchModal').classList.add('show');
-  });
-  document.getElementById('executeSearch').addEventListener('click', () => {
-    const query = document.getElementById('searchInput').value;
-    document.getElementById('searchModal').classList.remove('show');
-    showToast(query ? `Hasil pencarian: "${query}"` : 'Menampilkan semua video');
-  });
-
-  document.getElementById('liveBtn').addEventListener('click', () => {
-    showToast('Menghubungkan ke siaran LIVE...');
-  });
-
-  document.querySelectorAll('.top-bar .tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.top-bar .tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      showToast(`Beralih ke tab ${tab.textContent}`);
-    });
-  });
-
-  document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
-    item.addEventListener('click', () => {
-      document.querySelectorAll('.bottom-nav .nav-item').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-      const navName = item.dataset.nav;
-      if (navName) showToast(`Menu ${item.textContent.trim()} dipilih`);
-    });
-  });
-
-  // Modals Close handlers
-  document.querySelectorAll('.modal-close').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.getElementById(btn.dataset.close).classList.remove('show');
-    });
-  });
-  document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) overlay.classList.remove('show');
-    });
-  });
-
-  // Mute Indicator
+  // Mute Audio Indicator
   let muted = true;
   document.getElementById('muteIndicator').addEventListener('click', () => {
     muted = !muted;
     document.getElementById('muteIcon').textContent = muted ? '🔇' : '🔊';
-    document.getElementById('muteText').textContent = muted ? 'Ketik untuk bunyi' : 'Suara aktif';
+    document.getElementById('muteText').textContent = muted ? 'Suara Mati' : 'Suara Aktif';
     showToast(muted ? 'Audio dimatikan' : 'Audio diaktifkan');
   });
 
-  // ============ CAMERA & UPLOAD STUDIO FUNCTIONALITY ============
+  // ============ CAMERA & GALLERY LOGIC ============
   const cameraModal = document.getElementById('cameraModal');
   const cameraVideo = document.getElementById('cameraVideo');
-  const openCameraModalBtn = document.getElementById('openCameraModal');
+  const openCameraBtn = document.getElementById('openCameraModal');
   const closeCameraBtn = document.getElementById('closeCamera');
   const switchCameraBtn = document.getElementById('switchCameraBtn');
   const recordShutter = document.getElementById('recordShutter');
-  const recordingTimer = document.getElementById('recordingTimer');
   const uploadGalleryBtn = document.getElementById('uploadGalleryBtn');
   const galleryInput = document.getElementById('galleryInput');
 
@@ -1210,11 +906,10 @@
   let recordedChunks = [];
   let isRecording = false;
   let useFrontCamera = true;
-  let timerInterval = null;
 
-  async function startCamera(front = true) {
+  async function startCamera(front) {
     if (mediaStream) {
-      mediaStream.getTracks().forEach(track => track.stop());
+      mediaStream.getTracks().forEach(t => t.stop());
     }
     try {
       mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -1223,30 +918,19 @@
       });
       cameraVideo.srcObject = mediaStream;
     } catch (err) {
-      showToast('Gagal mengakses kamera/mikrofon');
-      console.error(err);
+      showToast('Akses kamera/mikrofon diblokir atau tidak tersedia');
     }
   }
 
-  openCameraModalBtn.addEventListener('click', async () => {
+  openCameraBtn.addEventListener('click', async () => {
     cameraModal.classList.add('show');
     await startCamera(useFrontCamera);
   });
 
   closeCameraBtn.addEventListener('click', () => {
-    stopCameraStream();
+    if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
     cameraModal.classList.remove('show');
   });
-
-  function stopCameraStream() {
-    if (mediaStream) {
-      mediaStream.getTracks().forEach(track => track.stop());
-      mediaStream = null;
-    }
-    if (isRecording) {
-      stopRecording();
-    }
-  }
 
   switchCameraBtn.addEventListener('click', async () => {
     useFrontCamera = !useFrontCamera;
@@ -1254,67 +938,34 @@
     showToast(useFrontCamera ? 'Kamera Depan Aktif' : 'Kamera Belakang Aktif');
   });
 
-  // Record Video Functionality
   recordShutter.addEventListener('click', () => {
     if (!isRecording) {
-      startRecording();
-    } else {
-      stopRecording();
-    }
-  });
-
-  function startRecording() {
-    recordedChunks = [];
-    try {
-      mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
-    } catch (e) {
+      recordedChunks = [];
       try {
-        mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/mp4' });
-      } catch (err) {
         mediaRecorder = new MediaRecorder(mediaStream);
+      } catch(e) {
+        mediaRecorder = new MediaRecorder(mediaStream, {mimeType: 'video/webm'});
       }
-    }
-
-    mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) recordedChunks.push(e.data);
-    };
-
-    mediaRecorder.onstop = () => {
-      const blob = new Blob(recordedChunks, { type: 'video/webm' });
-      const videoUrl = URL.createObjectURL(blob);
-      addNewVideoToFeed(videoUrl, 'Video Rekaman Kamera');
-    };
-
-    mediaRecorder.start();
-    isRecording = true;
-    recordShutter.classList.add('recording');
-    recordingTimer.style.display = 'block';
-    
-    let seconds = 0;
-    timerInterval = setInterval(() => {
-      seconds++;
-      let m = String(Math.floor(seconds / 60)).padStart(2, '0');
-      let s = String(seconds % 60).padStart(2, '0');
-      recordingTimer.textContent = `● ${m}:${s}`;
-    }, 1000);
-
-    showToast('Perekaman dimulai...');
-  }
-
-  function stopRecording() {
-    if (mediaRecorder && isRecording) {
+      mediaRecorder.ondataavailable = e => { if(e.data.size > 0) recordedChunks.push(e.data); };
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        addNewVideo(url);
+      };
+      mediaRecorder.start();
+      isRecording = true;
+      recordShutter.classList.add('recording');
+      showToast('Perekaman video dimulai...');
+    } else {
       mediaRecorder.stop();
       isRecording = false;
       recordShutter.classList.remove('recording');
-      recordingTimer.style.display = 'none';
-      clearInterval(timerInterval);
       cameraModal.classList.remove('show');
-      stopCameraStream();
+      if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
       showToast('Video berhasil direkam & diunggah!');
     }
-  }
+  });
 
-  // Upload from Gallery Functionality
   uploadGalleryBtn.addEventListener('click', () => {
     galleryInput.click();
   });
@@ -1322,65 +973,31 @@
   galleryInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
-      const videoUrl = URL.createObjectURL(file);
-      addNewVideoToFeed(videoUrl, file.name);
+      const url = URL.createObjectURL(file);
+      addNewVideo(url);
       cameraModal.classList.remove('show');
-      stopCameraStream();
+      if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
       showToast('Video dari galeri berhasil diunggah!');
     }
   });
 
-  function addNewVideoToFeed(videoUrl, captionTitle) {
-    const newVideoItem = {
+  function addNewVideo(url) {
+    videos.unshift({
       id: videos.length + 1,
-      user: 'saya_kreator',
+      user: 'kreator_saya',
       displayName: 'Anda',
-      avatar: '😎',
-      avatarBg: 'linear-gradient(135deg, #25f4ee, #fe2c55)',
-      caption: `Unggahan baru: ${captionTitle} 🚀`,
-      hashtags: ['fyp', 'indonesia', 'kreator'],
-      music: '♪ Original Sound - Saya',
-      likes: 1,
-      comments: 0,
-      shares: 0,
-      bookmarks: 0,
+      avatar: '⭐',
+      avatarBg: '#ff2d55',
+      caption: 'Video baru saya 🚀',
+      hashtags: ['fyp', 'upload'],
+      music: '♪ Original Audio - Anda',
+      likes: 1, comments: 0, shares: 0, bookmarks: 0,
       isCustomVideo: true,
-      videoUrl: videoUrl
-    };
-    videos.unshift(newVideoItem);
-    state.unshift({
-      liked: false,
-      bookmarked: false,
-      followed: true,
-      likes: 1,
-      bookmarks: 0,
-      comments: []
+      videoUrl: url
     });
+    state.unshift({ liked: false, bookmarked: false, followed: true, likes: 1, bookmarks: 0, comments: [] });
     renderFeed(videos);
-    initAnimations();
   }
-
-  // Intersection Observer to control autoplay canvas/video loops
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      const idx = parseInt(entry.target.dataset.idx);
-      const anim = animations[idx];
-      const vidEl = entry.target.querySelector('video');
-      
-      if (entry.isIntersecting && entry.intersectionRatio > 0.7) {
-        if (anim) anim.resume();
-        if (vidEl) vidEl.play().catch(e => {});
-      } else {
-        if (anim) anim.pause();
-        if (vidEl) vidEl.pause();
-      }
-    });
-  }, { threshold: [0, 0.7, 1] });
-
-  function observeSlides() {
-    document.querySelectorAll('.video-slide').forEach(slide => observer.observe(slide));
-  }
-  observeSlides();
 </script>
 </body>
 </html>
