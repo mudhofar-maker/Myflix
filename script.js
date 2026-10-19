@@ -9,7 +9,7 @@ let activeShareVideoUrl = window.location.href;
 let dbProfile;
 function initProfileDB() {
   return new Promise((resolve) => {
-    const request = indexedDB.open('TikVidAccountDB', 3);
+    const request = indexedDB.open('TikVidAccountDB', 4);
     request.onerror = () => { loadProfileFallback(); resolve(); };
     request.onupgradeneeded = (e) => {
       dbProfile = e.target.result;
@@ -67,13 +67,16 @@ function loadProfileFallback() {
 initProfileDB();
 
 function updateProfileUI() {
-  document.getElementById('currentUsername').textContent = currentUser;
+  const nameEl = document.getElementById('currentUsername');
+  if (nameEl) nameEl.textContent = currentUser;
   const navImg = document.getElementById('navProfileAvatar');
-  if (currentAvatar) {
-    navImg.src = currentAvatar;
-    navImg.style.display = 'block';
-  } else {
-    navImg.style.display = 'none';
+  if (navImg) {
+    if (currentAvatar) {
+      navImg.src = currentAvatar;
+      navImg.style.display = 'block';
+    } else {
+      navImg.style.display = 'none';
+    }
   }
 }
 
@@ -87,7 +90,7 @@ let currentSelectedMusic = '♪ Lofi Long Session - ChillBeats';
 let db;
 function initIndexedDB() {
   return new Promise((resolve) => {
-    const request = indexedDB.open('TikVidWhatsAppDB', 3);
+    const request = indexedDB.open('TikVidWhatsAppDB', 4);
     request.onerror = () => { loadVideosFallback(); resolve(); };
     request.onupgradeneeded = (e) => {
       db = e.target.result;
@@ -445,7 +448,7 @@ document.addEventListener('click', (e) => {
 
     updateProfileUI();
     document.getElementById('accountModal').classList.remove('show');
-    showToast(`Akun WA @${currentUser} berhasil disimpan permanen!`);
+    showToast(`Akun @${currentUser} berhasil disimpan permanen!`);
     renderFeed(videos);
     return;
   }
@@ -774,7 +777,7 @@ if (uploadGalleryBtn && galleryInput) {
   });
 }
 
-// --- EDITOR CAPTION INTERAKTIF (Geser, Cubit/Ukuran, Full Color) ---
+// --- EDITOR CAPTION INTERAKTIF (Geser, Ukuran, Full Color) ---
 function openCaptionEditor(videoDataUrl, durationStr) {
   let existingModal = document.getElementById('captionEditorModal');
   if (existingModal) existingModal.remove();
@@ -788,7 +791,7 @@ function openCaptionEditor(videoDataUrl, durationStr) {
     <div style="width: 100%; height: 100%; max-width: 480px; position: relative; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; background: #000;">
       <video src="${videoDataUrl}" autoplay loop muted style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1;"></video>
       
-      <!-- Teks Caption Interaktif (Bisa digeser & dicubit ukurannya) -->
+      <!-- Teks Caption Interaktif (Bisa digeser & diatur ukuran) -->
       <div id="draggableCaption" style="position: absolute; top: 40%; left: 10%; right: 10%; z-index: 10; text-align: center; cursor: move; touch-action: none; padding: 10px;">
         <div id="previewCaptionText" style="font-size: 22px; font-weight: bold; color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.9); word-break: break-word;">Tulis caption keren Anda di sini... 🚀</div>
       </div>
@@ -810,7 +813,7 @@ function openCaptionEditor(videoDataUrl, durationStr) {
             <input type="color" id="captionColorPicker" value="#ffffff" style="width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; background: none;" />
           </div>
           <div style="display: flex; gap: 8px; align-items: center;">
-            <span style="font-size: 12px; color: #fff;">Ukuran / Cubit:</span>
+            <span style="font-size: 12px; color: #fff;">Ukuran:</span>
             <input type="range" id="captionSizeRange" min="14" max="42" value="22" style="cursor: pointer;" />
           </div>
         </div>
