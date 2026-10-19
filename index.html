@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>TikVid - Video Pendek</title>
+<title>TikVid - Video Pendek & LIVE</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans@5.0.3/index.css" />
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -37,8 +37,10 @@
   }
   .top-bar .live-btn {
     font-size: 14px; font-weight: 600;
-    opacity: 0.85; cursor: pointer; padding: 6px 10px;
-    background: rgba(255,0,0,0.3); border-radius: 12px;
+    opacity: 0.9; cursor: pointer; padding: 6px 12px;
+    background: linear-gradient(135deg, #ff2d55, #ff9500); border-radius: 16px;
+    display: flex; align-items: center; gap: 4px;
+    box-shadow: 0 2px 10px rgba(255,45,85,0.4);
   }
   .top-bar .tabs {
     display: flex;
@@ -166,9 +168,7 @@
     cursor: pointer;
     border: 2px solid #000;
   }
-  .sidebar .follow-btn.followed {
-    background: #2ecc71;
-  }
+  .sidebar .follow-btn.followed { background: #2ecc71; }
   .sidebar .action {
     display: flex;
     flex-direction: column;
@@ -455,7 +455,7 @@
     z-index: 30;
     cursor: pointer;
   }
-  /* Camera Modal */
+  /* Camera & Live Studio Modal */
   .camera-modal {
     position: absolute;
     inset: 0;
@@ -526,13 +526,27 @@
     width: 30px; height: 30px;
     border-radius: 4px;
   }
+  /* LIVE Badge overlay inside camera */
+  .live-indicator-badge {
+    position: absolute;
+    top: 70px;
+    left: 20px;
+    background: #ff2d55;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    display: none;
+    z-index: 5;
+  }
 </style>
 </head>
 <body>
 <div id="app">
   <!-- Top Bar -->
   <div class="top-bar">
-    <div class="live-btn" id="liveBtn">📺 LIVE</div>
+    <div class="live-btn" id="liveBtn">🔴 LIVE</div>
     <div class="tabs">
       <div class="tab" data-tab="following">Mengikuti</div>
       <div class="tab active" data-tab="foryou">Untuk Kamu</div>
@@ -612,13 +626,14 @@
     </div>
   </div>
 
-  <!-- Camera & Upload Studio Modal -->
+  <!-- Camera & LIVE Studio Modal -->
   <div class="camera-modal" id="cameraModal">
     <div class="camera-preview-wrap">
       <video id="cameraVideo" autoplay playsinline muted></video>
     </div>
+    <div class="live-indicator-badge" id="liveBadge">LIVE STREAMING</div>
     <div class="camera-top-bar">
-      <div style="cursor: pointer; padding: 10px;" id="closeCamera">✕ Batal</div>
+      <div style="cursor: pointer; padding: 10px;" id="closeCamera">✕ Tutup</div>
       <div id="recordingTimer" style="color: #fe2c55; display: none;">● 00:00</div>
       <div style="cursor: pointer; padding: 10px;" id="switchCameraBtn">🔄 Putar Kamera</div>
     </div>
@@ -627,7 +642,7 @@
       <div class="record-shutter" id="recordShutter">
         <div class="record-shutter-inner"></div>
       </div>
-      <button class="cam-btn" id="camStatusBtn">Kamera Siap</button>
+      <button class="cam-btn" id="camModeToggleBtn">Mode: Rekam</button>
     </div>
     <input type="file" id="galleryInput" accept="video/*" style="display: none;" />
   </div>
@@ -741,7 +756,7 @@
 
   renderFeed(videos);
 
-  // Canvas animations
+  // Canvas animations for background feed items
   document.querySelectorAll('.video-slide').forEach((slide, idx) => {
     const canvas = slide.querySelector('canvas');
     if (!canvas) return;
@@ -763,9 +778,8 @@
     draw();
   });
 
-  // ============ GLOBAL EVENT LISTENER (MENJAMIN SEMUA TOMBOL BERFUNGSI) ============
+  // ============ GLOBAL EVENT LISTENER ============
   document.addEventListener('click', (e) => {
-    // Top Tabs
     const tab = e.target.closest('.tab');
     if (tab) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -774,13 +788,11 @@
       return;
     }
 
-    // Live Button
     if (e.target.closest('#liveBtn')) {
-      showToast('Menghubungkan ke LIVE...');
+      openLiveStudio();
       return;
     }
 
-    // Search Button & Search Action
     if (e.target.closest('#searchBtn')) {
       document.getElementById('searchModal').classList.add('show');
       return;
@@ -791,7 +803,6 @@
       return;
     }
 
-    // Bottom Navigation
     const navItem = e.target.closest('.bottom-nav .nav-item[data-nav]');
     if (navItem) {
       document.querySelectorAll('.bottom-nav .nav-item').forEach(i => i.classList.remove('active'));
@@ -800,7 +811,6 @@
       return;
     }
 
-    // Modal Close Buttons
     const closeBtn = e.target.closest('[data-close]');
     if (closeBtn) {
       const modalId = closeBtn.dataset.close;
@@ -808,7 +818,6 @@
       return;
     }
 
-    // Feed Actions (Like, Bookmark, Follow, Comment, Share)
     const actionEl = e.target.closest('[data-action]');
     if (actionEl) {
       const action = actionEl.dataset.action;
@@ -839,7 +848,6 @@
     }
   });
 
-  // Comments Management
   function openComments(idx) {
     const modal = document.getElementById('commentsModal');
     const list = document.getElementById('commentsList');
@@ -864,7 +872,6 @@
     showToast('Komentar terkirim');
   });
 
-  // Share Modal Management
   function openShare(idx) {
     const modal = document.getElementById('shareModal');
     const grid = document.getElementById('shareGrid');
@@ -882,7 +889,6 @@
     modal.classList.add('show');
   }
 
-  // Mute Audio Indicator
   let muted = true;
   document.getElementById('muteIndicator').addEventListener('click', () => {
     muted = !muted;
@@ -891,7 +897,7 @@
     showToast(muted ? 'Audio dimatikan' : 'Audio diaktifkan');
   });
 
-  // ============ CAMERA & GALLERY LOGIC ============
+  // ============ CAMERA, RECORD & LIVE STREAMING INTEGRATION ============
   const cameraModal = document.getElementById('cameraModal');
   const cameraVideo = document.getElementById('cameraVideo');
   const openCameraBtn = document.getElementById('openCameraModal');
@@ -900,12 +906,15 @@
   const recordShutter = document.getElementById('recordShutter');
   const uploadGalleryBtn = document.getElementById('uploadGalleryBtn');
   const galleryInput = document.getElementById('galleryInput');
+  const liveBadge = document.getElementById('liveBadge');
+  const camModeToggleBtn = document.getElementById('camModeToggleBtn');
 
   let mediaStream = null;
   let mediaRecorder = null;
   let recordedChunks = [];
   let isRecording = false;
   let useFrontCamera = true;
+  let isLiveMode = false;
 
   async function startCamera(front) {
     if (mediaStream) {
@@ -922,14 +931,33 @@
     }
   }
 
+  // Buka Studio dari tombol Rekam (+)
   openCameraBtn.addEventListener('click', async () => {
+    isLiveMode = false;
+    liveBadge.style.display = 'none';
+    camModeToggleBtn.textContent = 'Mode: Rekam';
     cameraModal.classList.add('show');
     await startCamera(useFrontCamera);
   });
 
+  // Buka Studio secara langsung dari tombol LIVE di Top Bar
+  async function openLiveStudio() {
+    isLiveMode = true;
+    liveBadge.style.display = 'block';
+    camModeToggleBtn.textContent = 'Mode: LIVE Aktif';
+    cameraModal.classList.add('show');
+    await startCamera(useFrontCamera);
+    showToast('Memulai Siaran LIVE via Kamera Perangkat...');
+  }
+
   closeCameraBtn.addEventListener('click', () => {
     if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
     cameraModal.classList.remove('show');
+    if (isRecording) {
+      mediaRecorder.stop();
+      isRecording = false;
+      recordShutter.classList.remove('recording');
+    }
   });
 
   switchCameraBtn.addEventListener('click', async () => {
@@ -939,6 +967,11 @@
   });
 
   recordShutter.addEventListener('click', () => {
+    if (isLiveMode) {
+      showToast('Anda sedang dalam siaran LIVE. Tekan Tutup untuk mengakhiri.');
+      return;
+    }
+
     if (!isRecording) {
       recordedChunks = [];
       try {
@@ -962,7 +995,7 @@
       recordShutter.classList.remove('recording');
       cameraModal.classList.remove('show');
       if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
-      showToast('Video berhasil direkam & diunggah!');
+      showToast('Video berhasil direkam & diunggah ke feed!');
     }
   });
 
