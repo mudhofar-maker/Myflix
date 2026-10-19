@@ -1,6 +1,6 @@
 let currentUser = localStorage.getItem('tikvid_username') || 'kreator_tamu';
 let currentWhatsApp = localStorage.getItem('tikvid_wa') || '';
-let currentBio = localStorage.getItem('tikvid_bio') || 'Selamat datang di profil resmi saya! Jelajahi video & produk terbaik.';
+let currentBio = localStorage.getItem('tikvid_bio') || 'Selamat datang di profil resmi saya!';
 let currentAvatar = localStorage.getItem('tikvid_avatar') || '';
 let currentShopLink = localStorage.getItem('tikvid_shoplink') || 'https://shopee.co.id';
 let activeTab = 'foryou';
@@ -9,7 +9,7 @@ let activeShareVideoUrl = window.location.href;
 let dbProfile;
 function initProfileDB() {
   return new Promise((resolve) => {
-    const request = indexedDB.open('TikVidAccountDB', 2);
+    const request = indexedDB.open('TikVidAccountDB', 3);
     request.onerror = () => { loadProfileFallback(); resolve(); };
     request.onupgradeneeded = (e) => {
       dbProfile = e.target.result;
@@ -78,7 +78,7 @@ function updateProfileUI() {
 }
 
 const defaultVideos = [
-  { id: 1, user: 'kreator_hebat', wa: '085710717478', bio: 'Selamat datang di profil resmi saya! Jelajahi video & produk terbaik.', avatar: '', shopLink: 'https://shopee.co.id', caption: 'Video original baru dari @kreator_hebat 🚀 #longformat #whatsapp #fyp', hashtags: ['longformat', 'whatsapp', 'fyp'], music: '♪ Lofi Long Session - ChillBeats', likes: 1, comments: 0, shares: 0, bookmarks: 0, durationLabel: '00:05', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' }
+  { id: 1, user: 'kreator_hebat', bio: 'Selamat datang di profil resmi saya!', avatar: '', shopLink: 'https://shopee.co.id', caption: 'Video original baru dari @kreator_hebat 🚀 #longformat #whatsapp #fyp', captionColor: '#ffffff', hashtags: ['longformat', 'whatsapp', 'fyp'], music: '♪ Lofi Long Session - ChillBeats', likes: 1, comments: 0, shares: 0, bookmarks: 0, durationLabel: '00:05', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' }
 ];
 
 let videos = [];
@@ -87,7 +87,7 @@ let currentSelectedMusic = '♪ Lofi Long Session - ChillBeats';
 let db;
 function initIndexedDB() {
   return new Promise((resolve) => {
-    const request = indexedDB.open('TikVidWhatsAppDB', 2);
+    const request = indexedDB.open('TikVidWhatsAppDB', 3);
     request.onerror = () => { loadVideosFallback(); resolve(); };
     request.onupgradeneeded = (e) => {
       db = e.target.result;
@@ -155,6 +155,7 @@ const sampleComments = [
 
 async function fetchViralMusicAPI() {
   const musicListEl = document.getElementById('musicList');
+  if (!musicListEl) return;
   musicListEl.innerHTML = `<div class="comment-item" style="padding: 14px; text-align:center; opacity:0.6;">Memuat musik viral...</div>`;
 
   const fallbackViralTracks = [
@@ -202,6 +203,7 @@ function formatCount(n) {
 
 function showToast(msg) {
   const toast = document.getElementById('toast');
+  if (!toast) return;
   toast.textContent = msg;
   toast.classList.add('show');
   clearTimeout(showToast._t);
@@ -219,6 +221,7 @@ function initStates() {
 }
 
 function renderFeed(list) {
+  if (!feed) return;
   feed.innerHTML = '';
   let filteredList = list;
   if (activeTab === 'following') {
@@ -349,28 +352,31 @@ const previewAvatarImg = document.getElementById('previewAvatarImg');
 const avatarPlaceholderText = document.getElementById('avatarPlaceholderText');
 let tempAvatarData = currentAvatar;
 
-if (currentAvatar) {
+if (currentAvatar && previewAvatarImg) {
   previewAvatarImg.src = currentAvatar;
   previewAvatarImg.style.display = 'block';
-  avatarPlaceholderText.style.display = 'none';
+  if (avatarPlaceholderText) avatarPlaceholderText.style.display = 'none';
 }
 
-triggerAvatarUpload.addEventListener('click', () => avatarFileInput.click());
-
-avatarFileInput.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onloadend = () => {
-      tempAvatarData = reader.result;
-      previewAvatarImg.src = tempAvatarData;
-      previewAvatarImg.style.display = 'block';
-      avatarPlaceholderText.style.display = 'none';
-      showToast('Foto profil dipilih');
-    };
-  }
-});
+if (triggerAvatarUpload && avatarFileInput) {
+  triggerAvatarUpload.addEventListener('click', () => avatarFileInput.click());
+  avatarFileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        tempAvatarData = reader.result;
+        if (previewAvatarImg) {
+          previewAvatarImg.src = tempAvatarData;
+          previewAvatarImg.style.display = 'block';
+        }
+        if (avatarPlaceholderText) avatarPlaceholderText.style.display = 'none';
+        showToast('Foto profil dipilih');
+      };
+    }
+  });
+}
 
 document.addEventListener('click', (e) => {
   const tab = e.target.closest('.tab');
@@ -397,10 +403,10 @@ document.addEventListener('click', (e) => {
     document.getElementById('bioInput').value = currentBio;
     document.getElementById('shopLinkInput').value = currentShopLink;
     tempAvatarData = currentAvatar;
-    if (currentAvatar) {
+    if (currentAvatar && previewAvatarImg) {
       previewAvatarImg.src = currentAvatar;
       previewAvatarImg.style.display = 'block';
-      avatarPlaceholderText.style.display = 'none';
+      if (avatarPlaceholderText) avatarPlaceholderText.style.display = 'none';
     }
     document.getElementById('accountModal').classList.add('show');
     return;
@@ -544,6 +550,7 @@ document.addEventListener('click', (e) => {
 
 function openFriendsModal() {
   const container = document.getElementById('friendsListContainer');
+  if (!container) return;
   container.innerHTML = '';
   
   videos.forEach((v, idx) => {
@@ -591,24 +598,30 @@ function openComments(idx) {
   modal.dataset.idx = idx;
 }
 
-document.getElementById('commentSend').addEventListener('click', () => {
-  const input = document.getElementById('commentInput');
-  const text = input.value.trim();
-  if (!text) return;
-  const modal = document.getElementById('commentsModal');
-  const idx = parseInt(modal.dataset.idx);
-  state[idx].comments.unshift({ user: currentUser, text: text });
-  input.value = '';
-  openComments(idx);
-  showToast('Komentar terkirim');
-});
+const commentSendBtn = document.getElementById('commentSend');
+if (commentSendBtn) {
+  commentSendBtn.addEventListener('click', () => {
+    const input = document.getElementById('commentInput');
+    const text = input.value.trim();
+    if (!text) return;
+    const modal = document.getElementById('commentsModal');
+    const idx = parseInt(modal.dataset.idx);
+    state[idx].comments.unshift({ user: currentUser, text: text });
+    input.value = '';
+    openComments(idx);
+    showToast('Komentar terkirim');
+  });
+}
 
 let muted = true;
-document.getElementById('muteIndicator').addEventListener('click', () => {
-  muted = !muted;
-  document.getElementById('muteIcon').textContent = muted ? '🔇' : '🔊';
-  document.getElementById('muteText').textContent = muted ? 'Suara Mati' : 'Suara Aktif';
-});
+const muteIndicator = document.getElementById('muteIndicator');
+if (muteIndicator) {
+  muteIndicator.addEventListener('click', () => {
+    muted = !muted;
+    document.getElementById('muteIcon').textContent = muted ? '🔇' : '🔊';
+    document.getElementById('muteText').textContent = muted ? 'Suara Mati' : 'Suara Aktif';
+  });
+}
 
 const cameraModal = document.getElementById('cameraModal');
 const cameraVideo = document.getElementById('cameraVideo');
@@ -638,24 +651,26 @@ async function startCamera(front) {
       video: { facingMode: front ? 'user' : 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
       audio: true
     });
-    cameraVideo.srcObject = mediaStream;
+    if (cameraVideo) cameraVideo.srcObject = mediaStream;
   } catch (err) {
     showToast('Akses kamera/mikrofon diblokir');
   }
 }
 
-openCameraBtn.addEventListener('click', async () => {
-  if (!currentWhatsApp) {
-    showToast('Silakan daftarkan nomor WhatsApp Anda terlebih dahulu di profil!');
-    document.getElementById('accountModal').classList.add('show');
-    return;
-  }
-  isLiveMode = false;
-  liveBadge.style.display = 'none';
-  camModeToggleBtn.textContent = 'Rekam Panjang';
-  cameraModal.classList.add('show');
-  await startCamera(useFrontCamera);
-});
+if (openCameraBtn) {
+  openCameraBtn.addEventListener('click', async () => {
+    if (!currentWhatsApp) {
+      showToast('Silakan daftarkan nomor WhatsApp Anda terlebih dahulu di profil!');
+      document.getElementById('accountModal').classList.add('show');
+      return;
+    }
+    isLiveMode = false;
+    if (liveBadge) liveBadge.style.display = 'none';
+    if (camModeToggleBtn) camModeToggleBtn.textContent = 'Rekam Panjang';
+    if (cameraModal) cameraModal.classList.add('show');
+    await startCamera(useFrontCamera);
+  });
+}
 
 async function openLiveStudio() {
   if (!currentWhatsApp) {
@@ -664,95 +679,102 @@ async function openLiveStudio() {
     return;
   }
   isLiveMode = true;
-  liveBadge.style.display = 'block';
-  camModeToggleBtn.textContent = 'LIVE Aktif';
-  cameraModal.classList.add('show');
+  if (liveBadge) liveBadge.style.display = 'block';
+  if (camModeToggleBtn) camModeToggleBtn.textContent = 'LIVE Aktif';
+  if (cameraModal) cameraModal.classList.add('show');
   await startCamera(useFrontCamera);
   showToast('Memulai Siaran LIVE Berdurasi Panjang...');
 }
 
-closeCameraBtn.addEventListener('click', () => {
-  if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
-  cameraModal.classList.remove('show');
-  clearInterval(timerInterval);
-  if (isRecording) { mediaRecorder.stop(); isRecording = false; recordShutter.classList.remove('recording'); }
-});
+if (closeCameraBtn) {
+  closeCameraBtn.addEventListener('click', () => {
+    if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+    if (cameraModal) cameraModal.classList.remove('show');
+    clearInterval(timerInterval);
+    if (isRecording) { mediaRecorder.stop(); isRecording = false; if (recordShutter) recordShutter.classList.remove('recording'); }
+  });
+}
 
-switchCameraBtn.addEventListener('click', async () => {
-  useFrontCamera = !useFrontCamera;
-  await startCamera(useFrontCamera);
-  showToast(useFrontCamera ? 'Kamera Depan' : 'Kamera Belakang');
-});
+if (switchCameraBtn) {
+  switchCameraBtn.addEventListener('click', async () => {
+    useFrontCamera = !useFrontCamera;
+    await startCamera(useFrontCamera);
+    showToast(useFrontCamera ? 'Kamera Depan' : 'Kamera Belakang');
+  });
+}
 
-recordShutter.addEventListener('click', () => {
-  if (isLiveMode) { showToast('Siaran LIVE sedang berlangsung.'); return; }
+if (recordShutter) {
+  recordShutter.addEventListener('click', () => {
+    if (isLiveMode) { showToast('Siaran LIVE sedang berlangsung.'); return; }
 
-  if (!isRecording) {
-    recordedChunks = [];
-    try {
-      mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm;codecs=vp9,opus' });
-    } catch(e) {
-      mediaRecorder = new MediaRecorder(mediaStream);
-    }
-    mediaRecorder.ondataavailable = e => { if(e.data.size > 0) recordedChunks.push(e.data); };
-    mediaRecorder.onstop = () => {
-      const blob = new Blob(recordedChunks, { type: 'video/webm' });
-      const reader = new FileReader();
-      reader.readAsDataURL(blob);
-      reader.onloadend = () => {
+    if (!isRecording) {
+      recordedChunks = [];
+      try {
+        mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm;codecs=vp9,opus' });
+      } catch(e) {
+        mediaRecorder = new MediaRecorder(mediaStream);
+      }
+      mediaRecorder.ondataavailable = e => { if(e.data.size > 0) recordedChunks.push(e.data); };
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = () => {
+          const m = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+          const s = String(secondsElapsed % 60).padStart(2, '0');
+          openCaptionEditor(reader.result, `${m}:${s}`);
+        };
+      };
+      mediaRecorder.start(1000);
+      isRecording = true;
+      recordShutter.classList.add('recording');
+      secondsElapsed = 0;
+      if (recordingTimerEl) recordingTimerEl.textContent = '● 00:00';
+      timerInterval = setInterval(() => {
+        secondsElapsed++;
         const m = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
         const s = String(secondsElapsed % 60).padStart(2, '0');
-        openCaptionEditor(reader.result, `${m}:${s}`);
+        if (recordingTimerEl) recordingTimerEl.textContent = `● ${m}:${s}`;
+      }, 1000);
+      showToast('Perekaman video panjang dimulai...');
+    } else {
+      mediaRecorder.stop();
+      isRecording = false;
+      clearInterval(timerInterval);
+      if (recordShutter) recordShutter.classList.remove('recording');
+      if (cameraModal) cameraModal.classList.remove('show');
+      if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+    }
+  });
+}
+
+if (uploadGalleryBtn && galleryInput) {
+  uploadGalleryBtn.addEventListener('click', () => galleryInput.click());
+  galleryInput.addEventListener('change', (e) => {
+    if (!currentWhatsApp) {
+      showToast('Silakan daftarkan nomor WhatsApp Anda di profil terlebih dahulu.');
+      return;
+    }
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        const tempVideo = document.createElement('video');
+        tempVideo.src = reader.result;
+        tempVideo.onloadedmetadata = () => {
+          const mins = String(Math.floor(tempVideo.duration / 60)).padStart(2, '0');
+          const secs = String(Math.floor(tempVideo.duration % 60)).padStart(2, '0');
+          openCaptionEditor(reader.result, `${mins}:${secs}`);
+          if (cameraModal) cameraModal.classList.remove('show');
+          if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+        };
       };
-    };
-    mediaRecorder.start(1000);
-    isRecording = true;
-    recordShutter.classList.add('recording');
-    secondsElapsed = 0;
-    recordingTimerEl.textContent = '● 00:00';
-    timerInterval = setInterval(() => {
-      secondsElapsed++;
-      const m = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
-      const s = String(secondsElapsed % 60).padStart(2, '0');
-      recordingTimerEl.textContent = `● ${m}:${s}`;
-    }, 1000);
-    showToast('Perekaman video panjang dimulai...');
-  } else {
-    mediaRecorder.stop();
-    isRecording = false;
-    clearInterval(timerInterval);
-    recordShutter.classList.remove('recording');
-    cameraModal.classList.remove('show');
-    if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
-  }
-});
+    }
+  });
+}
 
-uploadGalleryBtn.addEventListener('click', () => galleryInput.click());
-
-galleryInput.addEventListener('change', (e) => {
-  if (!currentWhatsApp) {
-    showToast('Silakan daftarkan nomor WhatsApp Anda di profil terlebih dahulu.');
-    return;
-  }
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onloadend = () => {
-      const tempVideo = document.createElement('video');
-      tempVideo.src = reader.result;
-      tempVideo.onloadedmetadata = () => {
-        const mins = String(Math.floor(tempVideo.duration / 60)).padStart(2, '0');
-        const secs = String(Math.floor(tempVideo.duration % 60)).padStart(2, '0');
-        openCaptionEditor(reader.result, `${mins}:${secs}`);
-        cameraModal.classList.remove('show');
-        if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
-      };
-    };
-  }
-});
-
-// --- FITUR EDIT CAPTION INTERAKTIF (Bisa Digeser, Cubit/Ukuran, Full Color) ---
+// --- EDITOR CAPTION INTERAKTIF (Geser, Cubit/Ukuran, Full Color) ---
 function openCaptionEditor(videoDataUrl, durationStr) {
   let existingModal = document.getElementById('captionEditorModal');
   if (existingModal) existingModal.remove();
@@ -766,9 +788,9 @@ function openCaptionEditor(videoDataUrl, durationStr) {
     <div style="width: 100%; height: 100%; max-width: 480px; position: relative; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; background: #000;">
       <video src="${videoDataUrl}" autoplay loop muted style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1;"></video>
       
-      <!-- Teks Caption Interaktif yang bisa digeser & dicubit ukurannya -->
+      <!-- Teks Caption Interaktif (Bisa digeser & dicubit ukurannya) -->
       <div id="draggableCaption" style="position: absolute; top: 40%; left: 10%; right: 10%; z-index: 10; text-align: center; cursor: move; touch-action: none; padding: 10px;">
-        <div id="previewCaptionText" style="font-size: 20px; font-weight: bold; color: #ffffff; text-shadow: 0 2px 8px rgba(0,0,0,0.8); word-break: break-word;">Tulis caption keren Anda di sini... 🚀</div>
+        <div id="previewCaptionText" style="font-size: 22px; font-weight: bold; color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.9); word-break: break-word;">Tulis caption keren Anda di sini... 🚀</div>
       </div>
 
       <!-- Top Bar Editor -->
@@ -788,11 +810,11 @@ function openCaptionEditor(videoDataUrl, durationStr) {
             <input type="color" id="captionColorPicker" value="#ffffff" style="width: 32px; height: 32px; border: none; border-radius: 50%; cursor: pointer; background: none;" />
           </div>
           <div style="display: flex; gap: 8px; align-items: center;">
-            <span style="font-size: 12px; color: #fff;">Ukuran Teks:</span>
-            <input type="range" id="captionSizeRange" min="14" max="36" value="20" style="cursor: pointer;" />
+            <span style="font-size: 12px; color: #fff;">Ukuran / Cubit:</span>
+            <input type="range" id="captionSizeRange" min="14" max="42" value="22" style="cursor: pointer;" />
           </div>
         </div>
-        <div style="font-size: 11px; text-align: center; opacity: 0.7; color: #fff;">💡 Tips: Teks di atas layar dapat digeser sesuka Anda!</div>
+        <div style="font-size: 11px; text-align: center; opacity: 0.7; color: #fff;">💡 Tips: Geser teks di layar & atur warna/ukuran sesuka Anda!</div>
       </div>
     </div>
   `;
@@ -858,7 +880,6 @@ function addNewLongVideoToDB(videoDataUrl, durationStr, captionText, captionColo
   const newVid = {
     id: Date.now(),
     user: currentUser,
-    wa: currentWhatsApp,
     bio: currentBio,
     avatar: currentAvatar,
     shopLink: currentShopLink,
