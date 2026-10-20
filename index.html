@@ -15,9 +15,9 @@
       <div class="tab" data-tab="following" id="tabFollowing">Mengikuti</div>
       <div class="tab active" data-tab="foryou">Panjang & FYP</div>
     </div>
-    <div class="profile-badge" id="openAccountModal" title="Daftar / Ganti Akun">
+    <div class="profile-badge" id="openAccountModal" title="Daftar / Masuk Akun">
       <img id="navProfileAvatar" src="" alt="" style="display:none;" />
-      <span id="currentUsername">Daftar Akun (WA)</span>
+      <span id="currentUsername">Akun (WA)</span>
     </div>
   </div>
 
@@ -50,33 +50,37 @@
     </div>
   </div>
 
-  <!-- Account Registration Modal -->
+  <!-- Account Registration & Sign In Modal -->
   <div class="modal-overlay" id="accountModal">
-    <div class="modal" style="height: 480px;">
+    <div class="modal" style="height: 520px;">
       <div class="modal-header">
-        Daftar Akun Baru TikVid (Nomor WhatsApp)
+        Akun TikVid (Daftar / Sign In WA)
         <div class="modal-close" data-close="accountModal">✕</div>
       </div>
-      <div style="padding-top: 12px; overflow-y: auto; flex:1;">
+      <div style="padding-top: 10px; overflow-y: auto; flex:1;">
         <div class="avatar-upload-box" id="triggerAvatarUpload" title="Ketuk untuk ganti foto profil">
           <span id="avatarPlaceholderText" style="font-size: 24px;">📷</span>
           <img id="previewAvatarImg" src="" alt="" style="display:none;" />
         </div>
         <input type="file" id="avatarFileInput" accept="image/*" style="display: none;" />
-        <div style="text-align: center; font-size: 11px; opacity: 0.6; margin-bottom: 12px;">Ketuk lingkaran untuk unggah foto profil</div>
+        <div style="text-align: center; font-size: 11px; opacity: 0.6; margin-bottom: 10px;">Ketuk lingkaran untuk unggah foto profil</div>
 
-        <label style="font-size: 12px; opacity: 0.8;">Nama Akun / Username:</label>
-        <input type="text" class="comment-input" id="accountInput" placeholder="Contoh: andi_vlog" style="width: 100%; margin: 6px 0 12px 0;" />
+        <label style="font-size: 12px; opacity: 0.8;">Nomor WhatsApp (Untuk Daftar / Sign In):</label>
+        <input type="tel" class="comment-input" id="whatsappInput" placeholder="Contoh: 081234567890" style="width: 100%; margin: 6px 0 10px 0;" />
 
-        <label style="font-size: 12px; opacity: 0.8;">Nomor WhatsApp:</label>
-        <input type="tel" class="comment-input" id="whatsappInput" placeholder="Contoh: 081234567890" style="width: 100%; margin: 6px 0 12px 0;" />
+        <button class="comment-send" id="signInWhatsAppBtn" style="width: 100%; border-radius: 20px; padding: 10px; background: #25D366; font-weight: bold; margin-bottom: 12px;">🔑 Sign In / Masuk dengan No WA</button>
+
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px;" />
+
+        <label style="font-size: 12px; opacity: 0.8;">Nama Akun / Username (Baru):</label>
+        <input type="text" class="comment-input" id="accountInput" placeholder="Contoh: andi_vlog" style="width: 100%; margin: 6px 0 10px 0;" />
 
         <label style="font-size: 12px; opacity: 0.8;">Bio Profil & Link Toko (Troli Kuning):</label>
-        <textarea class="comment-input" id="bioInput" placeholder="Tulis bio profil Anda..." style="width: 100%; height: 50px; border-radius: 12px; resize: none; margin: 6px 0 12px 0; padding: 10px;"></textarea>
+        <textarea class="comment-input" id="bioInput" placeholder="Tulis bio profil Anda..." style="width: 100%; height: 45px; border-radius: 12px; resize: none; margin: 6px 0 10px 0; padding: 8px;"></textarea>
 
-        <input type="text" class="comment-input" id="shopLinkInput" placeholder="Link jualan/toko (https://...)" style="width: 100%; margin: 0 0 16px 0;" />
+        <input type="text" class="comment-input" id="shopLinkInput" placeholder="Link jualan/toko (https://...)" style="width: 100%; margin: 0 0 14px 0;" />
 
-        <button class="comment-send" id="saveAccountBtn" style="width: 100%; border-radius: 20px; padding: 12px; background: #fe2c55; font-weight: bold;">Daftar & Simpan Akun (Save)</button>
+        <button class="comment-send" id="saveAccountBtn" style="width: 100%; border-radius: 20px; padding: 12px; background: #fe2c55; font-weight: bold;">Daftar Akun Baru (Save)</button>
       </div>
     </div>
   </div>
