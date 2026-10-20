@@ -9,7 +9,7 @@ let activeShareVideoUrl = window.location.href;
 let dbProfile;
 function initProfileDB() {
   return new Promise((resolve) => {
-    const request = indexedDB.open('TikVidAccountDB', 5);
+    const request = indexedDB.open('TikVidAccountDB', 7);
     request.onerror = () => { loadProfileFallback(); resolve(); };
     request.onupgradeneeded = (e) => {
       dbProfile = e.target.result;
@@ -106,7 +106,7 @@ let currentSelectedMusic = '♪ Lofi Long Session - ChillBeats';
 let db;
 function initIndexedDB() {
   return new Promise((resolve) => {
-    const request = indexedDB.open('TikVidWhatsAppDB', 5);
+    const request = indexedDB.open('TikVidWhatsAppDB', 7);
     request.onerror = () => { loadVideosFallback(); resolve(); };
     request.onupgradeneeded = (e) => {
       db = e.target.result;
@@ -365,36 +365,38 @@ function setupVideoInteractions() {
   slides.forEach(s => observer.observe(s));
 }
 
+// Penanganan upload foto profil yang responsif
 const triggerAvatarUpload = document.getElementById('triggerAvatarUpload');
 const avatarFileInput = document.getElementById('avatarFileInput');
 const previewAvatarImg = document.getElementById('previewAvatarImg');
 const avatarPlaceholderText = document.getElementById('avatarPlaceholderText');
 let tempAvatarData = currentAvatar;
 
-if (currentAvatar && previewAvatarImg) {
-  previewAvatarImg.src = currentAvatar;
-  previewAvatarImg.style.display = 'block';
-  if (avatarPlaceholderText) avatarPlaceholderText.style.display = 'none';
+function updateAvatarPreviewUI() {
+  if (tempAvatarData && previewAvatarImg) {
+    previewAvatarImg.src = tempAvatarData;
+    previewAvatarImg.style.display = 'block';
+    if (avatarPlaceholderText) avatarPlaceholderText.style.display = 'none';
+  } else if (previewAvatarImg) {
+    previewAvatarImg.style.display = 'none';
+    if (avatarPlaceholderText) avatarPlaceholderText.style.display = 'block';
+  }
 }
 
 if (triggerAvatarUpload && avatarFileInput) {
-  triggerAvatarUpload.addEventListener('click', () => avatarFileInput.click());
-  avatarFileInput.addEventListener('change', (e) => {
+  triggerAvatarUpload.onclick = () => avatarFileInput.click();
+  avatarFileInput.onchange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.readAsDataURL(file);
       reader.onloadend = () => {
         tempAvatarData = reader.result;
-        if (previewAvatarImg) {
-          previewAvatarImg.src = tempAvatarData;
-          previewAvatarImg.style.display = 'block';
-        }
-        if (avatarPlaceholderText) avatarPlaceholderText.style.display = 'none';
+        updateAvatarPreviewUI();
         showToast('Foto profil dipilih');
       };
+      reader.readAsDataURL(file);
     }
-  });
+  };
 }
 
 document.addEventListener('click', (e) => {
@@ -422,11 +424,7 @@ document.addEventListener('click', (e) => {
     document.getElementById('bioInput').value = currentBio;
     document.getElementById('shopLinkInput').value = currentShopLink;
     tempAvatarData = currentAvatar;
-    if (currentAvatar && previewAvatarImg) {
-      previewAvatarImg.src = currentAvatar;
-      previewAvatarImg.style.display = 'block';
-      if (avatarPlaceholderText) avatarPlaceholderText.style.display = 'none';
-    }
+    updateAvatarPreviewUI();
     document.getElementById('accountModal').classList.add('show');
     return;
   }
@@ -445,6 +443,7 @@ document.addEventListener('click', (e) => {
         currentBio = acc.bio;
         currentAvatar = acc.avatar;
         currentShopLink = acc.shopLink;
+        tempAvatarData = currentAvatar;
 
         saveProfileToDB(acc);
         localStorage.setItem('tikvid_username', currentUser);
@@ -458,9 +457,39 @@ document.addEventListener('click', (e) => {
         showToast(`Berhasil Sign In ke akun @${currentUser}!`);
         renderFeed(videos);
       } else {
-        showToast('Nomor WhatsApp belum terdaftar. Silakan daftar di bawah.');
+        showToast('Nomor WhatsApp belum terdaftar. Silakan lengkapi data di bawah.');
       }
     });
+    return;
+  }
+
+  // Tombol Sign Out (Keluar Akun)
+  if (e.target.closest('#signOutBtn')) {
+    currentUser = 'kreator_tamu';
+    currentWhatsApp = '';
+    currentBio = 'Selamat datang di profil resmi saya!';
+    currentAvatar = '';
+    currentShopLink = 'https://shopee.co.id';
+    tempAvatarData = '';
+
+    localStorage.removeItem('tikvid_username');
+    localStorage.removeItem('tikvid_wa');
+    localStorage.removeItem('tikvid_bio');
+    localStorage.removeItem('tikvid_avatar');
+    localStorage.removeItem('tikvid_shoplink');
+
+    // Hapus sesi aktif dari IndexedDB
+    if (dbProfile) {
+      try {
+        const tx = dbProfile.transaction(['user_profile'], 'readwrite');
+        tx.objectStore('user_profile').delete('current_account');
+      } catch (err) {}
+    }
+
+    updateProfileUI();
+    document.getElementById('accountModal').classList.remove('show');
+    showToast('Berhasil Sign Out (Keluar Akun)');
+    renderFeed(videos);
     return;
   }
 
