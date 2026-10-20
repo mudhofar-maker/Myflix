@@ -15,7 +15,7 @@
       <div class="tab" data-tab="following" id="tabFollowing">Mengikuti</div>
       <div class="tab active" data-tab="foryou">Panjang & FYP</div>
     </div>
-    <div class="profile-badge" id="openAccountModal" title="Daftar / Masuk Akun">
+    <div class="profile-badge" id="openAccountModal" title="Akun & Pengaturan">
       <img id="navProfileAvatar" src="" alt="" style="display:none;" />
       <span id="currentUsername">Akun (WA)</span>
     </div>
@@ -50,11 +50,11 @@
     </div>
   </div>
 
-  <!-- Account Registration & Sign In Modal -->
+  <!-- Account Registration, Sign In & Sign Out Modal -->
   <div class="modal-overlay" id="accountModal">
-    <div class="modal" style="height: 520px;">
+    <div class="modal" style="height: 560px;">
       <div class="modal-header">
-        Akun TikVid (Daftar / Sign In WA)
+        Akun TikVid (Sign In / Daftar WA)
         <div class="modal-close" data-close="accountModal">✕</div>
       </div>
       <div style="padding-top: 10px; overflow-y: auto; flex:1;">
@@ -65,14 +65,17 @@
         <input type="file" id="avatarFileInput" accept="image/*" style="display: none;" />
         <div style="text-align: center; font-size: 11px; opacity: 0.6; margin-bottom: 10px;">Ketuk lingkaran untuk unggah foto profil</div>
 
-        <label style="font-size: 12px; opacity: 0.8;">Nomor WhatsApp (Untuk Daftar / Sign In):</label>
+        <label style="font-size: 12px; opacity: 0.8;">Nomor WhatsApp (Untuk Sign In / Daftar):</label>
         <input type="tel" class="comment-input" id="whatsappInput" placeholder="Contoh: 081234567890" style="width: 100%; margin: 6px 0 10px 0;" />
 
-        <button class="comment-send" id="signInWhatsAppBtn" style="width: 100%; border-radius: 20px; padding: 10px; background: #25D366; font-weight: bold; margin-bottom: 12px;">🔑 Sign In / Masuk dengan No WA</button>
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <button class="comment-send" id="signInWhatsAppBtn" style="flex: 1; border-radius: 20px; padding: 10px; background: #25D366; font-weight: bold; font-size: 12px;">🔑 Sign In No WA</button>
+          <button class="comment-send" id="signOutBtn" style="flex: 1; border-radius: 20px; padding: 10px; background: #e74c3c; font-weight: bold; font-size: 12px;">🚪 Sign Out</button>
+        </div>
 
         <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px;" />
 
-        <label style="font-size: 12px; opacity: 0.8;">Nama Akun / Username (Baru):</label>
+        <label style="font-size: 12px; opacity: 0.8;">Nama Akun / Username Baru:</label>
         <input type="text" class="comment-input" id="accountInput" placeholder="Contoh: andi_vlog" style="width: 100%; margin: 6px 0 10px 0;" />
 
         <label style="font-size: 12px; opacity: 0.8;">Bio Profil & Link Toko (Troli Kuning):</label>
