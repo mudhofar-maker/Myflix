@@ -540,25 +540,29 @@ document.addEventListener('click', (e) => {
     document.getElementById('shopModalTitle').textContent = `Toko Produk: @${title}`;
     document.getElementById('shopModalLink').href = link;
     document.getElementById('shopModal').classList.add('show');
-    return;
-  }
-
-  if (e.target.closest('#shareWhatsApp')) {
-    const text = encodeURIComponent(`Tonton video seru ini di TikVid: ${activeShareVideoUrl}`);
-    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    if (e.target.closest('#shareWhatsApp')) {
+    const text = `Tonton video seru ini di TikVid: ${activeShareVideoUrl}`;
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    if (navigator.share) {
+      navigator.share({ title: 'TikVid', text: text, url: activeShareVideoUrl }).catch(() => {
+        window.location.href = waUrl;
+      });
+    } else {
+      window.location.href = waUrl;
+    }
     document.getElementById('shareModal').classList.remove('show');
     return;
   }
   if (e.target.closest('#shareFacebook')) {
-    const url = encodeURIComponent(activeShareVideoUrl);
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+    const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(activeShareVideoUrl)}`;
+    window.location.href = fbUrl;
     document.getElementById('shareModal').classList.remove('show');
     return;
   }
   if (e.target.closest('#shareTwitter')) {
-    const text = encodeURIComponent(`Tonton video menarik ini di TikVid!`);
-    const url = encodeURIComponent(activeShareVideoUrl);
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+    const text = encodeURIComponent('Tonton video menarik ini di TikVid!');
+    const twUrl = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(activeShareVideoUrl)}`;
+    window.location.href = twUrl;
     document.getElementById('shareModal').classList.remove('show');
     return;
   }
