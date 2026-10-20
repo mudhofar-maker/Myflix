@@ -9,12 +9,15 @@ let activeShareVideoUrl = window.location.href;
 let dbProfile;
 function initProfileDB() {
   return new Promise((resolve) => {
-    const request = indexedDB.open('TikVidAccountDB', 4);
+    const request = indexedDB.open('TikVidAccountDB', 5);
     request.onerror = () => { loadProfileFallback(); resolve(); };
     request.onupgradeneeded = (e) => {
       dbProfile = e.target.result;
       if (!dbProfile.objectStoreNames.contains('user_profile')) {
         dbProfile.createObjectStore('user_profile', { keyPath: 'id' });
+      }
+      if (!dbProfile.objectStoreNames.contains('all_accounts')) {
+        dbProfile.createObjectStore('all_accounts', { keyPath: 'whatsapp' });
       }
     };
     request.onsuccess = (e) => {
@@ -50,10 +53,23 @@ function getProfileFromDB(callback) {
 function saveProfileToDB(profileObj) {
   if (!dbProfile) return;
   try {
-    const tx = dbProfile.transaction(['user_profile'], 'readwrite');
-    const store = tx.objectStore('user_profile');
-    store.put({ id: 'current_account', ...profileObj });
+    const tx = dbProfile.transaction(['user_profile', 'all_accounts'], 'readwrite');
+    const storeCur = tx.objectStore('user_profile');
+    const storeAll = tx.objectStore('all_accounts');
+    storeCur.put({ id: 'current_account', ...profileObj });
+    storeAll.put(profileObj);
   } catch (e) {}
+}
+
+function findAccountByWhatsApp(waNumber, callback) {
+  if (!dbProfile) { callback(null); return; }
+  try {
+    const tx = dbProfile.transaction(['all_accounts'], 'readonly');
+    const store = tx.objectStore('all_accounts');
+    const req = store.get(waNumber);
+    req.onsuccess = () => callback(req.result || null);
+    req.onerror = () => callback(null);
+  } catch (e) { callback(null); }
 }
 
 function loadProfileFallback() {
@@ -90,7 +106,7 @@ let currentSelectedMusic = '♪ Lofi Long Session - ChillBeats';
 let db;
 function initIndexedDB() {
   return new Promise((resolve) => {
-    const request = indexedDB.open('TikVidWhatsAppDB', 4);
+    const request = indexedDB.open('TikVidWhatsAppDB', 5);
     request.onerror = () => { loadVideosFallback(); resolve(); };
     request.onupgradeneeded = (e) => {
       db = e.target.result;
@@ -415,6 +431,39 @@ document.addEventListener('click', (e) => {
     return;
   }
 
+  // Tombol Sign In dengan Nomor WhatsApp
+  if (e.target.closest('#signInWhatsAppBtn')) {
+    const waVal = document.getElementById('whatsappInput').value.trim();
+    if (!waVal) {
+      showToast('Masukkan nomor WhatsApp yang sudah terdaftar!');
+      return;
+    }
+    findAccountByWhatsApp(waVal, (acc) => {
+      if (acc) {
+        currentUser = acc.username;
+        currentWhatsApp = acc.whatsapp;
+        currentBio = acc.bio;
+        currentAvatar = acc.avatar;
+        currentShopLink = acc.shopLink;
+
+        saveProfileToDB(acc);
+        localStorage.setItem('tikvid_username', currentUser);
+        localStorage.setItem('tikvid_wa', currentWhatsApp);
+        localStorage.setItem('tikvid_bio', currentBio);
+        localStorage.setItem('tikvid_shoplink', currentShopLink);
+        localStorage.setItem('tikvid_avatar', currentAvatar);
+
+        updateProfileUI();
+        document.getElementById('accountModal').classList.remove('show');
+        showToast(`Berhasil Sign In ke akun @${currentUser}!`);
+        renderFeed(videos);
+      } else {
+        showToast('Nomor WhatsApp belum terdaftar. Silakan daftar di bawah.');
+      }
+    });
+    return;
+  }
+
   if (e.target.closest('#saveAccountBtn')) {
     const newName = document.getElementById('accountInput').value.trim();
     const newWA = document.getElementById('whatsappInput').value.trim();
@@ -432,13 +481,15 @@ document.addEventListener('click', (e) => {
     currentShopLink = newShop || 'https://shopee.co.id';
     currentAvatar = tempAvatarData;
 
-    saveProfileToDB({
+    const profileObj = {
       username: currentUser,
       whatsapp: currentWhatsApp,
       bio: currentBio,
       avatar: currentAvatar,
       shopLink: currentShopLink
-    });
+    };
+
+    saveProfileToDB(profileObj);
 
     localStorage.setItem('tikvid_username', currentUser);
     localStorage.setItem('tikvid_wa', currentWhatsApp);
@@ -448,7 +499,7 @@ document.addEventListener('click', (e) => {
 
     updateProfileUI();
     document.getElementById('accountModal').classList.remove('show');
-    showToast(`Akun @${currentUser} berhasil disimpan permanen!`);
+    showToast(`Akun WA @${currentUser} berhasil disimpan permanen!`);
     renderFeed(videos);
     return;
   }
@@ -777,7 +828,7 @@ if (uploadGalleryBtn && galleryInput) {
   });
 }
 
-// --- EDITOR CAPTION INTERAKTIF (Geser, Ukuran, Full Color) ---
+// --- EDITOR CAPTION INTERAKTIF ---
 function openCaptionEditor(videoDataUrl, durationStr) {
   let existingModal = document.getElementById('captionEditorModal');
   if (existingModal) existingModal.remove();
@@ -791,19 +842,16 @@ function openCaptionEditor(videoDataUrl, durationStr) {
     <div style="width: 100%; height: 100%; max-width: 480px; position: relative; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; background: #000;">
       <video src="${videoDataUrl}" autoplay loop muted style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1;"></video>
       
-      <!-- Teks Caption Interaktif (Bisa digeser & diatur ukuran) -->
       <div id="draggableCaption" style="position: absolute; top: 40%; left: 10%; right: 10%; z-index: 10; text-align: center; cursor: move; touch-action: none; padding: 10px;">
         <div id="previewCaptionText" style="font-size: 22px; font-weight: bold; color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.9); word-break: break-word;">Tulis caption keren Anda di sini... 🚀</div>
       </div>
 
-      <!-- Top Bar Editor -->
       <div style="position: relative; z-index: 20; padding: 15px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);">
         <div id="closeCaptionEditor" style="color: #fff; font-size: 16px; cursor: pointer; font-weight: bold;">✕ Batal</div>
         <div style="color: #fff; font-weight: bold; font-size: 15px;">🎨 Edit Teks & Warna</div>
         <div id="publishVideoBtn" style="color: #000; background: #25f4ee; padding: 6px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 14px;">Posting</div>
       </div>
 
-      <!-- Bottom Controls Editor -->
       <div style="position: relative; z-index: 20; padding: 20px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); display: flex; flex-direction: column; gap: 12px;">
         <input type="text" id="captionInputText" placeholder="Ketik caption video Anda..." class="comment-input" style="width: 100%; font-size: 15px;" />
         
@@ -842,7 +890,6 @@ function openCaptionEditor(videoDataUrl, durationStr) {
     textEl.style.fontSize = sizeRange.value + 'px';
   });
 
-  // Fitur Geser (Drag & Move) untuk Teks Caption
   let isDragging = false;
   let startX = 0, startY = 0;
   let posX = 0, posY = 0;
