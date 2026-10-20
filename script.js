@@ -9,7 +9,7 @@ let activeShareVideoUrl = window.location.href;
 let dbProfile;
 function initProfileDB() {
   return new Promise((resolve) => {
-    const request = indexedDB.open('TikVidAccountDB', 7);
+    const request = indexedDB.open('TikVidAccountDB', 8);
     request.onerror = () => { loadProfileFallback(); resolve(); };
     request.onupgradeneeded = (e) => {
       dbProfile = e.target.result;
@@ -106,7 +106,7 @@ let currentSelectedMusic = '♪ Lofi Long Session - ChillBeats';
 let db;
 function initIndexedDB() {
   return new Promise((resolve) => {
-    const request = indexedDB.open('TikVidWhatsAppDB', 7);
+    const request = indexedDB.open('TikVidWhatsAppDB', 8);
     request.onerror = () => { loadVideosFallback(); resolve(); };
     request.onupgradeneeded = (e) => {
       db = e.target.result;
@@ -365,7 +365,6 @@ function setupVideoInteractions() {
   slides.forEach(s => observer.observe(s));
 }
 
-// Penanganan upload foto profil yang responsif
 const triggerAvatarUpload = document.getElementById('triggerAvatarUpload');
 const avatarFileInput = document.getElementById('avatarFileInput');
 const previewAvatarImg = document.getElementById('previewAvatarImg');
@@ -429,7 +428,6 @@ document.addEventListener('click', (e) => {
     return;
   }
 
-  // Tombol Sign In dengan Nomor WhatsApp
   if (e.target.closest('#signInWhatsAppBtn')) {
     const waVal = document.getElementById('whatsappInput').value.trim();
     if (!waVal) {
@@ -463,7 +461,6 @@ document.addEventListener('click', (e) => {
     return;
   }
 
-  // Tombol Sign Out (Keluar Akun)
   if (e.target.closest('#signOutBtn')) {
     currentUser = 'kreator_tamu';
     currentWhatsApp = '';
@@ -478,7 +475,6 @@ document.addEventListener('click', (e) => {
     localStorage.removeItem('tikvid_avatar');
     localStorage.removeItem('tikvid_shoplink');
 
-    // Hapus sesi aktif dari IndexedDB
     if (dbProfile) {
       try {
         const tx = dbProfile.transaction(['user_profile'], 'readwrite');
@@ -540,7 +536,10 @@ document.addEventListener('click', (e) => {
     document.getElementById('shopModalTitle').textContent = `Toko Produk: @${title}`;
     document.getElementById('shopModalLink').href = link;
     document.getElementById('shopModal').classList.add('show');
-    if (e.target.closest('#shareWhatsApp')) {
+    return;
+  }
+
+  if (e.target.closest('#shareWhatsApp')) {
     const text = `Tonton video seru ini di TikVid: ${activeShareVideoUrl}`;
     const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     if (navigator.share) {
