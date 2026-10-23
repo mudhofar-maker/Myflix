@@ -3,133 +3,193 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>VideoStream - TikTok Clone</title>
+<title>TikVid - Video Panjang & Toko</title>
 <style>
-  :root{
-    --bg:#000; --surface:#121212; --surface2:#242424;
-    --primary:#fe2c55; --text:#fff; --text-dim:#b0b0b0;
+  /* ============ RESET & VARIABEL ============ */
+  :root {
+    --bg: #000;
+    --surface: #121212;
+    --surface2: #242424;
+    --primary: #fe2c55; /* Merah TikTok */
+    --cyan: #25f4ee;    /* Cyan TikTok */
+    --text: #fff;
+    --text-dim: #b0b0b0;
   }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;height:100%;overflow:hidden; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+  /* ============ NAVIGASI BAWAH (ALa TikTok) ============ */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 55px;
+    background: #000; display: flex; justify-content: space-around; align-items: center;
+    z-index: 1000; border-top: 1px solid #1a1a1a; padding-bottom: env(safe-area-inset-bottom);
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: var(--text-dim); font-size: 10px; cursor: pointer; gap: 3px; width: 20%;
+  }
+  .nav-item.active { color: var(--text); font-weight: bold; }
+  .nav-item .icon { font-size: 24px; }
+  .nav-item .icon.active-icon { filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
   
-  /* ============ NAVIGASI BAWAH ============ */
-  .bottom-nav{position:fixed; bottom:0; left:0; right:0; height:60px; background:var(--surface); display:flex; justify-content:space-around; align-items:center; z-index:100; border-top:1px solid #333;}
-  .nav-item{display:flex; flex-direction:column; align-items:center; color:var(--text-dim); font-size:11px; cursor:pointer; gap:4px; width:60px;}
-  .nav-item.active{color:var(--text);}
-  .nav-item .icon{font-size:22px;}
-  .btn-plus{position:relative; top:-15px; width:46px; height:32px; background:var(--text); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold; font-size:20px; border-left:3px solid var(--primary); border-right:3px solid #25f4ee; box-shadow:0 2px 10px rgba(0,0,0,0.5);}
+  /* Tombol Plus (Tengah) */
+  .btn-plus-wrap { position: relative; display: flex; justify-content: center; align-items: center; }
+  .btn-plus {
+    width: 46px; height: 30px; background: #fff; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: #000; font-weight: bold; font-size: 20px;
+    border-left: 3px solid var(--primary); border-right: 3px solid var(--cyan);
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  }
 
   /* ============ SCREENS ============ */
-  .screen{display:none; height:100%; width:100%; position:absolute; top:0; left:0;}
-  .screen.active{display:block;}
-  
+  .screen { display: none; height: 100%; width: 100%; position: absolute; top: 0; left: 0; padding-bottom: 55px; }
+  .screen.active { display: block; }
+  .screen.no-pad { padding-bottom: 0; }
+
   /* ============ BERANDA (FEED) ============ */
-  #screen-home{background:#000;}
-  .feed-container{height:100%; width:100%; overflow-y:scroll; scroll-snap-type:y mandatory;}
-  .video-card{height:100%; width:100%; position:relative; scroll-snap-align:start; background:#000;}
-  .video-card video{width:100%; height:100%; object-fit:contain;}
+  #screen-home { background: #000; }
+  .feed-container { height: 100%; width: 100%; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; }
+  .feed-container::-webkit-scrollbar { display: none; }
   
+  .video-card { height: 100%; width: 100%; position: relative; scroll-snap-align: start; background: #000; }
+  .video-card video { width: 100%; height: 100%; object-fit: cover; } /* Gunakan cover agar full screen seperti TikTok */
+  
+  /* Top Bar Feed (Live, Mengikuti, FYP) */
+  .feed-top-bar {
+    position: absolute; top: 15px; left: 0; right: 0; z-index: 20;
+    display: flex; justify-content: space-between; align-items: center; padding: 0 15px;
+    pointer-events: none; /* Biarkan klik tembus ke video */
+  }
+  .feed-tabs { display: flex; gap: 15px; align-items: center; margin: 0 auto; pointer-events: auto; }
+  .feed-tab { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.6); cursor: pointer; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+  .feed-tab.active { color: #fff; border-bottom: 2px solid #fff; padding-bottom: 2px; }
+  .live-badge { background: rgba(254,44,85,0.8); color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 4px; display: flex; align-items: center; gap: 4px; pointer-events: auto; }
+
   /* Tombol Suara */
   .volume-btn {
-    position:absolute; top:20px; right:20px; z-index:20;
-    background:rgba(0,0,0,0.6); color:#fff; border:none; border-radius:50%;
-    width:44px; height:44px; font-size:20px; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
+    position: absolute; top: 60px; right: 15px; z-index: 20;
+    background: rgba(0,0,0,0.5); color: #fff; border: none; border-radius: 50%;
+    width: 36px; height: 36px; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
   }
   .volume-btn.pulse { animation: pulse 1.5s infinite; }
   @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); background:rgba(254,44,85,0.8); } 100% { transform: scale(1); } }
 
-  .video-info{position:absolute; bottom:70px; left:15px; right:70px; z-index:10;}
-  .video-info .username{font-weight:bold; font-size:16px; margin-bottom:6px;}
-  .video-info .desc{font-size:14px; line-height:1.3; margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
-  .video-info .music{font-size:13px; display:flex; align-items:center; gap:6px;}
+  /* Info Video (Kiri Bawah) */
+  .video-info { position: absolute; bottom: 20px; left: 15px; right: 80px; z-index: 10; }
+  .video-info .username { font-weight: bold; font-size: 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .video-info .tag { background: rgba(255,255,255,0.2); font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: normal; }
+  .video-info .desc { font-size: 14px; line-height: 1.4; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+  .video-info .music { font-size: 13px; display: flex; align-items: center; gap: 6px; overflow: hidden; white-space: nowrap; }
+  .video-info .music span { animation: marquee 5s linear infinite; display: inline-block; padding-left: 100%; }
+  @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
   
-  /* Side Actions */
-  .side-actions{position:absolute; bottom:80px; right:10px; display:flex; flex-direction:column; gap:20px; align-items:center; z-index:10;}
-  .action-btn-side{display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12px; cursor:pointer;}
-  .action-btn-side .icon{font-size:32px; background:rgba(0,0,0,0.4); border-radius:50%; padding:8px;}
-  .action-btn-side:active .icon { background: rgba(255,255,255,0.2); transform: scale(0.9); }
+  /* Side Actions (Kanan Bawah) */
+  .side-actions { position: absolute; bottom: 25px; right: 10px; display: flex; flex-direction: column; gap: 20px; align-items: center; z-index: 10; }
+  .avatar-wrap { position: relative; width: 45px; height: 45px; margin-bottom: 10px; }
+  .avatar-img { width: 100%; height: 100%; border-radius: 50%; border: 1.5px solid #fff; object-fit: cover; }
+  .avatar-plus { position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #fff; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; border: 1px solid #000; }
+  
+  .action-btn-side { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; cursor: pointer; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+  .action-btn-side .icon { font-size: 34px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+  .action-btn-side:active { transform: scale(0.9); }
+  .action-btn-side.liked .icon { color: var(--primary); }
 
-  .empty-feed{display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--text-dim);}
+  .empty-feed { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-dim); }
 
   /* ============ CAMERA & EDITOR ============ */
-  #screen-camera, #screen-editor{background:#000; z-index:150;}
-  .top-bar{display:flex; justify-content:space-between; padding:15px; position:absolute; top:0; left:0; right:0; z-index:10;}
-  .icon-btn{background:rgba(0,0,0,0.5); border:none; color:#fff; width:40px; height:40px; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;}
+  #screen-camera, #screen-editor { background: #000; z-index: 150; }
+  .top-bar { display: flex; justify-content: space-between; padding: 15px; position: absolute; top: 0; left: 0; right: 0; z-index: 10; }
+  .icon-btn { background: rgba(0,0,0,0.5); border: none; color: #fff; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   
-  .cam-preview-wrap{width:100%; height:100%; display:flex; align-items:center; justify-content:center;}
-  #camPreview{width:100%; height:100%; object-fit:cover;}
+  .cam-preview-wrap { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+  #camPreview { width: 100%; height: 100%; object-fit: cover; }
   
-  .cam-controls{position:absolute; bottom:0; left:0; right:0; height:140px; display:flex; align-items:center; justify-content:space-around; padding-bottom:20px; z-index:10;}
-  .rec-btn{width:70px; height:70px; border-radius:50%; border:4px solid #fff; background:transparent; cursor:pointer; position:relative; transition:all .2s;}
-  .rec-btn::after{content:""; position:absolute; inset:6px; border-radius:50%; background:var(--primary); transition:all .2s;}
-  .rec-btn.recording::after{inset:18px; border-radius:8px;}
+  .cam-controls { position: absolute; bottom: 20px; left: 0; right: 0; display: flex; align-items: center; justify-content: space-around; z-index: 10; padding: 0 20px; }
+  .rec-btn { width: 70px; height: 70px; border-radius: 50%; border: 4px solid #fff; background: transparent; cursor: pointer; position: relative; transition: all .2s; }
+  .rec-btn::after { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: var(--primary); transition: all .2s; }
+  .rec-btn.recording::after { inset: 18px; border-radius: 8px; }
   
-  .rec-timer{position:absolute; top:-30px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); color:#fff; padding:4px 12px; border-radius:20px; font-size:13px; display:none; align-items:center; gap:6px;}
-  .rec-timer.show{display:flex;}
-  .rec-dot{width:8px;height:8px;background:var(--primary);border-radius:50%;animation:blink 1s infinite;}
-  @keyframes blink{50%{opacity:0.2;}}
+  .rec-timer { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 13px; display: none; align-items: center; gap: 6px; }
+  .rec-timer.show { display: flex; }
+  .rec-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: blink 1s infinite; }
+  @keyframes blink { 50% { opacity: 0.2; } }
 
   /* Editor Panel */
-  .editor-panel{position:absolute; bottom:0; left:0; right:0; background:var(--surface); padding:16px; border-radius:20px 20px 0 0; z-index:20;}
-  .trim-track{position:relative; height:36px; background:#333; border-radius:6px; margin-bottom:10px; overflow:hidden;}
-  .trim-selection{position:absolute; top:0; bottom:0; background:rgba(254,44,85,0.3); border-left:3px solid var(--primary); border-right:3px solid var(--primary); pointer-events:none;}
-  .trim-handle{position:absolute; top:0; width:20px; height:100%; background:var(--primary); cursor:ew-resize; z-index:2; display:flex; align-items:center; justify-content:center;}
-  .trim-handle::after{content:""; width:3px; height:16px; background:rgba(255,255,255,0.7); border-radius:2px;}
-  .trim-handle.left{left:0; border-radius:6px 0 0 6px;}
-  .trim-handle.right{right:0; border-radius:0 6px 6px 0;}
+  .editor-panel { position: absolute; bottom: 0; left: 0; right: 0; background: var(--surface); padding: 16px; border-radius: 20px 20px 0 0; z-index: 20; }
+  .trim-track { position: relative; height: 36px; background: #333; border-radius: 6px; margin-bottom: 10px; overflow: hidden; }
+  .trim-selection { position: absolute; top: 0; bottom: 0; background: rgba(254,44,85,0.3); border-left: 3px solid var(--primary); border-right: 3px solid var(--primary); pointer-events: none; }
+  .trim-handle { position: absolute; top: 0; width: 20px; height: 100%; background: var(--primary); cursor: ew-resize; z-index: 2; display: flex; align-items: center; justify-content: center; }
+  .trim-handle::after { content: ""; width: 3px; height: 16px; background: rgba(255,255,255,0.7); border-radius: 2px; }
+  .trim-handle.left { left: 0; border-radius: 6px 0 0 6px; }
+  .trim-handle.right { right: 0; border-radius: 0 6px 6px 0; }
   
-  .editor-actions{display:flex; gap:10px; margin-bottom:10px; overflow-x:auto;}
-  .btn-action{background:var(--surface2); border:none; color:#fff; padding:8px 12px; border-radius:8px; font-size:13px; cursor:pointer; white-space:nowrap;}
-  .btn-publish{width:100%; padding:14px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:bold; font-size:16px; cursor:pointer;}
+  .editor-actions { display: flex; gap: 10px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 5px; }
+  .btn-action { background: var(--surface2); border: none; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 13px; cursor: pointer; white-space: nowrap; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 60px; }
+  .btn-action span { font-size: 18px; }
+  .btn-publish { width: 100%; padding: 14px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
 
   /* Overlay Text Preview */
-  .text-overlay{position:absolute; color:#fff; font-weight:bold; text-shadow:2px 2px 4px rgba(0,0,0,0.9); white-space:nowrap; user-select:none; cursor:move; transform:translate(-50%,-50%); padding:4px; border:1px dashed transparent; z-index:5;}
-  .text-overlay:hover{border-color:rgba(255,255,255,0.5);}
+  .text-overlay { position: absolute; color: #fff; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.9); white-space: nowrap; user-select: none; cursor: move; transform: translate(-50%,-50%); padding: 4px; border: 1px dashed transparent; z-index: 5; }
+  .text-overlay:hover { border-color: rgba(255,255,255,0.5); }
 
   /* ============ PROFIL ============ */
-  #screen-profile{padding:20px; padding-top:60px; overflow-y:auto;}
-  .profile-header{display:flex; flex-direction:column; align-items:center; margin-bottom:20px;}
-  .avatar{width:80px; height:80px; border-radius:50%; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:40px; margin-bottom:10px;}
-  .grid-videos{display:grid; grid-template-columns:repeat(3, 1fr); gap:2px;}
-  .grid-item{aspect-ratio:9/16; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:24px; overflow:hidden;}
-  .grid-item video{width:100%; height:100%; object-fit:cover;}
+  #screen-profile { background: var(--bg); overflow-y: auto; }
+  .profile-header { display: flex; flex-direction: column; align-items: center; margin: 20px 0; }
+  .avatar-large { width: 90px; height: 90px; border-radius: 50%; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 10px; border: 2px solid #333; }
+  .profile-stats { display: flex; gap: 20px; margin-top: 15px; }
+  .stat-item { display: flex; flex-direction: column; align-items: center; font-size: 12px; color: var(--text-dim); }
+  .stat-item span:first-child { font-size: 17px; font-weight: bold; color: #fff; }
+  .btn-edit-profile { margin-top: 15px; padding: 8px 20px; background: var(--surface2); border: 1px solid #444; color: #fff; border-radius: 4px; font-weight: 600; font-size: 13px; cursor: pointer; }
+  
+  .profile-tabs { display: flex; border-bottom: 1px solid #222; margin-bottom: 2px; }
+  .p-tab { flex: 1; text-align: center; padding: 12px 0; color: var(--text-dim); font-size: 14px; cursor: pointer; border-bottom: 2px solid transparent; }
+  .p-tab.active { color: #fff; border-bottom-color: #fff; }
+  
+  .grid-videos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+  .grid-item { aspect-ratio: 9/16; background: var(--surface2); position: relative; overflow: hidden; }
+  .grid-item video { width: 100%; height: 100%; object-fit: cover; }
+  .grid-item .views { position: absolute; bottom: 5px; left: 5px; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 3px; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
 
   /* ============ MODALS ============ */
-  .modal-bg{position:fixed; inset:0; background:rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; z-index:200; padding:20px;}
-  .modal-bg.show{display:flex;}
-  .modal{background:var(--surface); border-radius:16px; padding:20px; width:100%; max-width:400px; max-height:80vh; overflow-y:auto;}
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: flex-end; justify-content: center; z-index: 2000; padding-bottom: 55px; }
+  .modal-bg.show { display: flex; }
+  .modal { background: var(--surface); border-radius: 16px 16px 0 0; padding: 20px; width: 100%; max-height: 85vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.3s; }
+  .modal-bg.show .modal { transform: translateY(0); }
   
-  /* Share Modal */
-  .share-options{display:flex; justify-content:space-around; margin:20px 0;}
-  .share-icon{display:flex; flex-direction:column; align-items:center; gap:8px; font-size:12px; cursor:pointer;}
-  .share-icon .circle{width:50px; height:50px; border-radius:50%; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:24px;}
+  .share-options { display: flex; justify-content: space-around; margin: 20px 0; }
+  .share-icon { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; color: #fff; }
+  .share-icon .circle { width: 55px; height: 55px; border-radius: 50%; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 26px; }
 
-  .form-group{margin-bottom:12px;}
-  .form-group label{display:block; font-size:12px; color:var(--text-dim); margin-bottom:4px;}
-  .form-group input, .form-group select, .form-group textarea{width:100%; padding:10px; background:var(--surface2); border:1px solid #444; border-radius:8px; color:#fff; outline:none;}
-  .color-picker{display:flex; gap:8px; flex-wrap:wrap;}
-  .color-swatch{width:32px; height:32px; border-radius:50%; cursor:pointer; border:2px solid transparent;}
-  .color-swatch.selected{border-color:#fff;}
-  .modal-actions{display:flex; gap:10px; margin-top:15px;}
-  .modal-actions button{flex:1; padding:12px; border-radius:8px; border:none; font-weight:bold; cursor:pointer;}
-  .btn-cancel{background:var(--surface2); color:#fff;}
-  .btn-ok{background:var(--primary); color:#fff;}
+  .form-group { margin-bottom: 15px; }
+  .form-group label { display: block; font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; background: var(--surface2); border: 1px solid #444; border-radius: 8px; color: #fff; outline: none; font-family: inherit; }
+  .color-picker { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px; }
+  .color-swatch { width: 34px; height: 34px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; }
+  .color-swatch.selected { border-color: #fff; }
+  
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .modal-actions button { flex: 1; padding: 14px; border-radius: 8px; border: none; font-weight: bold; font-size: 15px; cursor: pointer; }
+  .btn-cancel { background: var(--surface2); color: #fff; }
+  .btn-ok { background: var(--primary); color: #fff; }
   
   /* List Musik */
-  .music-item{display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--surface2); border-radius:8px; margin-bottom:8px; cursor:pointer; border:2px solid transparent;}
-  .music-item:active{background:#333;}
-  .music-item.selected{border-color:var(--primary); background:rgba(254,44,85,0.1);}
-  .music-ctrl{display:flex; align-items:center; gap:10px;}
-  .music-play-btn{background:none; border:none; color:#fff; font-size:20px; cursor:pointer;}
+  .music-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--surface2); border-radius: 8px; margin-bottom: 8px; cursor: pointer; border: 2px solid transparent; }
+  .music-item:active { background: #333; }
+  .music-item.selected { border-color: var(--primary); background: rgba(254,44,85,0.1); }
+  .music-info { display: flex; align-items: center; gap: 12px; }
+  .music-info .cover { width: 40px; height: 40px; border-radius: 4px; background: #444; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .music-play-btn { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; }
 
   /* Toast & Loader */
-  .toast{position:fixed; top:50px; left:50%; transform:translateX(-50%) translateY(-100px); background:var(--surface2); padding:10px 20px; border-radius:20px; font-size:13px; z-index:300; transition:transform 0.3s;}
-  .toast.show{transform:translateX(-50%) translateY(0);}
-  .loader-overlay{position:fixed; inset:0; background:rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; z-index:400; flex-direction:column; gap:15px;}
-  .loader-overlay.show{display:flex;}
-  .spinner{width:40px; height:40px; border:4px solid var(--surface2); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite;}
-  @keyframes spin{100%{transform:rotate(360deg);}}
+  .toast { position: fixed; top: 50px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--surface2); padding: 12px 24px; border-radius: 24px; font-size: 14px; font-weight: 500; z-index: 3000; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  
+  .loader-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 4000; flex-direction: column; gap: 15px; }
+  .loader-overlay.show { display: flex; }
+  .spinner { width: 40px; height: 40px; border: 4px solid var(--surface2); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+  @keyframes spin { 100% { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -143,10 +203,21 @@
 <!-- ============ BERANDA (FEED) ============ -->
 <div class="screen active" id="screen-home">
   <div class="feed-container" id="feedContainer">
+    
+    <!-- Top Bar Overlay (Live, Mengikuti, FYP) -->
+    <div class="feed-top-bar">
+      <div class="live-badge">🔴 LIVE</div>
+      <div class="feed-tabs">
+        <span class="feed-tab">Mengikuti</span>
+        <span class="feed-tab active">Panjang & FYP</span>
+      </div>
+      <div style="width: 40px;"></div> <!-- Spacer -->
+    </div>
+
     <div class="empty-feed" id="emptyFeed">
       <div style="font-size:60px; margin-bottom:10px;">🎬</div>
       <div>Belum ada video</div>
-      <div style="font-size:12px; margin-top:5px;">Ketuk tombol + untuk merekam</div>
+      <div style="font-size:12px; margin-top:5px; color:#666;">Ketuk tombol + untuk merekam</div>
     </div>
   </div>
 </div>
@@ -154,22 +225,45 @@
 <!-- ============ PROFIL ============ -->
 <div class="screen" id="screen-profile">
   <div class="profile-header">
-    <div class="avatar">👤</div>
-    <div style="font-weight:bold; font-size:18px;">@user_stream</div>
-    <div style="color:var(--text-dim); font-size:13px;" id="profileCount">0 Video</div>
+    <div class="avatar-large">👤</div>
+    <div style="font-weight:bold; font-size:18px;">@kreator_hebat</div>
+    <div class="profile-stats">
+      <div class="stat-item"><span id="profileCount">0</span><span>Video</span></div>
+      <div class="stat-item"><span>12.5K</span><span>Pengikut</span></div>
+      <div class="stat-item"><span>50</span><span>Mengikuti</span></div>
+    </div>
+    <button class="btn-edit-profile">Edit Profil</button>
   </div>
+  
+  <div class="profile-tabs">
+    <div class="p-tab active">🔒 Video</div>
+    <div class="p-tab">❤️ Disukai</div>
+  </div>
+  
   <div class="grid-videos" id="profileGrid"></div>
 </div>
 
 <!-- ============ NAVIGASI BAWAH ============ -->
 <div class="bottom-nav">
-  <div class="nav-item active" onclick="switchTab('home')"><span class="icon">🏠</span> Beranda</div>
-  <div class="nav-item" onclick="openCamera()"><div class="btn-plus">+</div></div>
-  <div class="nav-item" onclick="switchTab('profile')"><span class="icon">👤</span> Profil</div>
+  <div class="nav-item active" onclick="switchTab('home')">
+    <span class="icon active-icon">🏠</span> Beranda
+  </div>
+  <div class="nav-item">
+    <span class="icon">👥</span> Teman
+  </div>
+  <div class="nav-item btn-plus-wrap" onclick="openCamera()">
+    <div class="btn-plus">+</div>
+  </div>
+  <div class="nav-item">
+    <span class="icon">📥</span> Kotak Masuk
+  </div>
+  <div class="nav-item" onclick="switchTab('profile')">
+    <span class="icon">👤</span> Profil
+  </div>
 </div>
 
 <!-- ============ KAMERA ============ -->
-<div class="screen" id="screen-camera">
+<div class="screen no-pad" id="screen-camera">
   <div class="top-bar">
     <button class="icon-btn" onclick="stopCamera(); switchTab('home')">✕</button>
     <button class="icon-btn" onclick="toggleCameraFacing()">🔄</button>
@@ -187,7 +281,7 @@
 </div>
 
 <!-- ============ EDITOR ============ -->
-<div class="screen" id="screen-editor">
+<div class="screen no-pad" id="screen-editor">
   <div class="top-bar">
     <button class="icon-btn" onclick="goBackFromEditor()">←</button>
     <button class="icon-btn" onclick="publishVideo()" style="background:var(--primary);">✓</button>
@@ -209,8 +303,9 @@
     </div>
     
     <div class="editor-actions">
-      <button class="btn-action" onclick="openTextModal()">📝 Text</button>
-      <button class="btn-action" onclick="openMusicModal()">🎵 Musik</button>
+      <button class="btn-action" onclick="openTextModal()"><span>📝</span>Text</button>
+      <button class="btn-action" onclick="openMusicModal()"><span>🎵</span>Musik</button>
+      <button class="btn-action" onclick="openEffectModal()"><span>✨</span>Efek</button>
     </div>
     
     <div id="overlayList" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
@@ -221,7 +316,7 @@
 <!-- ============ MODAL SHARE ============ -->
 <div class="modal-bg" id="shareModal">
   <div class="modal">
-    <h3 style="margin-top:0; text-align:center;">Bagikan Video</h3>
+    <h3 style="margin-top:0; text-align:center;">Bagikan ke</h3>
     <div class="share-options">
       <div class="share-icon" onclick="shareViaWA()">
         <div class="circle">💬</div>
@@ -237,7 +332,7 @@
       </div>
     </div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('shareModal')" style="width:100%;">Batal</button>
+      <button class="btn-cancel" onclick="closeModal('shareModal')" style="width:100%; border-radius: 20px;">Batal</button>
     </div>
   </div>
 </div>
@@ -246,7 +341,7 @@
 <div class="modal-bg" id="textModal">
   <div class="modal">
     <h3 style="margin-top:0;">Tambah Text</h3>
-    <div class="form-group"><label>Teks</label><input type="text" id="txtContent" placeholder="Tulis..."></div>
+    <div class="form-group"><label>Teks</label><input type="text" id="txtContent" placeholder="Tulis sesuatu..."></div>
     <div class="form-group"><label>Ukuran</label><input type="number" id="txtSize" value="28"></div>
     <div class="form-group"><label>Warna</label><div class="color-picker" id="txtColors"></div></div>
     <div class="modal-actions">
@@ -273,7 +368,7 @@
   <div class="modal">
     <h3 style="margin-top:0;">Posting Video</h3>
     <div class="form-group"><label>Judul Video</label><input type="text" id="pubTitle" placeholder="Judul menarik..."></div>
-    <div class="form-group"><label>Deskripsi</label><textarea id="pubDesc" rows="3" placeholder="Deskripsi..."></textarea></div>
+    <div class="form-group"><label>Deskripsi</label><textarea id="pubDesc" rows="3" placeholder="Ceritakan videomu..."></textarea></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('publishModal')">Batal</button>
       <button class="btn-ok" onclick="confirmPublish()">Posting</button>
@@ -304,15 +399,15 @@ const state = {
   trimStart: 0,
   trimEnd: 0,
   textOverlays: [],
-  selectedMusicTrack: { id: 'none', name: 'Tanpa Musik', url: null },
-  shareVideoData: null // Menyimpan data video yang mau di-share
+  selectedMusicTrack: { id: 'none', name: 'Suara Asli', url: null },
+  shareVideoData: null
 };
 
 /* ============================================================
    DATABASE INDEXEDDB
    ============================================================ */
 let db;
-const DB_NAME = 'VideoStreamDB';
+const DB_NAME = 'TikVidDB';
 const DB_VERSION = 1;
 
 function initDB() {
@@ -357,7 +452,7 @@ function switchTab(tab) {
     renderFeed();
   } else if (tab === 'profile') {
     document.getElementById('screen-profile').classList.add('active');
-    document.querySelectorAll('.nav-item')[2].classList.add('active');
+    document.querySelectorAll('.nav-item')[4].classList.add('active');
     renderProfile();
   }
   state.currentTab = tab;
@@ -377,7 +472,7 @@ function stopAllAudio() {
 function renderFeed() {
   const container = document.getElementById('feedContainer');
   const empty = document.getElementById('emptyFeed');
-  Array.from(container.children).forEach(c => { if (c.id !== 'emptyFeed') c.remove(); });
+  Array.from(container.children).forEach(c => { if (c.id !== 'emptyFeed' && !c.classList.contains('feed-top-bar')) c.remove(); });
 
   if (state.videos.length === 0) {
     empty.style.display = 'flex';
@@ -398,6 +493,8 @@ function renderFeed() {
     const volBtn = document.createElement('button');
     volBtn.className = 'volume-btn pulse';
     volBtn.innerHTML = '🔇';
+    volBtn.style.top = '60px';
+    volBtn.style.right = '15px';
 
     const toggleVolume = (e) => {
       if(e) e.stopPropagation();
@@ -428,24 +525,56 @@ function renderFeed() {
       overlayContainer.appendChild(textEl);
     });
 
+    // Info Video
     const info = document.createElement('div');
     info.className = 'video-info';
     info.innerHTML = `
-      <div class="username">@user_stream</div>
+      <div class="username">@kreator_hebat <span class="tag">Panjang</span></div>
       <div class="desc">${escapeHtml(videoData.desc)}</div>
-      <div class="music">🎵 ${videoData.musicName}</div>
+      <div class="music">🎵 <span>${videoData.musicName} - original sound</span></div>
     `;
 
-    // Action Buttons (Like, Comment, Share)
+    // Action Buttons (Avatar, Like, Comment, Bookmark, Share)
     const actions = document.createElement('div');
     actions.className = 'side-actions';
-    actions.innerHTML = `
-      <div class="action-btn-side"><span class="icon">❤️</span>12K</div>
-      <div class="action-btn-side"><span class="icon">💬</span>345</div>
-      <div class="action-btn-side" onclick="openShareModal('${videoData.id}')">
-        <span class="icon">↗️</span>Share
-      </div>
-    `;
+    
+    // Avatar (dummy)
+    const avatarWrap = document.createElement('div');
+    avatarWrap.className = 'avatar-wrap';
+    avatarWrap.innerHTML = `<img src="https://i.pravatar.cc/100?img=5" class="avatar-img"><div class="avatar-plus">+</div>`;
+    
+    const likeBtn = document.createElement('div');
+    likeBtn.className = 'action-btn-side';
+    likeBtn.innerHTML = `<span class="icon">🤍</span>12.5K`;
+    likeBtn.onclick = function() {
+      this.classList.toggle('liked');
+      const icon = this.querySelector('.icon');
+      icon.textContent = this.classList.contains('liked') ? '❤️' : '🤍';
+    };
+
+    const commentBtn = document.createElement('div');
+    commentBtn.className = 'action-btn-side';
+    commentBtn.innerHTML = `<span class="icon">💬</span>345`;
+    
+    const bookmarkBtn = document.createElement('div');
+    bookmarkBtn.className = 'action-btn-side';
+    bookmarkBtn.innerHTML = `<span class="icon">🔖</span>1.2K`;
+    bookmarkBtn.onclick = function() {
+      this.classList.toggle('liked');
+      const icon = this.querySelector('.icon');
+      icon.textContent = this.classList.contains('liked') ? '📌' : '🔖';
+    };
+
+    const shareBtn = document.createElement('div');
+    shareBtn.className = 'action-btn-side';
+    shareBtn.innerHTML = `<span class="icon">↗️</span>Bagikan`;
+    shareBtn.onclick = () => openShareModal(videoData.id);
+
+    actions.appendChild(avatarWrap);
+    actions.appendChild(likeBtn);
+    actions.appendChild(commentBtn);
+    actions.appendChild(bookmarkBtn);
+    actions.appendChild(shareBtn);
 
     card.appendChild(vid);
     card.appendChild(volBtn);
@@ -475,72 +604,46 @@ function renderFeed() {
 function openShareModal(videoId) {
   const video = state.videos.find(v => v.id === videoId);
   if (!video) return;
-  
   state.shareVideoData = video;
   document.getElementById('shareModal').classList.add('show');
 }
 
-// 1. Share ke WhatsApp
 function shareViaWA() {
   if (!state.shareVideoData) return;
   const text = `Tonton video keren ini: ${state.shareVideoData.title}\n\n${window.location.href}`;
-  const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-  window.open(url, '_blank');
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   closeModal('shareModal');
 }
 
-// 2. Share via Web Share API (Bawaan HP)
 async function shareNative() {
   if (!state.shareVideoData) return;
   const video = state.shareVideoData;
-
   if (navigator.share) {
     try {
       const file = new File([video.blob], 'video.mp4', { type: video.blob.type });
-      await navigator.share({
-        title: video.title,
-        text: video.desc,
-        url: window.location.href,
-        files: [file] // Membagikan file video langsung jika didukung
-      });
+      await navigator.share({ title: video.title, text: video.desc, url: window.location.href, files: [file] });
       closeModal('shareModal');
     } catch (err) {
       if (err.name !== 'AbortError') {
-        // Fallback jika gagal share file
         try {
-          await navigator.share({
-            title: video.title,
-            text: video.desc,
-            url: window.location.href
-          });
+          await navigator.share({ title: video.title, text: video.desc, url: window.location.href });
           closeModal('shareModal');
-        } catch (e2) {
-          showToast('Fitur share tidak didukung di browser ini.');
-        }
+        } catch (e2) { showToast('Fitur share tidak didukung.'); }
       }
     }
-  } else {
-    // Fallback jika navigator.share tidak ada
-    shareFallback();
-  }
+  } else { shareFallback(); }
 }
 
-// 3. Copy Link
 function copyLink() {
-  const url = window.location.href;
-  navigator.clipboard.writeText(url).then(() => {
+  navigator.clipboard.writeText(window.location.href).then(() => {
     showToast('Link berhasil disalin! 🔗');
     closeModal('shareModal');
-  }).catch(() => {
-    showToast('Gagal menyalin link.');
-  });
+  }).catch(() => showToast('Gagal menyalin link.'));
 }
 
-// Fallback Umum
 function shareFallback() {
   if (!state.shareVideoData) return;
-  const text = `Tonton video keren ini: ${state.shareVideoData.title}\n\n${window.location.href}`;
-  prompt("Salin link ini untuk membagikan video:", text);
+  prompt("Salin link ini:", `${state.shareVideoData.title}\n${window.location.href}`);
   closeModal('shareModal');
 }
 
@@ -562,14 +665,14 @@ function showLoader(msg) {
 function hideLoader() { document.getElementById('loader').classList.remove('show'); }
 
 /* ============================================================
-   PROFIL & SISA KODE (Sama seperti sebelumnya)
+   PROFIL
    ============================================================ */
 function renderProfile() {
   const grid = document.getElementById('profileGrid');
   grid.innerHTML = '';
-  document.getElementById('profileCount').textContent = state.videos.length + ' Video';
+  document.getElementById('profileCount').textContent = state.videos.length;
   if (state.videos.length === 0) {
-    grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#666;">Belum ada video</div>';
+    grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#666; font-size:14px;">Belum ada video</div>';
     return;
   }
   state.videos.forEach(v => {
@@ -578,14 +681,19 @@ function renderProfile() {
     const vid = document.createElement('video');
     vid.src = URL.createObjectURL(v.blob);
     vid.muted = true; vid.playsInline = true;
-    vid.onmouseenter = () => vid.play();
-    vid.onmouseleave = () => { vid.pause(); vid.currentTime = 0; };
     item.appendChild(vid);
+    item.innerHTML += `<div class="views">▶ ${Math.floor(Math.random() * 1000)}K</div>`;
     grid.appendChild(item);
   });
 }
 
-async function openCamera() { showScreen('camera'); await startCamera(); }
+/* ============================================================
+   KAMERA
+   ============================================================ */
+async function openCamera() {
+  showScreen('camera');
+  await startCamera();
+}
 
 async function startCamera() {
   try {
@@ -669,13 +777,16 @@ function pickFromGallery() {
   input.click();
 }
 
+/* ============================================================
+   EDITOR
+   ============================================================ */
 function handleNewVideo(blob, filename) {
   stopCamera();
   if (state.videoURL) URL.revokeObjectURL(state.videoURL);
   state.videoBlob = blob;
   state.videoURL = URL.createObjectURL(blob);
   state.textOverlays = [];
-  state.selectedMusicTrack = { id: 'none', name: 'Tanpa Musik', url: null };
+  state.selectedMusicTrack = { id: 'none', name: 'Suara Asli', url: null };
   
   const v = document.getElementById('editVideo');
   v.src = state.videoURL;
@@ -804,8 +915,8 @@ function renderOverlays() {
   list.innerHTML = '';
   state.textOverlays.forEach((t, i) => {
     const chip = document.createElement('div');
-    chip.style.cssText = 'background:#333; padding:4px 8px; border-radius:10px; font-size:12px;';
-    chip.innerHTML = `${t.text} <span style="color:red; cursor:pointer;" onclick="removeOverlay(${i})">✕</span>`;
+    chip.style.cssText = 'background:#333; padding:4px 8px; border-radius:10px; font-size:12px; display:flex; gap:6px; align-items:center;';
+    chip.innerHTML = `${t.text} <span style="color:red; cursor:pointer; font-weight:bold;" onclick="removeOverlay(${i})">✕</span>`;
     list.appendChild(chip);
   });
 }
@@ -816,7 +927,7 @@ function removeOverlay(idx) {
 }
 
 const MUSIC_CATALOG = [
-  { id: 'none', name: 'Tanpa Musik', url: null },
+  { id: 'none', name: 'Suara Asli', url: null },
   { id: 'viral-funk', name: 'Viral Funk (Upbeat)', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
   { id: 'viral-chill', name: 'Chill Viral Beat', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' },
   { id: 'viral-epic', name: 'Epic Trend', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' },
@@ -830,6 +941,11 @@ function openMusicModal() {
   MUSIC_CATALOG.forEach(track => {
     const item = document.createElement('div');
     item.className = 'music-item' + (state.selectedMusicTrack.id === track.id ? ' selected' : '');
+    
+    const info = document.createElement('div');
+    info.className = 'music-info';
+    info.innerHTML = `<div class="cover">🎵</div><span>${track.name}</span>`;
+    
     const playBtn = document.createElement('button');
     playBtn.className = 'music-play-btn';
     playBtn.textContent = '▶️';
@@ -846,13 +962,10 @@ function openMusicModal() {
         }
       }
     };
-    const name = document.createElement('span');
-    name.textContent = track.name;
-    const ctrl = document.createElement('div');
-    ctrl.className = 'music-ctrl';
-    ctrl.appendChild(name);
-    if (track.id !== 'none') ctrl.appendChild(playBtn);
-    item.appendChild(ctrl);
+
+    item.appendChild(info);
+    if (track.id !== 'none') item.appendChild(playBtn);
+    
     item.onclick = () => {
       state.selectedMusicTrack = track;
       if (previewAudio) { previewAudio.pause(); previewAudio = null; }
@@ -902,10 +1015,10 @@ async function confirmPublish() {
     state.videoBlob = null;
     state.videoURL = null;
     state.textOverlays = [];
-    state.selectedMusicTrack = { id: 'none', name: 'Tanpa Musik', url: null };
+    state.selectedMusicTrack = { id: 'none', name: 'Suara Asli', url: null };
     
     hideLoader();
-    showToast('Video berhasil disimpan & diposting! 🎉');
+    showToast('Video berhasil diposting! 🎉');
     switchTab('home');
   } catch (err) {
     hideLoader();
