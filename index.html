@@ -1,204 +1,938 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>TikVid - Video Panjang & Toko</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans@5.0.3/index.css" />
-<link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>VideoStream - TikTok Clone</title>
+<style>
+  :root{
+    --bg:#000; --surface:#121212; --surface2:#242424;
+    --primary:#fe2c55; --text:#fff; --text-dim:#b0b0b0;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  
+  /* ============ NAVIGASI BAWAH ============ */
+  .bottom-nav{position:fixed; bottom:0; left:0; right:0; height:60px; background:var(--surface); display:flex; justify-content:space-around; align-items:center; z-index:100; border-top:1px solid #333;}
+  .nav-item{display:flex; flex-direction:column; align-items:center; color:var(--text-dim); font-size:11px; cursor:pointer; gap:4px; width:60px;}
+  .nav-item.active{color:var(--text);}
+  .nav-item .icon{font-size:22px;}
+  .btn-plus{position:relative; top:-15px; width:46px; height:32px; background:var(--text); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold; font-size:20px; border-left:3px solid var(--primary); border-right:3px solid #25f4ee; box-shadow:0 2px 10px rgba(0,0,0,0.5);}
+
+  /* ============ SCREENS ============ */
+  .screen{display:none; height:100%; width:100%; position:absolute; top:0; left:0;}
+  .screen.active{display:block;}
+  
+  /* ============ BERANDA (FEED) ============ */
+  #screen-home{background:#000;}
+  .feed-container{height:100%; width:100%; overflow-y:scroll; scroll-snap-type:y mandatory;}
+  .video-card{height:100%; width:100%; position:relative; scroll-snap-align:start; background:#000;}
+  .video-card video{width:100%; height:100%; object-fit:contain;}
+  
+  /* Tombol Suara */
+  .volume-btn {
+    position:absolute; top:20px; right:20px; z-index:20;
+    background:rgba(0,0,0,0.6); color:#fff; border:none; border-radius:50%;
+    width:44px; height:44px; font-size:20px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .volume-btn.pulse { animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); background:rgba(254,44,85,0.8); } 100% { transform: scale(1); } }
+
+  .video-info{position:absolute; bottom:70px; left:15px; right:70px; z-index:10;}
+  .video-info .username{font-weight:bold; font-size:16px; margin-bottom:6px;}
+  .video-info .desc{font-size:14px; line-height:1.3; margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  .video-info .music{font-size:13px; display:flex; align-items:center; gap:6px;}
+  
+  /* Side Actions */
+  .side-actions{position:absolute; bottom:80px; right:10px; display:flex; flex-direction:column; gap:20px; align-items:center; z-index:10;}
+  .action-btn-side{display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12px; cursor:pointer;}
+  .action-btn-side .icon{font-size:32px; background:rgba(0,0,0,0.4); border-radius:50%; padding:8px;}
+  .action-btn-side:active .icon { background: rgba(255,255,255,0.2); transform: scale(0.9); }
+
+  .empty-feed{display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--text-dim);}
+
+  /* ============ CAMERA & EDITOR ============ */
+  #screen-camera, #screen-editor{background:#000; z-index:150;}
+  .top-bar{display:flex; justify-content:space-between; padding:15px; position:absolute; top:0; left:0; right:0; z-index:10;}
+  .icon-btn{background:rgba(0,0,0,0.5); border:none; color:#fff; width:40px; height:40px; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;}
+  
+  .cam-preview-wrap{width:100%; height:100%; display:flex; align-items:center; justify-content:center;}
+  #camPreview{width:100%; height:100%; object-fit:cover;}
+  
+  .cam-controls{position:absolute; bottom:0; left:0; right:0; height:140px; display:flex; align-items:center; justify-content:space-around; padding-bottom:20px; z-index:10;}
+  .rec-btn{width:70px; height:70px; border-radius:50%; border:4px solid #fff; background:transparent; cursor:pointer; position:relative; transition:all .2s;}
+  .rec-btn::after{content:""; position:absolute; inset:6px; border-radius:50%; background:var(--primary); transition:all .2s;}
+  .rec-btn.recording::after{inset:18px; border-radius:8px;}
+  
+  .rec-timer{position:absolute; top:-30px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.7); color:#fff; padding:4px 12px; border-radius:20px; font-size:13px; display:none; align-items:center; gap:6px;}
+  .rec-timer.show{display:flex;}
+  .rec-dot{width:8px;height:8px;background:var(--primary);border-radius:50%;animation:blink 1s infinite;}
+  @keyframes blink{50%{opacity:0.2;}}
+
+  /* Editor Panel */
+  .editor-panel{position:absolute; bottom:0; left:0; right:0; background:var(--surface); padding:16px; border-radius:20px 20px 0 0; z-index:20;}
+  .trim-track{position:relative; height:36px; background:#333; border-radius:6px; margin-bottom:10px; overflow:hidden;}
+  .trim-selection{position:absolute; top:0; bottom:0; background:rgba(254,44,85,0.3); border-left:3px solid var(--primary); border-right:3px solid var(--primary); pointer-events:none;}
+  .trim-handle{position:absolute; top:0; width:20px; height:100%; background:var(--primary); cursor:ew-resize; z-index:2; display:flex; align-items:center; justify-content:center;}
+  .trim-handle::after{content:""; width:3px; height:16px; background:rgba(255,255,255,0.7); border-radius:2px;}
+  .trim-handle.left{left:0; border-radius:6px 0 0 6px;}
+  .trim-handle.right{right:0; border-radius:0 6px 6px 0;}
+  
+  .editor-actions{display:flex; gap:10px; margin-bottom:10px; overflow-x:auto;}
+  .btn-action{background:var(--surface2); border:none; color:#fff; padding:8px 12px; border-radius:8px; font-size:13px; cursor:pointer; white-space:nowrap;}
+  .btn-publish{width:100%; padding:14px; background:var(--primary); color:#fff; border:none; border-radius:8px; font-weight:bold; font-size:16px; cursor:pointer;}
+
+  /* Overlay Text Preview */
+  .text-overlay{position:absolute; color:#fff; font-weight:bold; text-shadow:2px 2px 4px rgba(0,0,0,0.9); white-space:nowrap; user-select:none; cursor:move; transform:translate(-50%,-50%); padding:4px; border:1px dashed transparent; z-index:5;}
+  .text-overlay:hover{border-color:rgba(255,255,255,0.5);}
+
+  /* ============ PROFIL ============ */
+  #screen-profile{padding:20px; padding-top:60px; overflow-y:auto;}
+  .profile-header{display:flex; flex-direction:column; align-items:center; margin-bottom:20px;}
+  .avatar{width:80px; height:80px; border-radius:50%; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:40px; margin-bottom:10px;}
+  .grid-videos{display:grid; grid-template-columns:repeat(3, 1fr); gap:2px;}
+  .grid-item{aspect-ratio:9/16; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:24px; overflow:hidden;}
+  .grid-item video{width:100%; height:100%; object-fit:cover;}
+
+  /* ============ MODALS ============ */
+  .modal-bg{position:fixed; inset:0; background:rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; z-index:200; padding:20px;}
+  .modal-bg.show{display:flex;}
+  .modal{background:var(--surface); border-radius:16px; padding:20px; width:100%; max-width:400px; max-height:80vh; overflow-y:auto;}
+  
+  /* Share Modal */
+  .share-options{display:flex; justify-content:space-around; margin:20px 0;}
+  .share-icon{display:flex; flex-direction:column; align-items:center; gap:8px; font-size:12px; cursor:pointer;}
+  .share-icon .circle{width:50px; height:50px; border-radius:50%; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:24px;}
+
+  .form-group{margin-bottom:12px;}
+  .form-group label{display:block; font-size:12px; color:var(--text-dim); margin-bottom:4px;}
+  .form-group input, .form-group select, .form-group textarea{width:100%; padding:10px; background:var(--surface2); border:1px solid #444; border-radius:8px; color:#fff; outline:none;}
+  .color-picker{display:flex; gap:8px; flex-wrap:wrap;}
+  .color-swatch{width:32px; height:32px; border-radius:50%; cursor:pointer; border:2px solid transparent;}
+  .color-swatch.selected{border-color:#fff;}
+  .modal-actions{display:flex; gap:10px; margin-top:15px;}
+  .modal-actions button{flex:1; padding:12px; border-radius:8px; border:none; font-weight:bold; cursor:pointer;}
+  .btn-cancel{background:var(--surface2); color:#fff;}
+  .btn-ok{background:var(--primary); color:#fff;}
+  
+  /* List Musik */
+  .music-item{display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--surface2); border-radius:8px; margin-bottom:8px; cursor:pointer; border:2px solid transparent;}
+  .music-item:active{background:#333;}
+  .music-item.selected{border-color:var(--primary); background:rgba(254,44,85,0.1);}
+  .music-ctrl{display:flex; align-items:center; gap:10px;}
+  .music-play-btn{background:none; border:none; color:#fff; font-size:20px; cursor:pointer;}
+
+  /* Toast & Loader */
+  .toast{position:fixed; top:50px; left:50%; transform:translateX(-50%) translateY(-100px); background:var(--surface2); padding:10px 20px; border-radius:20px; font-size:13px; z-index:300; transition:transform 0.3s;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .loader-overlay{position:fixed; inset:0; background:rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; z-index:400; flex-direction:column; gap:15px;}
+  .loader-overlay.show{display:flex;}
+  .spinner{width:40px; height:40px; border:4px solid var(--surface2); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite;}
+  @keyframes spin{100%{transform:rotate(360deg);}}
+</style>
 </head>
 <body>
-<div id="app">
-  <div class="top-bar">
-    <div class="live-btn" id="liveBtn">🔴 LIVE</div>
-    <div class="tabs">
-      <div class="tab" data-tab="following" id="tabFollowing">Mengikuti</div>
-      <div class="tab active" data-tab="foryou">Panjang & FYP</div>
-    </div>
-    <div class="profile-badge" id="openAccountModal" title="Akun & Pengaturan">
-      <img id="navProfileAvatar" src="" alt="" style="display:none;" />
-      <span id="currentUsername">Akun (WA)</span>
-    </div>
-  </div>
 
-  <div class="mute-indicator" id="muteIndicator">
-    <span id="muteIcon">🔇</span>
-    <span id="muteText">Suara Mati</span>
-  </div>
-
-  <div class="feed" id="feed"></div>
-
-  <div class="bottom-nav">
-    <div class="nav-item active" data-nav="beranda">
-      <div class="nav-icon">🏠</div>
-      <div>Beranda</div>
-    </div>
-    <div class="nav-item" data-nav="teman" id="friendsNavBtn">
-      <div class="nav-icon">👥</div>
-      <div>Teman</div>
-    </div>
-    <div class="nav-item">
-      <div class="upload-btn" id="openCameraModal"></div>
-    </div>
-    <div class="nav-item" data-nav="kotakmasuk">
-      <div class="nav-icon">📥</div>
-      <div>Kotak Masuk</div>
-    </div>
-    <div class="nav-item" data-nav="profil" id="profileTabBtn">
-      <div class="nav-icon">👤</div>
-      <div>Profil</div>
-    </div>
-  </div>
-
-  <!-- Account Registration, Sign In & Sign Out Modal -->
-  <div class="modal-overlay" id="accountModal">
-    <div class="modal" style="height: 560px;">
-      <div class="modal-header">
-        Akun TikVid (Sign In / Daftar WA)
-        <div class="modal-close" data-close="accountModal">✕</div>
-      </div>
-      <div style="padding-top: 10px; overflow-y: auto; flex:1;">
-        <div class="avatar-upload-box" id="triggerAvatarUpload" title="Ketuk untuk ganti foto profil">
-          <span id="avatarPlaceholderText" style="font-size: 24px;">📷</span>
-          <img id="previewAvatarImg" src="" alt="" style="display:none;" />
-        </div>
-        <input type="file" id="avatarFileInput" accept="image/*" style="display: none;" />
-        <div style="text-align: center; font-size: 11px; opacity: 0.6; margin-bottom: 10px;">Ketuk lingkaran untuk unggah foto profil</div>
-
-        <label style="font-size: 12px; opacity: 0.8;">Nomor WhatsApp (Untuk Sign In / Daftar):</label>
-        <input type="tel" class="comment-input" id="whatsappInput" placeholder="Contoh: 081234567890" style="width: 100%; margin: 6px 0 10px 0;" />
-
-        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-          <button class="comment-send" id="signInWhatsAppBtn" style="flex: 1; border-radius: 20px; padding: 10px; background: #25D366; font-weight: bold; font-size: 12px;">🔑 Sign In No WA</button>
-          <button class="comment-send" id="signOutBtn" style="flex: 1; border-radius: 20px; padding: 10px; background: #e74c3c; font-weight: bold; font-size: 12px;">🚪 Sign Out</button>
-        </div>
-
-        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin-bottom: 12px;" />
-
-        <label style="font-size: 12px; opacity: 0.8;">Nama Akun / Username Baru:</label>
-        <input type="text" class="comment-input" id="accountInput" placeholder="Contoh: andi_vlog" style="width: 100%; margin: 6px 0 10px 0;" />
-
-        <label style="font-size: 12px; opacity: 0.8;">Bio Profil & Link Toko (Troli Kuning):</label>
-        <textarea class="comment-input" id="bioInput" placeholder="Tulis bio profil Anda..." style="width: 100%; height: 45px; border-radius: 12px; resize: none; margin: 6px 0 10px 0; padding: 8px;"></textarea>
-
-        <input type="text" class="comment-input" id="shopLinkInput" placeholder="Link jualan/toko (https://...)" style="width: 100%; margin: 0 0 14px 0;" />
-
-        <button class="comment-send" id="saveAccountBtn" style="width: 100%; border-radius: 20px; padding: 12px; background: #fe2c55; font-weight: bold;">Daftar Akun Baru (Save)</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Friends Modal -->
-  <div class="modal-overlay" id="friendsModal">
-    <div class="modal" style="height: 420px;">
-      <div class="modal-header">
-        👥 Temukan & Tambah Teman
-        <div class="modal-close" data-close="friendsModal">✕</div>
-      </div>
-      <div style="padding: 12px 0;" id="friendsListContainer" class="comments-list"></div>
-    </div>
-  </div>
-
-  <!-- Shopping Cart Modal -->
-  <div class="modal-overlay" id="shopModal">
-    <div class="modal" style="height: 280px;">
-      <div class="modal-header">
-        🛒 Keranjang Belanja Produk
-        <div class="modal-close" data-close="shopModal">✕</div>
-      </div>
-      <div style="padding: 20px; text-align: center; display: flex; flex-direction: column; gap: 15px; justify-content: center; flex:1;">
-        <div style="font-size: 15px; font-weight: bold;" id="shopModalTitle">Produk Pilihan Kreator</div>
-        <div style="font-size: 13px; opacity: 0.7;">Dapatkan penawaran menarik langsung dari video ini.</div>
-        <a id="shopModalLink" href="#" target="_blank" style="background: #ffcc00; color: #000; padding: 12px 20px; border-radius: 25px; font-weight: bold; text-decoration: none; display: block;">Kunjungi Link Jualan ↗</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Share Modal -->
-  <div class="modal-overlay" id="shareModal">
-    <div class="modal" style="height: 260px;">
-      <div class="modal-header">
-        Bagikan Video Ini
-        <div class="modal-close" data-close="shareModal">✕</div>
-      </div>
-      <div class="share-grid">
-        <div class="share-item" id="shareWhatsApp">
-          <div class="share-icon" style="background: #25D366;">💬</div>
-          <div>WhatsApp</div>
-        </div>
-        <div class="share-item" id="shareFacebook">
-          <div class="share-icon" style="background: #1877F2;">📘</div>
-          <div>Facebook</div>
-        </div>
-        <div class="share-item" id="shareTwitter">
-          <div class="share-icon" style="background: #1DA1F2;">🐦</div>
-          <div>Twitter / X</div>
-        </div>
-        <div class="share-item" id="shareCopyLink">
-          <div class="share-icon" style="background: #555;">🔗</div>
-          <div>Salin Link</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Comments Modal -->
-  <div class="modal-overlay" id="commentsModal">
-    <div class="modal">
-      <div class="modal-header">
-        <span id="commentsCount">0 Komentar</span>
-        <div class="modal-close" data-close="commentsModal">✕</div>
-      </div>
-      <div class="comments-list" id="commentsList"></div>
-      <div class="comment-input-wrap">
-        <input type="text" class="comment-input" id="commentInput" placeholder="Tambah komentar..." />
-        <button class="comment-send" id="commentSend">Kirim</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Music Picker Modal -->
-  <div class="modal-overlay" id="musicModal">
-    <div class="modal" style="height: 380px;">
-      <div class="modal-header">
-        Pilih Musik Viral (API Live)
-        <div class="modal-close" data-close="musicModal">✕</div>
-      </div>
-      <div class="comments-list" id="musicList">
-        <div class="comment-item" style="padding: 14px; text-align:center; opacity:0.6;">Memuat musik...</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Camera & LIVE Studio Modal -->
-  <div class="camera-modal" id="cameraModal">
-    <div class="camera-preview-wrap">
-      <video id="cameraVideo" autoplay playsinline muted></video>
-    </div>
-    <div class="live-indicator-badge" id="liveBadge">LIVE STREAMING</div>
-    <div class="camera-top-bar">
-      <div style="cursor: pointer; padding: 10px;" id="closeCamera">✕ Tutup</div>
-      <div id="recordingTimer" style="color: #fe2c55; font-weight: bold;">● 00:00</div>
-      <div style="cursor: pointer; padding: 10px;" id="switchCameraBtn">🔄 Putar Kamera</div>
-    </div>
-    <div class="camera-controls">
-      <div class="music-picker" id="openMusicModal">
-        <span id="selectedMusicLabel">🎵 ♪ Lofi Long Session - ChillBeats</span>
-      </div>
-      <div class="camera-actions-row">
-        <button class="cam-btn" id="uploadGalleryBtn">📁 Galeri (Durasi Panjang)</button>
-        <div class="record-shutter" id="recordShutter">
-          <div class="record-shutter-inner"></div>
-        </div>
-        <button class="cam-btn" id="camModeToggleBtn">Rekam Panjang</button>
-      </div>
-    </div>
-    <input type="file" id="galleryInput" accept="video/*" style="display: none;" />
-  </div>
-
-  <div class="toast" id="toast"></div>
+<!-- ============ LOADER ============ -->
+<div class="loader-overlay" id="loader">
+  <div class="spinner"></div>
+  <div id="loaderText">Memuat...</div>
 </div>
 
-<script src="script.js"></script>
+<!-- ============ BERANDA (FEED) ============ -->
+<div class="screen active" id="screen-home">
+  <div class="feed-container" id="feedContainer">
+    <div class="empty-feed" id="emptyFeed">
+      <div style="font-size:60px; margin-bottom:10px;">🎬</div>
+      <div>Belum ada video</div>
+      <div style="font-size:12px; margin-top:5px;">Ketuk tombol + untuk merekam</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PROFIL ============ -->
+<div class="screen" id="screen-profile">
+  <div class="profile-header">
+    <div class="avatar">👤</div>
+    <div style="font-weight:bold; font-size:18px;">@user_stream</div>
+    <div style="color:var(--text-dim); font-size:13px;" id="profileCount">0 Video</div>
+  </div>
+  <div class="grid-videos" id="profileGrid"></div>
+</div>
+
+<!-- ============ NAVIGASI BAWAH ============ -->
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="switchTab('home')"><span class="icon">🏠</span> Beranda</div>
+  <div class="nav-item" onclick="openCamera()"><div class="btn-plus">+</div></div>
+  <div class="nav-item" onclick="switchTab('profile')"><span class="icon">👤</span> Profil</div>
+</div>
+
+<!-- ============ KAMERA ============ -->
+<div class="screen" id="screen-camera">
+  <div class="top-bar">
+    <button class="icon-btn" onclick="stopCamera(); switchTab('home')">✕</button>
+    <button class="icon-btn" onclick="toggleCameraFacing()">🔄</button>
+  </div>
+  <div class="cam-preview-wrap">
+    <video id="camPreview" autoplay playsinline muted></video>
+  </div>
+  <div class="cam-controls">
+    <div class="rec-timer" id="recTimer"><span class="rec-dot"></span><span id="recTimerText">00:00</span></div>
+    <button class="icon-btn" onclick="pickFromGallery()" style="width:50px;height:50px;font-size:24px;">🖼️</button>
+    <button class="rec-btn" id="recBtn" onclick="toggleRecording()"></button>
+    <button class="icon-btn" onclick="toggleCamMute()" id="camMuteBtn" style="width:50px;height:50px;font-size:24px;">🔊</button>
+  </div>
+  <input type="file" id="galleryInput" accept="video/*" style="display:none">
+</div>
+
+<!-- ============ EDITOR ============ -->
+<div class="screen" id="screen-editor">
+  <div class="top-bar">
+    <button class="icon-btn" onclick="goBackFromEditor()">←</button>
+    <button class="icon-btn" onclick="publishVideo()" style="background:var(--primary);">✓</button>
+  </div>
+  <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; position:relative;">
+    <video id="editVideo" playsinline controls style="max-width:100%; max-height:100%; object-fit:contain;"></video>
+    <div id="overlayLayer" style="position:absolute; inset:0; pointer-events:none;"></div>
+  </div>
+  
+  <div class="editor-panel">
+    <div class="trim-track" id="trimTrack">
+      <div class="trim-selection" id="trimSelection"></div>
+      <div class="trim-handle left" id="trimLeft" style="left:0;"></div>
+      <div class="trim-handle right" id="trimRight" style="right:0;"></div>
+    </div>
+    <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-dim); margin-bottom:15px;">
+      <span id="trimCurrent">00:00 - 00:00</span>
+      <span id="trimDur">Durasi: 00:00</span>
+    </div>
+    
+    <div class="editor-actions">
+      <button class="btn-action" onclick="openTextModal()">📝 Text</button>
+      <button class="btn-action" onclick="openMusicModal()">🎵 Musik</button>
+    </div>
+    
+    <div id="overlayList" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
+    <button class="btn-publish" onclick="publishVideo()">Posting Video</button>
+  </div>
+</div>
+
+<!-- ============ MODAL SHARE ============ -->
+<div class="modal-bg" id="shareModal">
+  <div class="modal">
+    <h3 style="margin-top:0; text-align:center;">Bagikan Video</h3>
+    <div class="share-options">
+      <div class="share-icon" onclick="shareViaWA()">
+        <div class="circle">💬</div>
+        <span>WhatsApp</span>
+      </div>
+      <div class="share-icon" onclick="shareNative()">
+        <div class="circle">📱</div>
+        <span>Lainnya</span>
+      </div>
+      <div class="share-icon" onclick="copyLink()">
+        <div class="circle">🔗</div>
+        <span>Salin Link</span>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('shareModal')" style="width:100%;">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL TEXT ============ -->
+<div class="modal-bg" id="textModal">
+  <div class="modal">
+    <h3 style="margin-top:0;">Tambah Text</h3>
+    <div class="form-group"><label>Teks</label><input type="text" id="txtContent" placeholder="Tulis..."></div>
+    <div class="form-group"><label>Ukuran</label><input type="number" id="txtSize" value="28"></div>
+    <div class="form-group"><label>Warna</label><div class="color-picker" id="txtColors"></div></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('textModal')">Batal</button>
+      <button class="btn-ok" onclick="addTextOverlay()">Tambah</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL MUSIK ============ -->
+<div class="modal-bg" id="musicModal">
+  <div class="modal">
+    <h3 style="margin-top:0;">🎵 Lagu Viral & No Royalty</h3>
+    <p style="font-size:12px; color:var(--text-dim); margin-bottom:15px;">Pilih musik latar untuk video Anda.</p>
+    <div id="musicList"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeMusicModal()">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL PUBLISH ============ -->
+<div class="modal-bg" id="publishModal">
+  <div class="modal">
+    <h3 style="margin-top:0;">Posting Video</h3>
+    <div class="form-group"><label>Judul Video</label><input type="text" id="pubTitle" placeholder="Judul menarik..."></div>
+    <div class="form-group"><label>Deskripsi</label><textarea id="pubDesc" rows="3" placeholder="Deskripsi..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('publishModal')">Batal</button>
+      <button class="btn-ok" onclick="confirmPublish()">Posting</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   STATE GLOBAL
+   ============================================================ */
+const state = {
+  currentTab: 'home',
+  videos: [],
+  camStream: null,
+  camFacing: 'environment',
+  mediaRecorder: null,
+  recordedChunks: [],
+  isRecording: false,
+  recordingStartTime: 0,
+  recTimerInterval: null,
+  camMuted: false,
+  videoBlob: null,
+  videoURL: null,
+  videoDuration: 0,
+  trimStart: 0,
+  trimEnd: 0,
+  textOverlays: [],
+  selectedMusicTrack: { id: 'none', name: 'Tanpa Musik', url: null },
+  shareVideoData: null // Menyimpan data video yang mau di-share
+};
+
+/* ============================================================
+   DATABASE INDEXEDDB
+   ============================================================ */
+let db;
+const DB_NAME = 'VideoStreamDB';
+const DB_VERSION = 1;
+
+function initDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('videos')) db.createObjectStore('videos', { keyPath: 'id' });
+    };
+    req.onsuccess = e => { db = e.target.result; resolve(); };
+    req.onerror = e => reject(e.target.error);
+  });
+}
+function saveVideoToDB(video) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('videos', 'readwrite');
+    const req = tx.objectStore('videos').put(video);
+    req.onsuccess = () => resolve();
+    req.onerror = e => reject(e.target.error);
+  });
+}
+function getAllVideosFromDB() {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('videos', 'readonly');
+    const req = tx.objectStore('videos').getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+/* ============================================================
+   NAVIGASI
+   ============================================================ */
+function switchTab(tab) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  stopAllAudio();
+
+  if (tab === 'home') {
+    document.getElementById('screen-home').classList.add('active');
+    document.querySelectorAll('.nav-item')[0].classList.add('active');
+    renderFeed();
+  } else if (tab === 'profile') {
+    document.getElementById('screen-profile').classList.add('active');
+    document.querySelectorAll('.nav-item')[2].classList.add('active');
+    renderProfile();
+  }
+  state.currentTab = tab;
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+}
+function stopAllAudio() {
+  document.querySelectorAll('video').forEach(v => v.pause());
+}
+
+/* ============================================================
+   FEED & SHARE
+   ============================================================ */
+function renderFeed() {
+  const container = document.getElementById('feedContainer');
+  const empty = document.getElementById('emptyFeed');
+  Array.from(container.children).forEach(c => { if (c.id !== 'emptyFeed') c.remove(); });
+
+  if (state.videos.length === 0) {
+    empty.style.display = 'flex';
+    return;
+  }
+  empty.style.display = 'none';
+
+  state.videos.forEach(videoData => {
+    const card = document.createElement('div');
+    card.className = 'video-card';
+    
+    const vid = document.createElement('video');
+    vid.src = URL.createObjectURL(videoData.blob);
+    vid.loop = true;
+    vid.playsInline = true;
+    vid.muted = true; 
+    
+    const volBtn = document.createElement('button');
+    volBtn.className = 'volume-btn pulse';
+    volBtn.innerHTML = '🔇';
+
+    const toggleVolume = (e) => {
+      if(e) e.stopPropagation();
+      vid.muted = !vid.muted;
+      if (vid.muted) {
+        volBtn.innerHTML = '🔇';
+        volBtn.classList.add('pulse');
+      } else {
+        volBtn.innerHTML = '🔊';
+        volBtn.classList.remove('pulse');
+      }
+    };
+
+    volBtn.onclick = toggleVolume;
+    vid.onclick = toggleVolume;
+
+    // Overlay Text
+    const overlayContainer = document.createElement('div');
+    overlayContainer.style.position = 'absolute'; overlayContainer.style.inset = '0'; overlayContainer.style.pointerEvents = 'none';
+    videoData.texts.forEach(t => {
+      const textEl = document.createElement('div');
+      textEl.className = 'text-overlay';
+      textEl.textContent = t.text;
+      textEl.style.left = (t.x * 100) + '%';
+      textEl.style.top = (t.y * 100) + '%';
+      textEl.style.fontSize = t.size + 'px';
+      textEl.style.color = t.color;
+      overlayContainer.appendChild(textEl);
+    });
+
+    const info = document.createElement('div');
+    info.className = 'video-info';
+    info.innerHTML = `
+      <div class="username">@user_stream</div>
+      <div class="desc">${escapeHtml(videoData.desc)}</div>
+      <div class="music">🎵 ${videoData.musicName}</div>
+    `;
+
+    // Action Buttons (Like, Comment, Share)
+    const actions = document.createElement('div');
+    actions.className = 'side-actions';
+    actions.innerHTML = `
+      <div class="action-btn-side"><span class="icon">❤️</span>12K</div>
+      <div class="action-btn-side"><span class="icon">💬</span>345</div>
+      <div class="action-btn-side" onclick="openShareModal('${videoData.id}')">
+        <span class="icon">↗️</span>Share
+      </div>
+    `;
+
+    card.appendChild(vid);
+    card.appendChild(volBtn);
+    card.appendChild(overlayContainer);
+    card.appendChild(info);
+    card.appendChild(actions);
+    container.appendChild(card);
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) { vid.play().catch(e=>{}); } 
+        else { 
+          vid.pause(); 
+          vid.muted = true;
+          volBtn.innerHTML = '🔇';
+          volBtn.classList.add('pulse');
+        }
+      });
+    }, { threshold: 0.6 });
+    observer.observe(card);
+  });
+}
+
+/* ============================================================
+   FITUR SHARE (BAGIKAN)
+   ============================================================ */
+function openShareModal(videoId) {
+  const video = state.videos.find(v => v.id === videoId);
+  if (!video) return;
+  
+  state.shareVideoData = video;
+  document.getElementById('shareModal').classList.add('show');
+}
+
+// 1. Share ke WhatsApp
+function shareViaWA() {
+  if (!state.shareVideoData) return;
+  const text = `Tonton video keren ini: ${state.shareVideoData.title}\n\n${window.location.href}`;
+  const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+  closeModal('shareModal');
+}
+
+// 2. Share via Web Share API (Bawaan HP)
+async function shareNative() {
+  if (!state.shareVideoData) return;
+  const video = state.shareVideoData;
+
+  if (navigator.share) {
+    try {
+      const file = new File([video.blob], 'video.mp4', { type: video.blob.type });
+      await navigator.share({
+        title: video.title,
+        text: video.desc,
+        url: window.location.href,
+        files: [file] // Membagikan file video langsung jika didukung
+      });
+      closeModal('shareModal');
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        // Fallback jika gagal share file
+        try {
+          await navigator.share({
+            title: video.title,
+            text: video.desc,
+            url: window.location.href
+          });
+          closeModal('shareModal');
+        } catch (e2) {
+          showToast('Fitur share tidak didukung di browser ini.');
+        }
+      }
+    }
+  } else {
+    // Fallback jika navigator.share tidak ada
+    shareFallback();
+  }
+}
+
+// 3. Copy Link
+function copyLink() {
+  const url = window.location.href;
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('Link berhasil disalin! 🔗');
+    closeModal('shareModal');
+  }).catch(() => {
+    showToast('Gagal menyalin link.');
+  });
+}
+
+// Fallback Umum
+function shareFallback() {
+  if (!state.shareVideoData) return;
+  const text = `Tonton video keren ini: ${state.shareVideoData.title}\n\n${window.location.href}`;
+  prompt("Salin link ini untuk membagikan video:", text);
+  closeModal('shareModal');
+}
+
+/* ============================================================
+   TOAST & LOADER
+   ============================================================ */
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+function showLoader(msg) {
+  document.getElementById('loaderText').textContent = msg;
+  document.getElementById('loader').classList.add('show');
+}
+function hideLoader() { document.getElementById('loader').classList.remove('show'); }
+
+/* ============================================================
+   PROFIL & SISA KODE (Sama seperti sebelumnya)
+   ============================================================ */
+function renderProfile() {
+  const grid = document.getElementById('profileGrid');
+  grid.innerHTML = '';
+  document.getElementById('profileCount').textContent = state.videos.length + ' Video';
+  if (state.videos.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#666;">Belum ada video</div>';
+    return;
+  }
+  state.videos.forEach(v => {
+    const item = document.createElement('div');
+    item.className = 'grid-item';
+    const vid = document.createElement('video');
+    vid.src = URL.createObjectURL(v.blob);
+    vid.muted = true; vid.playsInline = true;
+    vid.onmouseenter = () => vid.play();
+    vid.onmouseleave = () => { vid.pause(); vid.currentTime = 0; };
+    item.appendChild(vid);
+    grid.appendChild(item);
+  });
+}
+
+async function openCamera() { showScreen('camera'); await startCamera(); }
+
+async function startCamera() {
+  try {
+    if (state.camStream) state.camStream.getTracks().forEach(t => t.stop());
+    state.camStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: state.camFacing, width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: !state.camMuted 
+    });
+    const video = document.getElementById('camPreview');
+    video.srcObject = state.camStream;
+    video.muted = true;
+    await video.play();
+    document.getElementById('camMuteBtn').textContent = state.camMuted ? '🔇' : '🔊';
+  } catch (err) {
+    showToast('Gagal kamera/mic: ' + err.message);
+    switchTab('home');
+  }
+}
+
+function stopCamera() {
+  if (state.camStream) { state.camStream.getTracks().forEach(t => t.stop()); state.camStream = null; }
+  if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') state.mediaRecorder.stop();
+  clearInterval(state.recTimerInterval);
+  state.isRecording = false;
+  document.getElementById('recBtn').classList.remove('recording');
+  document.getElementById('recTimer').classList.remove('show');
+}
+
+async function toggleCameraFacing() {
+  if (state.isRecording) return;
+  state.camFacing = state.camFacing === 'environment' ? 'user' : 'environment';
+  await startCamera();
+}
+
+function toggleCamMute() {
+  state.camMuted = !state.camMuted;
+  document.getElementById('camMuteBtn').textContent = state.camMuted ? '🔇' : '🔊';
+  if (!state.isRecording) startCamera();
+}
+
+function toggleRecording() {
+  if (state.isRecording) {
+    if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') state.mediaRecorder.stop();
+    state.isRecording = false;
+    clearInterval(state.recTimerInterval);
+    document.getElementById('recBtn').classList.remove('recording');
+    document.getElementById('recTimer').classList.remove('show');
+  } else {
+    if (!state.camStream) return;
+    state.recordedChunks = [];
+    const hasAudio = state.camStream.getAudioTracks().length > 0;
+    const mime = hasAudio ? 'video/webm;codecs=vp9,opus' : 'video/webm;codecs=vp9';
+    try { state.mediaRecorder = new MediaRecorder(state.camStream, { mimeType: mime }); } 
+    catch (e) { state.mediaRecorder = new MediaRecorder(state.camStream); }
+    
+    state.mediaRecorder.ondataavailable = e => { if (e.data.size > 0) state.recordedChunks.push(e.data); };
+    state.mediaRecorder.onstop = () => {
+      const blob = new Blob(state.recordedChunks, { type: 'video/webm' });
+      handleNewVideo(blob, 'rekaman.webm');
+    };
+    state.mediaRecorder.start();
+    state.isRecording = true;
+    state.recordingStartTime = Date.now();
+    document.getElementById('recBtn').classList.add('recording');
+    document.getElementById('recTimer').classList.add('show');
+    state.recTimerInterval = setInterval(() => {
+      const s = Math.floor((Date.now() - state.recordingStartTime) / 1000);
+      document.getElementById('recTimerText').textContent = formatTime(s);
+    }, 250);
+  }
+}
+
+function pickFromGallery() {
+  const input = document.getElementById('galleryInput');
+  input.value = '';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    handleNewVideo(file, file.name);
+  };
+  input.click();
+}
+
+function handleNewVideo(blob, filename) {
+  stopCamera();
+  if (state.videoURL) URL.revokeObjectURL(state.videoURL);
+  state.videoBlob = blob;
+  state.videoURL = URL.createObjectURL(blob);
+  state.textOverlays = [];
+  state.selectedMusicTrack = { id: 'none', name: 'Tanpa Musik', url: null };
+  
+  const v = document.getElementById('editVideo');
+  v.src = state.videoURL;
+  v.muted = false;
+  v.onloadedmetadata = () => {
+    state.videoDuration = v.duration;
+    state.trimStart = 0;
+    state.trimEnd = v.duration;
+    initTrimUI();
+    renderOverlays();
+    showScreen('editor');
+    v.currentTime = 0;
+    v.play();
+  };
+}
+
+function initTrimUI() {
+  const track = document.getElementById('trimTrack');
+  const sel = document.getElementById('trimSelection');
+  const left = document.getElementById('trimLeft');
+  const right = document.getElementById('trimRight');
+
+  function updateSelection() {
+    const w = track.clientWidth;
+    const s = (state.trimStart / state.videoDuration) * w;
+    const e = (state.trimEnd / state.videoDuration) * w;
+    sel.style.left = s + 'px';
+    sel.style.width = Math.max(0, e - s) + 'px';
+    document.getElementById('trimCurrent').textContent = formatTime(state.trimStart) + ' - ' + formatTime(state.trimEnd);
+    document.getElementById('trimDur').textContent = 'Durasi: ' + formatTime(state.trimEnd - state.trimStart);
+  }
+  updateSelection();
+
+  let dragging = null;
+  const onStart = side => e => { e.preventDefault(); dragging = side; };
+  const onMove = e => {
+    if (!dragging) return;
+    e.preventDefault();
+    const rect = track.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const ratio = Math.max(0, Math.min(1, x / rect.width));
+    const time = ratio * state.videoDuration;
+    const minDur = 3;
+
+    if (dragging === 'left') {
+      state.trimStart = Math.min(Math.max(0, time), state.trimEnd - minDur);
+    } else {
+      state.trimEnd = Math.max(Math.min(state.videoDuration, time), state.trimStart + minDur);
+    }
+    updateSelection();
+  };
+  const onEnd = () => { dragging = null; };
+
+  left.onmousedown = left.ontouchstart = onStart('left');
+  right.onmousedown = right.ontouchstart = onStart('right');
+  document.onmousemove = onMove;
+  document.ontouchmove = onMove;
+  document.onmouseup = onEnd;
+  document.ontouchend = onEnd;
+}
+
+let selectedColor = '#ffffff';
+function openTextModal() {
+  document.getElementById('txtContent').value = '';
+  const colors = ['#ffffff', '#ffff00', '#ff5252', '#00e5ff', '#69f0ae', '#ff4081'];
+  const wrap = document.getElementById('txtColors');
+  wrap.innerHTML = '';
+  colors.forEach(c => {
+    const sw = document.createElement('div');
+    sw.className = 'color-swatch' + (c === '#ffffff' ? ' selected' : '');
+    sw.style.background = c;
+    sw.onclick = () => {
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+      sw.classList.add('selected');
+      selectedColor = c;
+    };
+    wrap.appendChild(sw);
+  });
+  document.getElementById('textModal').classList.add('show');
+}
+
+function addTextOverlay() {
+  const text = document.getElementById('txtContent').value.trim();
+  if (!text) return;
+  const size = parseInt(document.getElementById('txtSize').value) || 28;
+  state.textOverlays.push({ id: Date.now(), text, size, color: selectedColor, x: 0.5, y: 0.5 });
+  closeModal('textModal');
+  renderOverlays();
+}
+
+function renderOverlays() {
+  const layer = document.getElementById('overlayLayer');
+  layer.innerHTML = '';
+  state.textOverlays.forEach((t, idx) => {
+    const el = document.createElement('div');
+    el.className = 'text-overlay';
+    el.textContent = t.text;
+    el.style.left = (t.x * 100) + '%';
+    el.style.top = (t.y * 100) + '%';
+    el.style.fontSize = t.size + 'px';
+    el.style.color = t.color;
+    el.style.pointerEvents = 'auto';
+    
+    let drag = false;
+    const parent = document.getElementById('editVideo').parentElement;
+    el.onmousedown = el.ontouchstart = (e) => { e.preventDefault(); drag = true; };
+    document.addEventListener('mousemove', (e) => {
+      if (!drag) return;
+      const rect = parent.getBoundingClientRect();
+      const cx = (e.touches ? e.touches[0].clientX : e.clientX);
+      const cy = (e.touches ? e.touches[0].clientY : e.clientY);
+      let x = (cx - rect.left) / rect.width;
+      let y = (cy - rect.top) / rect.height;
+      state.textOverlays[idx].x = Math.max(0, Math.min(1, x));
+      state.textOverlays[idx].y = Math.max(0, Math.min(1, y));
+      el.style.left = (state.textOverlays[idx].x * 100) + '%';
+      el.style.top = (state.textOverlays[idx].y * 100) + '%';
+    });
+    document.addEventListener('mouseup', () => drag = false);
+    document.addEventListener('touchend', () => drag = false);
+    
+    layer.appendChild(el);
+  });
+  
+  const list = document.getElementById('overlayList');
+  list.innerHTML = '';
+  state.textOverlays.forEach((t, i) => {
+    const chip = document.createElement('div');
+    chip.style.cssText = 'background:#333; padding:4px 8px; border-radius:10px; font-size:12px;';
+    chip.innerHTML = `${t.text} <span style="color:red; cursor:pointer;" onclick="removeOverlay(${i})">✕</span>`;
+    list.appendChild(chip);
+  });
+}
+
+function removeOverlay(idx) {
+  state.textOverlays.splice(idx, 1);
+  renderOverlays();
+}
+
+const MUSIC_CATALOG = [
+  { id: 'none', name: 'Tanpa Musik', url: null },
+  { id: 'viral-funk', name: 'Viral Funk (Upbeat)', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
+  { id: 'viral-chill', name: 'Chill Viral Beat', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' },
+  { id: 'viral-epic', name: 'Epic Trend', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' },
+  { id: 'lofi-vibe', name: 'Lofi Study Vibe', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3' }
+];
+let previewAudio = null; 
+
+function openMusicModal() {
+  const list = document.getElementById('musicList');
+  list.innerHTML = '';
+  MUSIC_CATALOG.forEach(track => {
+    const item = document.createElement('div');
+    item.className = 'music-item' + (state.selectedMusicTrack.id === track.id ? ' selected' : '');
+    const playBtn = document.createElement('button');
+    playBtn.className = 'music-play-btn';
+    playBtn.textContent = '▶️';
+    playBtn.onclick = (e) => {
+      e.stopPropagation();
+      if (previewAudio && !previewAudio.paused) {
+        previewAudio.pause(); previewAudio.currentTime = 0; playBtn.textContent = '▶️';
+      } else {
+        if (previewAudio) previewAudio.pause();
+        if (track.id !== 'none' && track.url) {
+          previewAudio = new Audio(track.url);
+          previewAudio.play(); playBtn.textContent = '⏸️';
+          previewAudio.onended = () => { playBtn.textContent = '▶️'; };
+        }
+      }
+    };
+    const name = document.createElement('span');
+    name.textContent = track.name;
+    const ctrl = document.createElement('div');
+    ctrl.className = 'music-ctrl';
+    ctrl.appendChild(name);
+    if (track.id !== 'none') ctrl.appendChild(playBtn);
+    item.appendChild(ctrl);
+    item.onclick = () => {
+      state.selectedMusicTrack = track;
+      if (previewAudio) { previewAudio.pause(); previewAudio = null; }
+      closeMusicModal();
+      showToast('Musik dipilih: ' + track.name);
+    };
+    list.appendChild(item);
+  });
+  document.getElementById('musicModal').classList.add('show');
+}
+
+function closeMusicModal() {
+  if (previewAudio) { previewAudio.pause(); previewAudio = null; }
+  document.getElementById('musicModal').classList.remove('show');
+}
+
+function publishVideo() {
+  const v = document.getElementById('editVideo');
+  v.pause();
+  if (previewAudio) { previewAudio.pause(); previewAudio = null; }
+  document.getElementById('publishModal').classList.add('show');
+}
+
+async function confirmPublish() {
+  const title = document.getElementById('pubTitle').value.trim();
+  const desc = document.getElementById('pubDesc').value.trim();
+  if (!title) { showToast('Judul wajib diisi!'); return; }
+  
+  const newVideo = {
+    id: Date.now().toString(),
+    title: title,
+    desc: title + (desc ? ' ' + desc : ''),
+    musicId: state.selectedMusicTrack.id,
+    musicName: state.selectedMusicTrack.name,
+    musicUrl: state.selectedMusicTrack.url,
+    texts: [...state.textOverlays],
+    blob: state.videoBlob,
+    timestamp: Date.now()
+  };
+  
+  closeModal('publishModal');
+  showLoader('Menyimpan video...');
+  
+  try {
+    await saveVideoToDB(newVideo);
+    state.videos.unshift(newVideo);
+    state.videoBlob = null;
+    state.videoURL = null;
+    state.textOverlays = [];
+    state.selectedMusicTrack = { id: 'none', name: 'Tanpa Musik', url: null };
+    
+    hideLoader();
+    showToast('Video berhasil disimpan & diposting! 🎉');
+    switchTab('home');
+  } catch (err) {
+    hideLoader();
+    showToast('Gagal menyimpan: ' + err.message);
+  }
+}
+
+function formatTime(sec) {
+  sec = Math.max(0, Math.floor(sec));
+  return `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+}
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+window.addEventListener('load', async () => {
+  showLoader('Memuat aplikasi...');
+  try {
+    await initDB();
+    state.videos = await getAllVideosFromDB();
+    state.videos.sort((a, b) => b.timestamp - a.timestamp);
+    switchTab('home');
+  } catch (err) {
+    showToast('Gagal memuat database: ' + err.message);
+  } finally {
+    hideLoader();
+  }
+});
+</script>
 </body>
 </html>
