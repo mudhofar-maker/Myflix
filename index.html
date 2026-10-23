@@ -10,17 +10,18 @@
     --bg: #000;
     --surface: #121212;
     --surface2: #242424;
-    --primary: #fe2c55; /* Merah TikTok */
-    --cyan: #25f4ee;    /* Cyan TikTok */
+    --primary: #fe2c55;
+    --cyan: #25f4ee;
     --text: #fff;
     --text-dim: #b0b0b0;
+    --nav-height: 60px;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
 
-  /* ============ NAVIGASI BAWAH (ALa TikTok) ============ */
+  /* ============ NAVIGASI BAWAH ============ */
   .bottom-nav {
-    position: fixed; bottom: 0; left: 0; right: 0; height: 55px;
+    position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-height);
     background: #000; display: flex; justify-content: space-around; align-items: center;
     z-index: 1000; border-top: 1px solid #1a1a1a; padding-bottom: env(safe-area-inset-bottom);
   }
@@ -29,13 +30,11 @@
     color: var(--text-dim); font-size: 10px; cursor: pointer; gap: 3px; width: 20%;
   }
   .nav-item.active { color: var(--text); font-weight: bold; }
-  .nav-item .icon { font-size: 24px; }
-  .nav-item .icon.active-icon { filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
+  .nav-item .icon { font-size: 22px; }
   
-  /* Tombol Plus (Tengah) */
   .btn-plus-wrap { position: relative; display: flex; justify-content: center; align-items: center; }
   .btn-plus {
-    width: 46px; height: 30px; background: #fff; border-radius: 8px;
+    width: 44px; height: 28px; background: #fff; border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
     color: #000; font-weight: bold; font-size: 20px;
     border-left: 3px solid var(--primary); border-right: 3px solid var(--cyan);
@@ -43,9 +42,12 @@
   }
 
   /* ============ SCREENS ============ */
-  .screen { display: none; height: 100%; width: 100%; position: absolute; top: 0; left: 0; padding-bottom: 55px; }
+  .screen { display: none; height: 100%; width: 100%; position: absolute; top: 0; left: 0; padding-bottom: var(--nav-height); }
   .screen.active { display: block; }
-  .screen.no-pad { padding-bottom: 0; }
+  
+  /* Layar tanpa padding bawah (seperti kamera & editor) */
+  .screen.full-screen { padding-bottom: 0; }
+  .screen.full-screen > .content { height: calc(100% - var(--nav-height)); position: relative; overflow: hidden; }
 
   /* ============ BERANDA (FEED) ============ */
   #screen-home { background: #000; }
@@ -53,20 +55,18 @@
   .feed-container::-webkit-scrollbar { display: none; }
   
   .video-card { height: 100%; width: 100%; position: relative; scroll-snap-align: start; background: #000; }
-  .video-card video { width: 100%; height: 100%; object-fit: cover; } /* Gunakan cover agar full screen seperti TikTok */
+  .video-card video { width: 100%; height: 100%; object-fit: cover; }
   
-  /* Top Bar Feed (Live, Mengikuti, FYP) */
   .feed-top-bar {
     position: absolute; top: 15px; left: 0; right: 0; z-index: 20;
     display: flex; justify-content: space-between; align-items: center; padding: 0 15px;
-    pointer-events: none; /* Biarkan klik tembus ke video */
+    pointer-events: none;
   }
   .feed-tabs { display: flex; gap: 15px; align-items: center; margin: 0 auto; pointer-events: auto; }
   .feed-tab { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.6); cursor: pointer; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
   .feed-tab.active { color: #fff; border-bottom: 2px solid #fff; padding-bottom: 2px; }
   .live-badge { background: rgba(254,44,85,0.8); color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 4px; display: flex; align-items: center; gap: 4px; pointer-events: auto; }
 
-  /* Tombol Suara */
   .volume-btn {
     position: absolute; top: 60px; right: 15px; z-index: 20;
     background: rgba(0,0,0,0.5); color: #fff; border: none; border-radius: 50%;
@@ -76,7 +76,6 @@
   .volume-btn.pulse { animation: pulse 1.5s infinite; }
   @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); background:rgba(254,44,85,0.8); } 100% { transform: scale(1); } }
 
-  /* Info Video (Kiri Bawah) */
   .video-info { position: absolute; bottom: 20px; left: 15px; right: 80px; z-index: 10; }
   .video-info .username { font-weight: bold; font-size: 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
   .video-info .tag { background: rgba(255,255,255,0.2); font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: normal; }
@@ -85,7 +84,6 @@
   .video-info .music span { animation: marquee 5s linear infinite; display: inline-block; padding-left: 100%; }
   @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
   
-  /* Side Actions (Kanan Bawah) */
   .side-actions { position: absolute; bottom: 25px; right: 10px; display: flex; flex-direction: column; gap: 20px; align-items: center; z-index: 10; }
   .avatar-wrap { position: relative; width: 45px; height: 45px; margin-bottom: 10px; }
   .avatar-img { width: 100%; height: 100%; border-radius: 50%; border: 1.5px solid #fff; object-fit: cover; }
@@ -98,15 +96,20 @@
 
   .empty-feed { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-dim); }
 
-  /* ============ CAMERA & EDITOR ============ */
-  #screen-camera, #screen-editor { background: #000; z-index: 150; }
-  .top-bar { display: flex; justify-content: space-between; padding: 15px; position: absolute; top: 0; left: 0; right: 0; z-index: 10; }
-  .icon-btn { background: rgba(0,0,0,0.5); border: none; color: #fff; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  
+  /* ============ KAMERA (FIXED POSITION) ============ */
+  #screen-camera .content { background: #000; }
   .cam-preview-wrap { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
   #camPreview { width: 100%; height: 100%; object-fit: cover; }
   
-  .cam-controls { position: absolute; bottom: 20px; left: 0; right: 0; display: flex; align-items: center; justify-content: space-around; z-index: 10; padding: 0 20px; }
+  .cam-top-bar { display: flex; justify-content: space-between; padding: 15px; position: absolute; top: 0; left: 0; right: 0; z-index: 10; }
+  .icon-btn { background: rgba(0,0,0,0.5); border: none; color: #fff; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  
+  /* Panel Kontrol Kamera (Di atas Navigasi Bawah) */
+  .cam-controls { 
+    position: absolute; bottom: 20px; left: 0; right: 0; 
+    display: flex; align-items: center; justify-content: space-around; 
+    padding: 0 20px; z-index: 10; 
+  }
   .rec-btn { width: 70px; height: 70px; border-radius: 50%; border: 4px solid #fff; background: transparent; cursor: pointer; position: relative; transition: all .2s; }
   .rec-btn::after { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: var(--primary); transition: all .2s; }
   .rec-btn.recording::after { inset: 18px; border-radius: 8px; }
@@ -116,8 +119,17 @@
   .rec-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: blink 1s infinite; }
   @keyframes blink { 50% { opacity: 0.2; } }
 
-  /* Editor Panel */
-  .editor-panel { position: absolute; bottom: 0; left: 0; right: 0; background: var(--surface); padding: 16px; border-radius: 20px 20px 0 0; z-index: 20; }
+  /* ============ EDITOR (FIXED POSITION) ============ */
+  #screen-editor .content { background: #000; display: flex; flex-direction: column; }
+  .editor-top-bar { display: flex; justify-content: space-between; padding: 15px; position: absolute; top: 0; left: 0; right: 0; z-index: 10; }
+  
+  .editor-video-wrap { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+  #editVideo { max-width: 100%; max-height: 100%; object-fit: contain; }
+  
+  .editor-panel { 
+    background: var(--surface); padding: 16px; 
+    border-radius: 20px 20px 0 0; z-index: 20; 
+  }
   .trim-track { position: relative; height: 36px; background: #333; border-radius: 6px; margin-bottom: 10px; overflow: hidden; }
   .trim-selection { position: absolute; top: 0; bottom: 0; background: rgba(254,44,85,0.3); border-left: 3px solid var(--primary); border-right: 3px solid var(--primary); pointer-events: none; }
   .trim-handle { position: absolute; top: 0; width: 20px; height: 100%; background: var(--primary); cursor: ew-resize; z-index: 2; display: flex; align-items: center; justify-content: center; }
@@ -130,7 +142,6 @@
   .btn-action span { font-size: 18px; }
   .btn-publish { width: 100%; padding: 14px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
 
-  /* Overlay Text Preview */
   .text-overlay { position: absolute; color: #fff; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.9); white-space: nowrap; user-select: none; cursor: move; transform: translate(-50%,-50%); padding: 4px; border: 1px dashed transparent; z-index: 5; }
   .text-overlay:hover { border-color: rgba(255,255,255,0.5); }
 
@@ -153,7 +164,7 @@
   .grid-item .views { position: absolute; bottom: 5px; left: 5px; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 3px; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
 
   /* ============ MODALS ============ */
-  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: flex-end; justify-content: center; z-index: 2000; padding-bottom: 55px; }
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: flex-end; justify-content: center; z-index: 2000; padding-bottom: var(--nav-height); }
   .modal-bg.show { display: flex; }
   .modal { background: var(--surface); border-radius: 16px 16px 0 0; padding: 20px; width: 100%; max-height: 85vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.3s; }
   .modal-bg.show .modal { transform: translateY(0); }
@@ -203,17 +214,14 @@
 <!-- ============ BERANDA (FEED) ============ -->
 <div class="screen active" id="screen-home">
   <div class="feed-container" id="feedContainer">
-    
-    <!-- Top Bar Overlay (Live, Mengikuti, FYP) -->
     <div class="feed-top-bar">
       <div class="live-badge">🔴 LIVE</div>
       <div class="feed-tabs">
         <span class="feed-tab">Mengikuti</span>
         <span class="feed-tab active">Panjang & FYP</span>
       </div>
-      <div style="width: 40px;"></div> <!-- Spacer -->
+      <div style="width: 40px;"></div>
     </div>
-
     <div class="empty-feed" id="emptyFeed">
       <div style="font-size:60px; margin-bottom:10px;">🎬</div>
       <div>Belum ada video</div>
@@ -234,82 +242,70 @@
     </div>
     <button class="btn-edit-profile">Edit Profil</button>
   </div>
-  
   <div class="profile-tabs">
     <div class="p-tab active">🔒 Video</div>
     <div class="p-tab">❤️ Disukai</div>
   </div>
-  
   <div class="grid-videos" id="profileGrid"></div>
 </div>
 
 <!-- ============ NAVIGASI BAWAH ============ -->
 <div class="bottom-nav">
-  <div class="nav-item active" onclick="switchTab('home')">
-    <span class="icon active-icon">🏠</span> Beranda
-  </div>
-  <div class="nav-item">
-    <span class="icon">👥</span> Teman
-  </div>
-  <div class="nav-item btn-plus-wrap" onclick="openCamera()">
-    <div class="btn-plus">+</div>
-  </div>
-  <div class="nav-item">
-    <span class="icon">📥</span> Kotak Masuk
-  </div>
-  <div class="nav-item" onclick="switchTab('profile')">
-    <span class="icon">👤</span> Profil
-  </div>
+  <div class="nav-item active" onclick="switchTab('home')"><span class="icon">🏠</span> Beranda</div>
+  <div class="nav-item"><span class="icon">👥</span> Teman</div>
+  <div class="nav-item btn-plus-wrap" onclick="openCamera()"><div class="btn-plus">+</div></div>
+  <div class="nav-item"><span class="icon">📥</span> Kotak Masuk</div>
+  <div class="nav-item" onclick="switchTab('profile')"><span class="icon">👤</span> Profil</div>
 </div>
 
-<!-- ============ KAMERA ============ -->
-<div class="screen no-pad" id="screen-camera">
-  <div class="top-bar">
-    <button class="icon-btn" onclick="stopCamera(); switchTab('home')">✕</button>
-    <button class="icon-btn" onclick="toggleCameraFacing()">🔄</button>
-  </div>
-  <div class="cam-preview-wrap">
-    <video id="camPreview" autoplay playsinline muted></video>
-  </div>
-  <div class="cam-controls">
-    <div class="rec-timer" id="recTimer"><span class="rec-dot"></span><span id="recTimerText">00:00</span></div>
-    <button class="icon-btn" onclick="pickFromGallery()" style="width:50px;height:50px;font-size:24px;">🖼️</button>
-    <button class="rec-btn" id="recBtn" onclick="toggleRecording()"></button>
-    <button class="icon-btn" onclick="toggleCamMute()" id="camMuteBtn" style="width:50px;height:50px;font-size:24px;">🔊</button>
+<!-- ============ KAMERA (Full Screen) ============ -->
+<div class="screen full-screen" id="screen-camera">
+  <div class="content">
+    <div class="cam-top-bar">
+      <button class="icon-btn" onclick="stopCamera(); switchTab('home')">✕</button>
+      <button class="icon-btn" onclick="toggleCameraFacing()">🔄</button>
+    </div>
+    <div class="cam-preview-wrap">
+      <video id="camPreview" autoplay playsinline muted></video>
+    </div>
+    <div class="cam-controls">
+      <div class="rec-timer" id="recTimer"><span class="rec-dot"></span><span id="recTimerText">00:00</span></div>
+      <button class="icon-btn" onclick="pickFromGallery()" style="width:50px;height:50px;font-size:24px;">🖼️</button>
+      <button class="rec-btn" id="recBtn" onclick="toggleRecording()"></button>
+      <button class="icon-btn" onclick="toggleCamMute()" id="camMuteBtn" style="width:50px;height:50px;font-size:24px;">🔊</button>
+    </div>
   </div>
   <input type="file" id="galleryInput" accept="video/*" style="display:none">
 </div>
 
-<!-- ============ EDITOR ============ -->
-<div class="screen no-pad" id="screen-editor">
-  <div class="top-bar">
-    <button class="icon-btn" onclick="goBackFromEditor()">←</button>
-    <button class="icon-btn" onclick="publishVideo()" style="background:var(--primary);">✓</button>
-  </div>
-  <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; position:relative;">
-    <video id="editVideo" playsinline controls style="max-width:100%; max-height:100%; object-fit:contain;"></video>
-    <div id="overlayLayer" style="position:absolute; inset:0; pointer-events:none;"></div>
-  </div>
-  
-  <div class="editor-panel">
-    <div class="trim-track" id="trimTrack">
-      <div class="trim-selection" id="trimSelection"></div>
-      <div class="trim-handle left" id="trimLeft" style="left:0;"></div>
-      <div class="trim-handle right" id="trimRight" style="right:0;"></div>
+<!-- ============ EDITOR (Full Screen) ============ -->
+<div class="screen full-screen" id="screen-editor">
+  <div class="content">
+    <div class="editor-top-bar">
+      <button class="icon-btn" onclick="goBackFromEditor()">←</button>
+      <button class="icon-btn" onclick="publishVideo()" style="background:var(--primary);">✓</button>
     </div>
-    <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-dim); margin-bottom:15px;">
-      <span id="trimCurrent">00:00 - 00:00</span>
-      <span id="trimDur">Durasi: 00:00</span>
+    <div class="editor-video-wrap" id="editorVideoWrap">
+      <video id="editVideo" playsinline controls style="max-width:100%; max-height:100%; object-fit:contain;"></video>
+      <div id="overlayLayer" style="position:absolute; inset:0; pointer-events:none;"></div>
     </div>
-    
-    <div class="editor-actions">
-      <button class="btn-action" onclick="openTextModal()"><span>📝</span>Text</button>
-      <button class="btn-action" onclick="openMusicModal()"><span>🎵</span>Musik</button>
-      <button class="btn-action" onclick="openEffectModal()"><span>✨</span>Efek</button>
+    <div class="editor-panel">
+      <div class="trim-track" id="trimTrack">
+        <div class="trim-selection" id="trimSelection"></div>
+        <div class="trim-handle left" id="trimLeft" style="left:0;"></div>
+        <div class="trim-handle right" id="trimRight" style="right:0;"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-dim); margin-bottom:15px;">
+        <span id="trimCurrent">00:00 - 00:00</span>
+        <span id="trimDur">Durasi: 00:00</span>
+      </div>
+      <div class="editor-actions">
+        <button class="btn-action" onclick="openTextModal()"><span>📝</span>Text</button>
+        <button class="btn-action" onclick="openMusicModal()"><span>🎵</span>Musik</button>
+      </div>
+      <div id="overlayList" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
+      <button class="btn-publish" onclick="publishVideo()">Posting Video</button>
     </div>
-    
-    <div id="overlayList" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;"></div>
-    <button class="btn-publish" onclick="publishVideo()">Posting Video</button>
   </div>
 </div>
 
@@ -318,18 +314,9 @@
   <div class="modal">
     <h3 style="margin-top:0; text-align:center;">Bagikan ke</h3>
     <div class="share-options">
-      <div class="share-icon" onclick="shareViaWA()">
-        <div class="circle">💬</div>
-        <span>WhatsApp</span>
-      </div>
-      <div class="share-icon" onclick="shareNative()">
-        <div class="circle">📱</div>
-        <span>Lainnya</span>
-      </div>
-      <div class="share-icon" onclick="copyLink()">
-        <div class="circle">🔗</div>
-        <span>Salin Link</span>
-      </div>
+      <div class="share-icon" onclick="shareViaWA()"><div class="circle">💬</div><span>WhatsApp</span></div>
+      <div class="share-icon" onclick="shareNative()"><div class="circle">📱</div><span>Lainnya</span></div>
+      <div class="share-icon" onclick="copyLink()"><div class="circle">🔗</div><span>Salin Link</span></div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('shareModal')" style="width:100%; border-radius: 20px;">Batal</button>
@@ -511,7 +498,6 @@ function renderFeed() {
     volBtn.onclick = toggleVolume;
     vid.onclick = toggleVolume;
 
-    // Overlay Text
     const overlayContainer = document.createElement('div');
     overlayContainer.style.position = 'absolute'; overlayContainer.style.inset = '0'; overlayContainer.style.pointerEvents = 'none';
     videoData.texts.forEach(t => {
@@ -525,7 +511,6 @@ function renderFeed() {
       overlayContainer.appendChild(textEl);
     });
 
-    // Info Video
     const info = document.createElement('div');
     info.className = 'video-info';
     info.innerHTML = `
@@ -534,11 +519,9 @@ function renderFeed() {
       <div class="music">🎵 <span>${videoData.musicName} - original sound</span></div>
     `;
 
-    // Action Buttons (Avatar, Like, Comment, Bookmark, Share)
     const actions = document.createElement('div');
     actions.className = 'side-actions';
     
-    // Avatar (dummy)
     const avatarWrap = document.createElement('div');
     avatarWrap.className = 'avatar-wrap';
     avatarWrap.innerHTML = `<img src="https://i.pravatar.cc/100?img=5" class="avatar-img"><div class="avatar-plus">+</div>`;
@@ -891,7 +874,7 @@ function renderOverlays() {
     el.style.pointerEvents = 'auto';
     
     let drag = false;
-    const parent = document.getElementById('editVideo').parentElement;
+    const parent = document.getElementById('editorVideoWrap');
     el.onmousedown = el.ontouchstart = (e) => { e.preventDefault(); drag = true; };
     document.addEventListener('mousemove', (e) => {
       if (!drag) return;
