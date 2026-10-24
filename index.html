@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>TikVid - Cloudinary Edition</title>
-<!-- Menghubungkan ke file CSS eksternal -->
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,11 +14,11 @@
   <div id="loaderText">Memuat...</div>
 </div>
 
-<!-- HALAMAN BERANDA (FEED) -->
+<!-- BERANDA -->
 <div class="screen active" id="screen-home">
   <div class="feed-container" id="feedContainer">
     <div class="feed-top-bar">
-      <div class="live-badge" onclick="showToast('Live segera hadir')">🔴 LIVE</div>
+      <div class="live-badge" onclick="openLive()">🔴 LIVE</div>
       <div class="feed-tabs">
         <span class="feed-tab active">Mengikuti</span>
         <span class="feed-tab">Panjang & FYP</span>
@@ -32,34 +31,79 @@
   </div>
 </div>
 
-<!-- HALAMAN PROFIL -->
-<div class="screen" id="screen-profile">
-    <div style="padding: 40px; text-align: center;">
-        <h2>Profil</h2>
-        <p style="color: var(--text-dim);">Video yang kamu posting akan muncul di sini.</p>
-        <button class="btn-publish" onclick="switchTab('home')" style="max-width: 200px; margin: 20px auto;">Kembali ke Beranda</button>
+<!-- PROFIL -->
+<div class="screen" id="screen-profile" style="overflow-y: auto;">
+  <div style="display: flex; flex-direction: column; align-items: center; padding: 30px 20px;">
+    <div style="position: relative; width: 90px; height: 90px; margin-bottom: 15px;">
+      <img id="profileAvatar" src="https://i.pravatar.cc/150?img=11" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #333;">
+      <div onclick="openEditProfile()" style="position: absolute; bottom: 0; right: 0; background: var(--primary); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #000; cursor: pointer;">
+        <span style="font-size: 14px;">📷</span>
+      </div>
     </div>
+    <div id="profileName" style="font-weight: bold; font-size: 20px;">@user_cloudinary</div>
+    <div id="profileBio" style="font-size: 13px; color: var(--text-dim); margin-top: 5px; text-align: center;">Halo, saya pengguna baru TikVid!</div>
+    
+    <div style="display: flex; gap: 30px; margin-top: 20px;">
+      <div style="text-align: center;"><div style="font-weight: bold; font-size: 16px;" id="statFollowing">0</div><div style="font-size: 12px; color: var(--text-dim);">Mengikuti</div></div>
+      <div style="text-align: center;"><div style="font-weight: bold; font-size: 16px;" id="statFollowers">0</div><div style="font-size: 12px; color: var(--text-dim);">Pengikut</div></div>
+      <div style="text-align: center;"><div style="font-weight: bold; font-size: 16px;" id="statLikes">0</div><div style="font-size: 12px; color: var(--text-dim);">Suka</div></div>
+    </div>
+    
+    <button onclick="openEditProfile()" style="margin-top: 20px; padding: 8px 30px; background: var(--surface2); border: 1px solid #444; color: #fff; border-radius: 4px; font-weight: 600; font-size: 14px; cursor: pointer;">Edit Profil</button>
+  </div>
+  
+  <div style="display: flex; border-bottom: 1px solid #222; margin-bottom: 2px;">
+    <div style="flex: 1; text-align: center; padding: 12px 0; font-weight: bold; border-bottom: 2px solid #fff;">Video</div>
+    <div style="flex: 1; text-align: center; padding: 12px 0; color: var(--text-dim);">Disukai</div>
+  </div>
+  
+  <div id="profileGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;">
+    <!-- Video profil akan muncul di sini -->
+  </div>
 </div>
 
-<!-- NAVIGASI BAWAH -->
+<!-- TEMAN -->
+<div class="screen" id="screen-friends">
+  <div style="padding: 20px;">
+    <h2 style="margin-top: 0;">Cari Teman</h2>
+    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+      <input type="text" id="searchFriend" placeholder="Cari username..." style="flex: 1; padding: 12px; border-radius: 20px; border: none; background: var(--surface2); color: #fff; outline: none;">
+      <button onclick="searchFriends()" style="padding: 0 20px; border-radius: 20px; border: none; background: var(--primary); color: #fff; font-weight: bold; cursor: pointer;">Cari</button>
+    </div>
+    <div id="friendList">
+      <!-- Daftar teman akan muncul di sini -->
+    </div>
+  </div>
+</div>
+
+<!-- LIVE STREAMING -->
+<div class="screen full-screen" id="screen-live">
+  <div class="content" style="background:#000;">
+    <video id="livePreview" autoplay playsinline muted style="width:100%; height:100%; object-fit:cover;"></video>
+    <div style="position:absolute; top:20px; left:20px; right:20px; display:flex; justify-content:space-between; z-index:10;">
+      <div style="background:var(--primary); padding:5px 15px; border-radius:20px; font-weight:bold; display:flex; align-items:center; gap:8px;">🔴 LIVE</div>
+      <button class="icon-btn" onclick="stopLive()">✕</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAVIGASI -->
 <div class="bottom-nav">
   <div class="nav-item active" onclick="switchTab('home')"><span class="icon">🏠</span> Beranda</div>
-  <div class="nav-item" onclick="showToast('Fitur Teman')"><span class="icon">👥</span> Teman</div>
+  <div class="nav-item" onclick="switchTab('friends')"><span class="icon">👥</span> Teman</div>
   <div class="nav-item btn-plus-wrap" onclick="openCamera()"><div class="btn-plus">+</div></div>
   <div class="nav-item" onclick="showToast('Kotak Masuk')"><span class="icon">📥</span> Kotak Masuk</div>
   <div class="nav-item" onclick="switchTab('profile')"><span class="icon">👤</span> Profil</div>
 </div>
 
-<!-- HALAMAN KAMERA -->
+<!-- KAMERA -->
 <div class="screen full-screen" id="screen-camera">
   <div class="content">
     <div style="display:flex; justify-content:space-between; padding:15px; position:absolute; top:0; left:0; right:0; z-index:10;">
       <button class="icon-btn" onclick="stopCamera(); switchTab('home')">✕</button>
       <button class="icon-btn" onclick="toggleCameraFacing()">🔄</button>
     </div>
-    <div class="cam-preview-wrap">
-      <video id="camPreview" autoplay playsinline muted></video>
-    </div>
+    <div class="cam-preview-wrap"><video id="camPreview" autoplay playsinline muted></video></div>
     <div class="cam-controls">
       <div style="width:50px;"></div>
       <button class="rec-btn" id="recBtn" onclick="toggleRecording()"></button>
@@ -69,35 +113,69 @@
   <input type="file" id="galleryInput" accept="video/*" style="display:none">
 </div>
 
-<!-- HALAMAN EDITOR & UPLOAD -->
+<!-- EDITOR -->
 <div class="screen full-screen" id="screen-editor">
   <div class="content">
     <div style="display:flex; justify-content:space-between; padding:15px; position:absolute; top:0; left:0; right:0; z-index:10;">
       <button class="icon-btn" onclick="switchTab('home')">←</button>
       <button class="icon-btn" onclick="publishVideo()" style="background:var(--primary);">✓</button>
     </div>
-    <div class="editor-video-wrap">
-      <video id="editVideo" playsinline controls style="max-width:100%; max-height:100%;"></video>
-    </div>
+    <div class="editor-video-wrap"><video id="editVideo" playsinline controls style="max-width:100%; max-height:100%;"></video></div>
     <div class="editor-panel">
-      <p style="color:var(--text-dim); font-size:12px; text-align:center; margin-bottom:10px;">Video siap diupload.</p>
+      <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+        <button onclick="openMusicModal()" style="flex: 1; padding: 10px; background: var(--surface2); border: none; color: #fff; border-radius: 8px; font-weight: bold;">🎵 Ganti Musik</button>
+      </div>
       <button class="btn-publish" onclick="publishVideo()">Posting Video</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL PUBLISH (INPUT JUDUL & DESKRIPSI) -->
+<!-- MODAL EDIT PROFIL -->
+<div class="modal-bg" id="editProfileModal">
+  <div class="modal">
+    <h3 style="margin-top:0;">Edit Profil</h3>
+    <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+      <img id="editAvatarPreview" src="" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px;">
+      <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="previewAvatar(event)">
+      <button onclick="document.getElementById('avatarInput').click()" style="padding: 6px 12px; background: var(--surface2); border: 1px solid #444; color: #fff; border-radius: 4px; font-size: 12px; cursor: pointer;">Ganti Foto</button>
+    </div>
+    <div class="form-group"><label>Nama Tampilan</label><input type="text" id="editName" placeholder="Nama kamu..."></div>
+    <div class="form-group"><label>Username</label><input type="text" id="editUsername" placeholder="@username"></div>
+    <div class="form-group"><label>Bio</label><textarea id="editBio" rows="2" placeholder="Tentang kamu..."></textarea></div>
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button onclick="closeModal('editProfileModal')" style="flex:1; padding:14px; background:var(--surface2); border:none; color:#fff; border-radius:8px; cursor:pointer;">Batal</button>
+      <button onclick="saveProfile()" style="flex:1; padding:14px; background:var(--primary); border:none; color:#fff; border-radius:8px; font-weight:bold; cursor:pointer;">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL KOMENTAR -->
+<div class="modal-bg" id="commentModal">
+  <div class="modal" style="height: 60vh; display: flex; flex-direction: column;">
+    <h3 style="margin-top:0;">Komentar</h3>
+    <div id="commentList" style="flex:1; overflow-y:auto; margin-bottom:15px;"></div>
+    <div style="display:flex; gap:10px;">
+      <input type="text" id="commentInput" placeholder="Tambah komentar..." style="flex:1; padding:12px; border-radius:20px; border:1px solid #444; background:var(--surface2); color:#fff; outline:none;">
+      <button onclick="sendComment()" style="background:var(--primary); color:#fff; border:none; padding:0 20px; border-radius:20px; font-weight:bold; cursor:pointer;">Kirim</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MUSIK -->
+<div class="modal-bg" id="musicModal">
+  <div class="modal">
+    <h3 style="margin-top:0;">🎵 Pilih Musik</h3>
+    <div id="musicList" style="max-height: 50vh; overflow-y: auto; margin-bottom: 15px;"></div>
+    <button onclick="closeModal('musicModal')" style="width:100%; padding:14px; background:var(--surface2); border:none; color:#fff; border-radius:8px; cursor:pointer;">Tutup</button>
+  </div>
+</div>
+
+<!-- MODAL PUBLISH -->
 <div class="modal-bg" id="publishModal">
   <div class="modal">
     <h3 style="margin-top:0;">Posting Video</h3>
-    <div class="form-group">
-      <label>Judul Video</label>
-      <input type="text" id="pubTitle" placeholder="Judul menarik...">
-    </div>
-    <div class="form-group">
-      <label>Deskripsi</label>
-      <textarea id="pubDesc" rows="3" placeholder="Deskripsi..."></textarea>
-    </div>
+    <div class="form-group"><label>Judul Video</label><input type="text" id="pubTitle" placeholder="Judul menarik..."></div>
+    <div class="form-group"><label>Deskripsi</label><textarea id="pubDesc" rows="3" placeholder="Deskripsi..."></textarea></div>
     <div style="display:flex; gap:10px; margin-top:20px;">
       <button onclick="closeModal('publishModal')" style="flex:1; padding:14px; background:var(--surface2); border:none; color:#fff; border-radius:8px; cursor:pointer;">Batal</button>
       <button onclick="confirmPublish()" style="flex:1; padding:14px; background:var(--primary); border:none; color:#fff; border-radius:8px; font-weight:bold; cursor:pointer;">Posting</button>
@@ -105,10 +183,7 @@
   </div>
 </div>
 
-<!-- NOTIFIKASI TOAST -->
 <div class="toast" id="toast"></div>
-
-<!-- PANGGIL FILE SCRIPT.JS -->
 <script type="module" src="script.js"></script>
 </body>
 </html>
