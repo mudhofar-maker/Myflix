@@ -1,27 +1,33 @@
-// 1. IMPORT FIREBASE
+// ============================================================
+// 1. IMPORT FIREBASE (Realtime Database)
+// ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// 2. KONFIGURASI CLOUDINARY (SUDAH SESUAI PUNYAMU)
+// ============================================================
+// 2. KONFIGURASI (Cloudinary & Firebase)
+// ============================================================
 const CLOUD_NAME = "tpiqfmqy"; 
 const UPLOAD_PRESET = "tikvid_preset"; 
 
-// 3. KONFIGURASI FIREBASE (WAJIB DIGANTI DENGAN PUNYAMU!)
-// Jika belum punya, buat project di console.firebase.google.com, aktifkan Firestore.
 const firebaseConfig = {
-  apiKey: "AIzaSy...", // <--- GANTI DENGAN API KEY KAMU
-  authDomain: "myflix-xxxxx.firebaseapp.com",
-  projectId: "myflix-xxxxx",
-  storageBucket: "myflix-xxxxx.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef"
+  apiKey: "AIzaSyAac2M5yW5TGkaH0lvMwbZz8ZLhQOAjgEU",
+  authDomain: "gen-lang-client-0767458981.firebaseapp.com",
+  // PENTING: Pastikan URL ini persis sama dengan yang ada di Firebase Console (menu Realtime Database)
+  databaseURL: "https://gen-lang-client-0767458981-default-rtdb.asia-southeast1.firebasedatabase.app", 
+  projectId: "gen-lang-client-0767458981",
+  storageBucket: "gen-lang-client-0767458981.firebasestorage.app",
+  messagingSenderId: "641921193770",
+  appId: "1:641921193770:web:19a736bcbdc0151cee3053"
 };
 
 // Inisialisasi Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db = getDatabase(app);
 
-// STATE GLOBAL
+// ============================================================
+// 3. STATE GLOBAL
+// ============================================================
 const state = {
   currentTab: 'home',
   camStream: null,
@@ -34,7 +40,7 @@ const state = {
 };
 
 // ============================================================
-// FUNGSI UI (Didaftarkan ke window agar bisa dipanggil HTML)
+// 4. FUNGSI UI (Didaftarkan ke window agar bisa dipanggil HTML)
 // ============================================================
 window.showToast = function(msg) {
   const el = document.getElementById('toast');
@@ -63,7 +69,7 @@ window.switchTab = function(tab) {
   if (tab === 'home') {
     document.getElementById('screen-home').classList.add('active');
     document.querySelectorAll('.nav-item')[0].classList.add('active');
-    loadFeedFromFirestore();
+    loadFeedFromRealtimeDB();
   } else if (tab === 'profile') {
     document.getElementById('screen-profile').classList.add('active');
     document.querySelectorAll('.nav-item')[4].classList.add('active');
@@ -71,30 +77,34 @@ window.switchTab = function(tab) {
 };
 
 // ============================================================
-// AMBIL FEED DARI FIRESTORE
+// 5. AMBIL FEED DARI REALTIME DATABASE
 // ============================================================
-async function loadFeedFromFirestore() {
+function loadFeedFromRealtimeDB() {
   const container = document.getElementById('feedContainer');
   const empty = document.getElementById('emptyFeed');
   
+  // Bersihkan video lama
   Array.from(container.children).forEach(c => { 
       if (c.id !== 'emptyFeed' && !c.classList.contains('feed-top-bar')) c.remove(); 
   });
 
-  try {
-    window.showLoader('Mengambil video...');
-    const q = query(collection(db, "videos"), orderBy("createdAt", "desc"));
-    const snapshot = await getDocs(q);
+  window.showLoader('Mengambil video...');
+  
+  // Mendengarkan data secara real-time
+  onValue(ref(db, 'videos'), (snapshot) => {
+    const data = snapshot.val();
+    window.hideLoader();
     
-    if (snapshot.empty) {
+    if (!data) {
       empty.style.display = 'flex';
-      window.hideLoader();
       return;
     }
     empty.style.display = 'none';
 
-    snapshot.forEach((doc) => {
-      const videoData = doc.data();
+    // Konversi object ke array dan urutkan dari yang terbaru
+    const videos = Object.values(data).sort((a, b) => b.createdAt - a.createdAt);
+
+    videos.forEach(videoData => {
       const card = document.createElement('div');
       card.className = 'video-card';
       
@@ -141,17 +151,15 @@ async function loadFeedFromFirestore() {
       }, { threshold: 0.6 });
       observer.observe(card);
     });
-    window.hideLoader();
-  } catch (error) {
+  }, (error) => {
     console.error("Gagal load feed:", error);
-    window.showToast('Gagal memuat video dari server.');
     window.hideLoader();
-    empty.style.display = 'flex';
-  }
+    window.showToast('Gagal memuat video. Cek Rules Database.');
+  });
 }
 
 // ============================================================
-// UPLOAD KE CLOUDINARY & SIMPAN KE FIRESTORE
+// 6. UPLOAD KE CLOUDINARY & SIMPAN KE REALTIME DB
 // ============================================================
 window.publishVideo = function() {
   const v = document.getElementById('editVideo');
@@ -171,7 +179,6 @@ window.confirmPublish = async function() {
   const formData = new FormData();
   formData.append('file', state.videoBlob);
   formData.append('upload_preset', UPLOAD_PRESET);
-  formData.append('context', `caption=${title}|alt=${desc}`);
 
   try {
     const xhr = new XMLHttpRequest();
@@ -187,11 +194,12 @@ window.confirmPublish = async function() {
         const response = JSON.parse(xhr.responseText);
         const videoUrl = response.secure_url;
 
-        await addDoc(collection(db, "videos"), {
+        // Simpan metadata ke Realtime Database
+        await push(ref(db, 'videos'), {
           title: title,
           desc: title + (desc ? ' ' + desc : ''),
           videoUrl: videoUrl,
-          createdAt: serverTimestamp()
+          createdAt: Date.now()
         });
 
         state.videoBlob = null;
@@ -201,7 +209,7 @@ window.confirmPublish = async function() {
         window.switchTab('home'); 
       } else {
         window.hideLoader();
-        window.showToast('Gagal upload: ' + xhr.responseText);
+        window.showToast('Gagal upload ke Cloudinary.');
       }
     };
     xhr.send(formData);
@@ -212,7 +220,7 @@ window.confirmPublish = async function() {
 };
 
 // ============================================================
-// KAMERA & GALERI
+// 7. KAMERA & GALERI
 // ============================================================
 window.openCamera = async function() {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -280,7 +288,9 @@ window.pickFromGallery = function() {
   input.click();
 };
 
-// FUNGSI INTERNAL (Tidak perlu window.)
+// ============================================================
+// 8. FUNGSI INTERNAL & INISIALISASI
+// ============================================================
 function handleNewVideo(blob) {
   window.stopCamera();
   if (state.videoURL) URL.revokeObjectURL(state.videoURL);
@@ -294,7 +304,7 @@ function handleNewVideo(blob) {
   v.play();
 }
 
-// JALANKAN SAAT HALAMAN DIMUAT
+// Jalankan saat halaman dimuat
 window.addEventListener('load', () => {
   window.switchTab('home');
 });
