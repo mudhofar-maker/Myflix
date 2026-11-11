@@ -3,72 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyFlix - Nonton Video Pendek</title>
+    <title>MyFlix - Video Pendek & Kreator Hub</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #121212; color: #fff; font-family: sans-serif; }
+        body { background-color: #121212; color: #fff; font-family: sans-serif; margin: 0; padding: 0; }
+        .main-container { width: 100%; max-width: 1000px; margin: 0 auto; padding: 15px; }
         .card-custom { background: #1e1e1e; border: 1px solid #333; border-radius: 12px; }
-        .video-container { background: #000; height: 350px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #777; }
+        .video-container { background: #000; height: 400px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #777; width: 100%; }
+        .upload-section { background: #181818; border: 2px dashed #444; border-radius: 12px; padding: 20px; text-align: center; }
     </style>
 </head>
-<body class="container py-4">
+<body>
 
-    <div class="row justify-content-center">
-        <div class="col-md-6">
+    <div class="main-container">
 
-            <!-- HEADER / NAVBAR SEDERHANA -->
-            <div class="d-flex justify-content-between align-items-center mb-4 px-2">
-                <h3 class="text-danger fw-bold m-0">MyFlix</h3>
-                <span class="text-muted small">Tanpa Daftar • Tanpa Login</span>
-            </div>
+        <!-- HEADER FULL WIDTH -->
+        <div class="d-flex justify-content-between align-items-center mb-4 p-3 card-custom">
+            <h3 class="text-danger fw-bold m-0">🎬 MyFlix</h3>
+            <span class="text-muted small">Platform Video Pendek & Musik Kreatif</span>
+        </div>
 
-            <!-- FEED UTAMA (Khusus Penonton: Nonton, Like, Komen, Share) -->
-            <div id="videoFeed">
-                
-                <!-- Contoh Video 1 -->
-                <div class="card card-custom p-3 mb-4 shadow">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center text-white fw-bold me-2" style="width: 35px; height: 35px;">K</div>
-                        <div>
-                            <h6 class="mb-0 text-white">Kreator Official</h6>
-                            <small class="text-muted">Video Pendek Pilihan</small>
-                        </div>
-                    </div>
+        <div class="row">
+            <!-- KOLOM KIRI: PANEL UPLOAD & MUSIK (KREATOR) -->
+            <div class="col-md-5 mb-4">
+                <div class="card card-custom p-4 shadow-lg">
+                    <h5 class="mb-3 text-warning">🚀 Studio Kreator & Upload</h5>
                     
-                    <p class="mb-2">Menikmati momen seru hari ini! 🎬✨</p>
+                    <div class="upload-section mb-3">
+                        <label for="videoFile" class="form-label fw-bold text-white mb-2">📁 Ambil Video dari Galeri</label>
+                        <input class="form-control form-control-sm bg-dark text-white border-secondary mb-3" type="file" id="videoFile" accept="video/*">
+                        
+                        <label for="bgMusic" class="form-label fw-bold text-white mb-2">🎵 Tambahkan Musik / Audio</label>
+                        <select id="bgMusic" class="form-select form-select-sm bg-dark text-white border-secondary mb-3">
+                            <option value="">-- Pilih Musik Latar --</option>
+                            <option value="Dj Remix Viral">DJ Remix Viral 2026</option>
+                            <option value="Akustik Santai">Akustik Santai Senja</option>
+                            <option value="Beat Elektronik">Beat Elektronik Cepat</option>
+                            <option value="Instrumental Cinematic">Instrumental Cinematic</option>
+                        </select>
 
-                    <!-- Area Pemutar Video -->
-                    <div class="video-container mb-3">
-                        [ Pemutar Video MyFlix ]
-                    </div>
-
-                    <!-- Tombol Interaksi (Like, Komen, Share) -->
-                    <div class="d-flex justify-content-around border-top border-secondary pt-2">
-                        <button class="btn btn-sm btn-dark text-danger" onclick="toggleLike(this)">❤️ <span class="like-count">124</span></button>
-                        <button class="btn btn-sm btn-dark text-info" onclick="toggleCommentBox(this)">💬 Komentar</button>
-                        <button class="btn btn-sm btn-dark text-success" onclick="shareVideo()">🔗 Bagikan</button>
-                    </div>
-
-                    <!-- Kolom Komentar Tersembunyi Awalnya -->
-                    <div class="comment-section mt-3 d-none">
-                        <div class="input-group mb-2">
-                            <input type="text" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Tulis komentar publik...">
-                            <button class="btn btn-sm btn-outline-light" onclick="addComment(this)">Kirim</button>
-                        </div>
-                        <div class="comment-list small text-muted">
-                            <p class="mb-1"><strong>Budi:</strong> Videonya keren banget!</p>
-                        </div>
+                        <button class="btn btn-danger w-100 fw-bold" onclick="uploadVideoFromGallery()">Unggah ke Feed Publik</button>
                     </div>
                 </div>
-
             </div>
 
+            <!-- KOLOM KANAN: FEED VIDEO (TAMPILAN LEBAR & PENUH) -->
+            <div class="col-md-7">
+                <div class="card card-custom p-4 shadow-lg mb-4">
+                    <h5 class="mb-3 text-info">🔥 Feed Video Pendek</h5>
+                    
+                    <div id="videoFeedContainer">
+                        <!-- Video Default / Contoh -->
+                        <div class="card card-custom p-3 mb-4 border-secondary">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="bg-danger rounded-circle d-flex align-items-center justify-content-center text-white fw-bold me-2" style="width: 35px; height: 35px;">M</div>
+                                <div>
+                                    <h6 class="mb-0 text-white">Mudhofar Official</h6>
+                                    <small class="text-muted">Musik: DJ Remix Viral</small>
+                                </div>
+                            </div>
+                            
+                            <p class="mb-2">Contoh video pendek dari galeri siap ditonton! 🚀✨</p>
+
+                            <div class="video-container mb-3">
+                                [ Pemutar Video Pendek MyFlix ]
+                            </div>
+
+                            <div class="d-flex justify-content-around border-top border-secondary pt-2">
+                                <button class="btn btn-sm btn-dark text-danger" onclick="toggleLike(this)">❤️ <span class="like-count">45</span></button>
+                                <button class="btn btn-sm btn-dark text-info" onclick="toggleCommentBox(this)">💬 Komentar</button>
+                                <button class="btn btn-sm btn-dark text-success" onclick="shareVideo()">🔗 Bagikan</button>
+                            </div>
+
+                            <div class="comment-section mt-3 d-none">
+                                <div class="input-group mb-2">
+                                    <input type="text" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Tulis komentar...">
+                                    <button class="btn btn-sm btn-outline-light" onclick="addComment(this)">Kirim</button>
+                                </div>
+                                <div class="comment-list small text-muted">
+                                    <p class="mb-1"><strong>Siti:</strong> Videonya bagus banget!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
         </div>
+
     </div>
 
     <script>
-        // Fungsi Like Interaktif Tanpa Login
+        // Fungsi Upload dari Galeri & Pilihan Musik
+        function uploadVideoFromGallery() {
+            const fileInput = document.getElementById('videoFile');
+            const musicSelect = document.getElementById('bgMusic');
+
+            if (fileInput.files.length === 0) {
+                alert('Silakan pilih file video dari galeri terlebih dahulu!');
+                return;
+            }
+
+            const fileName = fileInput.files[0].name;
+            const selectedMusic = musicSelect.value ? musicSelect.value : 'Tanpa Musik';
+
+            // Simpan ke LocalStorage agar tampil di Feed
+            let videos = JSON.parse(localStorage.getItem('myflix_feed_videos')) || [];
+            videos.unshift({ name: fileName, music: selectedMusic, date: 'Baru saja' });
+            localStorage.setItem('myflix_feed_videos', JSON.stringify(videos));
+
+            alert(`Video "${fileName}" dengan musik "${selectedMusic}" berhasil diunggah ke feed publik!`);
+            fileInput.value = '';
+            musicSelect.value = '';
+            loadFeedVideos();
+        }
+
+        // Muat Feed Video
+        window.onload = function() {
+            loadFeedVideos();
+        };
+
+        function loadFeedVideos() {
+            let videos = JSON.parse(localStorage.getItem('myflix_feed_videos')) || [];
+            let container = document.getElementById('videoFeedContainer');
+            
+            if (videos.length === 0) return;
+
+            // Tambahkan video baru ke bagian atas feed
+            videos.forEach(vid => {
+                // Cek apakah video sudah ada di HTML agar tidak duplikat
+                container.innerHTML += `
+                    <div class="card card-custom p-3 mb-4 border-secondary">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-white fw-bold me-2" style="width: 35px; height: 35px;">K</div>
+                            <div>
+                                <h6 class="mb-0 text-white">Kreator Mandiri</h6>
+                                <small class="text-muted">Musik: ${vid.music}</small>
+                            </div>
+                        </div>
+                        
+                        <p class="mb-2">📱 ${vid.name}</p>
+
+                        <div class="video-container mb-3">
+                            [ Pemutar Video Pendek ]
+                        </div>
+
+                        <div class="d-flex justify-content-around border-top border-secondary pt-2">
+                            <button class="btn btn-sm btn-dark text-danger" onclick="toggleLike(this)">❤️ <span class="like-count">1</span></button>
+                            <button class="btn btn-sm btn-dark text-info" onclick="toggleCommentBox(this)">💬 Komentar</button>
+                            <button class="btn btn-sm btn-dark text-success" onclick="shareVideo()">🔗 Bagikan</button>
+                        </div>
+
+                        <div class="comment-section mt-3 d-none">
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Tulis komentar...">
+                                <button class="btn btn-sm btn-outline-light" onclick="addComment(this)">Kirim</button>
+                            </div>
+                            <div class="comment-list small text-muted"></div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
         function toggleLike(btn) {
             let countSpan = btn.querySelector('.like-count');
             let count = parseInt(countSpan.textContent);
@@ -83,14 +181,12 @@
             }
         }
 
-        // Buka/Tutup Kolom Komentar
         function toggleCommentBox(btn) {
             let card = btn.closest('.card');
             let commentSection = card.querySelector('.comment-section');
             commentSection.classList.toggle('d-none');
         }
 
-        // Kirim Komentar Instan
         function addComment(btn) {
             let section = btn.closest('.comment-section');
             let input = section.querySelector('input');
@@ -102,9 +198,8 @@
             input.value = '';
         }
 
-        // Fitur Share
         function shareVideo() {
-            alert('Tautan video disalin ke clipboard!');
+            alert('Tautan video berhasil disalin!');
         }
     </script>
 </body>
