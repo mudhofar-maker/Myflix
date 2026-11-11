@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyFlix - Publik Creator Hub & Business</title>
+    <title>MyFlix - WhatsApp Creator Dashboard</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -16,84 +16,159 @@
 
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <!-- Header & Dompet Publik -->
-            <div class="card card-custom p-4 shadow-lg rounded-4 mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h3 class="mb-0">🎬 MyFlix Publik Creator Hub</h3>
-                    <span class="badge bg-warning text-dark p-2" id="coinDisplay">🪙 100 Koin</span>
-                </div>
-                <p class="text-muted small">Akses terbuka untuk umum. Unggah video, dapatkan XP gamifikasi, dan kumpulkan koin digital.</p>
+
+            <!-- TAHAP 1: FORM MASUK NOMOR WA (Hanya muncul jika belum tersimpan) -->
+            <div id="authSection" class="card card-custom p-4 shadow-lg rounded-4 mb-4">
+                <h3 class="mb-3">📱 Masuk dengan Nomor WhatsApp</h3>
+                <p class="text-muted small">Masukkan nomor WA Anda untuk langsung masuk ke Dashboard Kreator pribadi.</p>
                 
-                <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-warning" onclick="topUpCoins()">+ Ambil Koin Harian</button>
-                    <button class="btn btn-sm btn-outline-success" onclick="sendTip('Kreator_Publik', 20)">Kirim Tip (20 Koin)</button>
+                <div class="mb-3">
+                    <label for="waNumber" class="form-label">Nomor WhatsApp</label>
+                    <input type="tel" class="form-control bg-dark text-white border-secondary" id="waNumber" placeholder="Contoh: 081234567890">
                 </div>
+                <button class="btn btn-success w-100 fw-bold" onclick="loginWithWA()">Masuk ke Dashboard</button>
             </div>
 
-            <!-- Panel Upload Bebas & Gamifikasi -->
-            <div class="card card-custom p-4 shadow-lg rounded-4">
-                <h5 class="mb-3">🚀 Unggah Video Bebas (Tanpa Login)</h5>
-
-                <!-- Area Pilih File -->
-                <div id="uploadSection" class="mb-3">
-                    <label for="videoFile" class="form-label">Pilih File Video dari Perangkat Anda</label>
-                    <input class="form-control bg-dark text-white border-secondary mb-3" type="file" id="videoFile" accept="video/*">
-                    <button class="btn btn-danger w-100 fw-bold" onclick="startUploadProcess()">Unggah Video Sekarang</button>
-                </div>
-
-                <!-- Progress Bar Interaktif -->
-                <div id="progressContainer" class="d-none">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span id="statusText" class="small text-info">Mengupload video... 0%</span>
-                        <span class="small text-warning">+50 XP & +10 Koin Menanti!</span>
+            <!-- TAHAP 2: DASHBOARD KOSONG (Tersembunyi sampai memasukkan No WA) -->
+            <div id="dashboardSection" class="d-none">
+                
+                <!-- Header Profil & Info WA -->
+                <div class="card card-custom p-4 shadow-lg rounded-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="mb-0">🎬 Dashboard Kreator Anda</h4>
+                        <button class="btn btn-sm btn-outline-danger" onclick="logoutWA()">Keluar / Ganti WA</button>
                     </div>
-                    <div class="progress mb-3" style="height: 25px; background-color: #2c2c2c;">
-                        <div id="progressBar" class="progress-bar progress-bar-gamer progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;">0%</div>
-                    </div>
-                    <button class="btn btn-outline-secondary btn-sm" onclick="cancelUpload()">Batalkan</button>
+                    <p class="text-muted small mb-1">Nomor WA Aktif: <strong id="displayWa" class="text-info"></strong></p>
+                    <p class="text-warning small mb-0">🪙 Saldo Koin: <span id="coinDisplay">100</span> Koin | ⭐ XP: <span id="xpDisplay">0</span></p>
                 </div>
 
-                <!-- Notifikasi Berhasil -->
-                <div id="rewardBox" class="alert alert-success mt-3 d-none" role="alert">
-                    <h5 class="alert-heading">🎉 Berhasil Diunggah!</h5>
-                    <p id="rewardMessage" class="mb-0">Video Anda berhasil masuk ke sistem. Anda mendapatkan +50 XP & +10 Koin Flix!</p>
+                <!-- Panel Upload Video Kosong Siap Isi -->
+                <div class="card card-custom p-4 shadow-lg rounded-4 mb-4">
+                    <h5 class="mb-3">🚀 Unggah Video Baru</h5>
+                    
+                    <div id="uploadFormArea" class="mb-3">
+                        <label for="videoFile" class="form-label">Pilih File Video Anda</label>
+                        <input class="form-control bg-dark text-white border-secondary mb-3" type="file" id="videoFile" accept="video/*">
+                        <button class="btn btn-danger w-100 fw-bold" onclick="startUploadProcess()">Mulai Unggah Video</button>
+                    </div>
+
+                    <!-- Progress Bar Upload -->
+                    <div id="progressContainer" class="d-none">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span id="statusText" class="small text-info">Mengupload video... 0%</span>
+                            <span class="small text-warning">+50 XP & +10 Koin</span>
+                        </div>
+                        <div class="progress mb-3" style="height: 25px; background-color: #2c2c2c;">
+                            <div id="progressBar" class="progress-bar progress-bar-gamer progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;">0%</div>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Daftar Video Anda (Dashboard Kosong Awalnya) -->
+                <div class="card card-custom p-4 shadow-lg rounded-4">
+                    <h5 class="mb-3">📂 Daftar Video Saya</h5>
+                    <div id="videoListContainer">
+                        <p class="text-muted text-center py-3 mb-0" id="emptyVideoText">Belum ada video yang diunggah. Silakan unggah video pertama Anda di atas!</p>
+                    </div>
+                </div>
+
             </div>
+
         </div>
     </div>
 
     <script>
         let uploadInterval;
 
-        function getAppData() {
-            const data = localStorage.getItem('myflix_public_data');
-            return data ? JSON.parse(data) : { coins: 100, xp: 0, streak: 1 };
-        }
-
-        function saveAppData(data) {
-            localStorage.setItem('myflix_public_data', JSON.stringify(data));
-            updateUI();
-        }
-
-        function updateUI() {
-            const data = getAppData();
-            document.getElementById('coinDisplay').textContent = `🪙 ${data.coins} Koin`;
-        }
-
+        // Cek status saat halaman dimuat
         window.onload = function() {
-            updateUI();
+            const savedWA = localStorage.getItem('myflix_current_wa');
+            if (savedWA) {
+                showDashboard(savedWA);
+            }
         };
 
-        function startUploadProcess() {
-            const fileInput = document.getElementById('videoFile');
-            if (fileInput.files.length === 0) {
-                alert('Silakan pilih file video terlebih dahulu!');
+        // Fungsi Login dengan No WA
+        function loginWithWA() {
+            const waInput = document.getElementById('waNumber').value.trim();
+            if (waInput.length < 10) {
+                alert('Masukkan nomor WhatsApp yang valid!');
                 return;
             }
 
-            document.getElementById('uploadSection').classList.add('d-none');
+            // Simpan sesi No WA di browser
+            localStorage.setItem('myflix_current_wa', waInput);
+            
+            // Inisialisasi data kosong jika belum ada untuk nomor ini
+            if (!localStorage.getItem('myflix_videos_' + waInput)) {
+                localStorage.setItem('myflix_videos_' + waInput, JSON.stringify([]));
+            }
+            if (!localStorage.getItem('myflix_profile_' + waInput)) {
+                localStorage.setItem('myflix_profile_' + waInput, JSON.stringify({ coins: 100, xp: 0 }));
+            }
+
+            showDashboard(waInput);
+        }
+
+        // Tampilkan Dashboard & Sembunyikan Form Login
+        function showDashboard(waNumber) {
+            document.getElementById('authSection').classList.add('d-none');
+            document.getElementById('dashboardSection').classList.remove('d-none');
+            document.getElementById('displayWa').textContent = waNumber;
+            loadUserData(waNumber);
+            loadUserVideos(waNumber);
+        }
+
+        // Logout / Ganti WA
+        function logoutWA() {
+            localStorage.removeItem('myflix_current_wa');
+            document.getElementById('dashboardSection').classList.add('d-none');
+            document.getElementById('authSection').classList.remove('d-none');
+            document.getElementById('waNumber').value = '';
+        }
+
+        // Muat Data Profil (Koin & XP)
+        function loadUserData(waNumber) {
+            const profile = JSON.parse(localStorage.getItem('myflix_profile_' + waNumber));
+            document.getElementById('coinDisplay').textContent = profile.coins;
+            document.getElementById('xpDisplay').textContent = profile.xp;
+        }
+
+        // Muat Daftar Video Pengguna
+        function loadUserVideos(waNumber) {
+            const videos = JSON.parse(localStorage.getItem('myflix_videos_' + waNumber)) || [];
+            const container = document.getElementById('videoListContainer');
+            
+            if (videos.length === 0) {
+                container.innerHTML = `<p class="text-muted text-center py-3 mb-0">Belum ada video yang diunggah. Silakan unggah video pertama Anda di atas!</p>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            videos.forEach((vid, index) => {
+                container.innerHTML += `
+                    <div class="d-flex justify-content-between align-items-center bg-dark p-3 rounded mb-2 border border-secondary">
+                        <div>
+                            <h6 class="mb-1 text-white">📹 ${vid.name}</h6>
+                            <small class="text-muted">Diunggah pada: ${vid.date}</small>
+                        </div>
+                        <span class="badge bg-success">Publik</span>
+                    </div>
+                `;
+            });
+        }
+
+        // Simulasi Proses Upload Video
+        function startUploadProcess() {
+            const fileInput = document.getElementById('videoFile');
+            if (fileInput.files.length === 0) {
+                alert('Pilih file video terlebih dahulu!');
+                return;
+            }
+
+            const fileName = fileInput.files[0].name;
+            document.getElementById('uploadFormArea').classList.add('d-none');
             document.getElementById('progressContainer').classList.remove('d-none');
-            document.getElementById('rewardBox').classList.add('d-none');
 
             let progress = 0;
             const progressBar = document.getElementById('progressBar');
@@ -103,51 +178,38 @@
                 progress += 25;
                 progressBar.style.width = progress + '%';
                 progressBar.textContent = progress + '%';
-                statusText.textContent = `Mengupload video... ${progress}%`;
+                statusText.textContent = `Mengunggah... ${progress}%`;
 
                 if (progress >= 100) {
                     clearInterval(uploadInterval);
-                    finishUploadSuccess();
+                    finishUpload(fileName);
                 }
             }, 300);
         }
 
-        function finishUploadSuccess() {
+        // Selesai Upload & Simpan ke Dashboard Pengguna
+        function finishUpload(fileName) {
             document.getElementById('progressContainer').classList.add('d-none');
-            document.getElementById('uploadSection').classList.remove('d-none');
-            document.getElementById('rewardBox').classList.remove('d-none');
-
-            let appData = getAppData();
-            appData.xp += 50;
-            appData.coins += 10;
-            saveAppData(appData);
-
+            document.getElementById('uploadFormArea').classList.remove('d-none');
             document.getElementById('videoFile').value = '';
-        }
 
-        function cancelUpload() {
-            clearInterval(uploadInterval);
-            document.getElementById('progressContainer').classList.add('d-none');
-            document.getElementById('uploadSection').classList.remove('d-none');
-            alert('Unggahan dibatalkan.');
-        }
+            const waNumber = localStorage.getItem('myflix_current_wa');
+            
+            // Simpan video ke list data WA tersebut
+            let videos = JSON.parse(localStorage.getItem('myflix_videos_' + waNumber)) || [];
+            videos.unshift({ name: fileName, date: new Date().toLocaleDateString() });
+            localStorage.setItem('myflix_videos_' + waNumber, JSON.stringify(videos));
 
-        function topUpCoins() {
-            let appData = getAppData();
-            appData.coins += 50;
-            saveAppData(appData);
-            alert('Berhasil klaim 50 Koin Flix gratis harian!');
-        }
+            // Tambah XP dan Koin gamifikasi
+            let profile = JSON.parse(localStorage.getItem('myflix_profile_' + waNumber));
+            profile.xp += 50;
+            profile.coins += 10;
+            localStorage.setItem('myflix_profile_' + waNumber, JSON.stringify(profile));
 
-        function sendTip(creatorName, amount) {
-            let appData = getAppData();
-            if (appData.coins < amount) {
-                alert('Koin Anda tidak cukup!');
-                return;
-            }
-            appData.coins -= amount;
-            saveAppData(appData);
-            alert(`Berhasil mengirim ${amount} Koin Flix ke kreator!`);
+            // Refresh tampilan dashboard
+            loadUserData(waNumber);
+            loadUserVideos(waNumber);
+            alert('Video berhasil diunggah ke dashboard Anda!');
         }
     </script>
 </body>
