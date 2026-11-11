@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyFlix - Creator Upload & Gamification</title>
+    <!-- Bootstrap CSS untuk styling cepat -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #121212; color: #fff; font-family: sans-serif; }
+        .card-custom { background: #1e1e1e; border: 1px solid #333; }
+        .progress-bar-gamer { background: linear-gradient(45deg, #ff416c, #ff4b2b); }
+    </style>
+</head>
+<body class="container py-5">
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card card-custom p-4 shadow-lg rounded-4">
+                <h3 class="mb-3">🎬 MyFlix Creator Hub</h3>
+                <p class="text-muted">Sistem Manajemen Upload & Gamifikasi Terintegrasi</p>
+
+                <!-- Area Status Upload -->
+                <div id="uploadSection" class="mb-4">
+                    <label for="videoFile" class="form-label">Pilih Video untuk Diunggah</label>
+                    <input class="form-control bg-dark text-white border-secondary mb-3" type="file" id="videoFile" accept="video/*">
+                    
+                    <button id="uploadBtn" class="btn btn-danger w-100 fw-bold" onclick="startUploadProcess()">Mulai Unggah (Cloudinary)</button>
+                </div>
+
+                <!-- Progress Bar & Gamifikasi (Tersembunyi Awalnya) -->
+                <div id="progressContainer" class="d-none">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span id="statusText" class="small text-info">Mengupload video... 0%</span>
+                        <span id="xpRewardHint" class="small text-warning">+50 XP Menanti!</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 25px; background-color: #2c2c2c;">
+                        <div id="progressBar" class="progress-bar progress-bar-gamer progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;">0%</div>
+                    </div>
+                    <button id="cancelBtn" class="btn btn-outline-secondary btn-sm" onclick="cancelUpload()">Batalkan</button>
+                </div>
+
+                <!-- Panel Notifikasi Hadiah Gamifikasi -->
+                <div id="rewardBox" class="alert alert-success mt-4 d-none" role="alert">
+                    <h5 class="alert-heading">🎉 Quest Completed!</h5>
+                    <p id="rewardMessage" class="mb-0">Video berhasil diunggah! Anda mendapatkan +50 XP, 1 Mystery Box, dan Streak Harian bertambah!</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let uploadInterval;
+
+        function startUploadProcess() {
+            const fileInput = document.getElementById('videoFile');
+            if (fileInput.files.length === 0) {
+                alert('Silakan pilih file video terlebih dahulu!');
+                return;
+            }
+
+            // Sembunyikan tombol upload, tampilkan progress bar
+            document.getElementById('uploadSection').classList.add('d-none');
+            document.getElementById('progressContainer').classList.remove('d-none');
+            document.getElementById('rewardBox').classList.add('d-none');
+
+            let progress = 0;
+            const progressBar = document.getElementById('progressBar');
+            const statusText = document.getElementById('statusText');
+
+            // Simulasi proses upload Cloudinary (Ganti dengan logika API Cloudinary Anda)
+            uploadInterval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = progress + '%';
+                progressBar.textContent = progress + '%';
+                statusText.textContent = `Mengupload video ke Cloudinary... ${progress}%`;
+
+                if (progress >= 100) {
+                    clearInterval(uploadInterval);
+                    finishUploadSuccess();
+                }
+            }, 300);
+        }
+
+        function finishUploadSuccess() {
+            document.getElementById('progressContainer').classList.add('d-none');
+            document.getElementById('uploadSection').classList.remove('d-none');
+            
+            // Tampilkan hadiah gamifikasi
+            const rewardBox = document.getElementById('rewardBox');
+            rewardBox.classList.remove('d-none');
+
+            // Reset input file
+            document.getElementById('videoFile').value = '';
+        }
+
+        function cancelUpload() {
+            clearInterval(uploadInterval);
+            document.getElementById('progressContainer').classList.add('d-none');
+            document.getElementById('uploadSection').classList.remove('d-none');
+            alert('Unggahan dibatalkan.');
+        }
+    </script>
+</body>
+                      </html>
+  
