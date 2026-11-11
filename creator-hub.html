@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyFlix - Creator Upload & Gamification</title>
-    <!-- Bootstrap CSS untuk styling cepat -->
+    <title>MyFlix - Creator Hub, Gamification & Business</title>
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #121212; color: #fff; font-family: sans-serif; }
@@ -12,40 +12,52 @@
         .progress-bar-gamer { background: linear-gradient(45deg, #ff416c, #ff4b2b); }
     </style>
 </head>
-<body class="container py-5">
+<body class="container py-4">
 
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card card-custom p-4 shadow-lg rounded-4">
-                <h3 class="mb-3">🎬 MyFlix Creator Hub</h3>
-                <p class="text-muted">Sistem Manajemen Upload & Gamifikasi Terintegrasi</p>
+            <!-- Header & Panel Bisnis (Saldo Koin) -->
+            <div class="card card-custom p-4 shadow-lg rounded-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="mb-0">🎬 MyFlix Business & Creator Hub</h3>
+                    <span class="badge bg-warning text-dark p-2" id="coinDisplay">🪙 100 Koin</span>
+                </div>
+                <p class="text-muted small">Platform video pendek dengan sistem manajemen, gamifikasi, dan monetisasi mandiri.</p>
+                
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-warning" onclick="topUpCoins()">+ Top-Up Koin</button>
+                    <button class="btn btn-sm btn-outline-success" onclick="sendTip('Kreator_Utama', 20)">Kirim Tip (20 Koin)</button>
+                </div>
+            </div>
 
-                <!-- Area Status Upload -->
-                <div id="uploadSection" class="mb-4">
-                    <label for="videoFile" class="form-label">Pilih Video untuk Diunggah</label>
+            <!-- Panel Manajemen Upload & Gamifikasi -->
+            <div class="card card-custom p-4 shadow-lg rounded-4">
+                <h5 class="mb-3">🚀 Unggah Konten & Quest Gamifikasi</h5>
+
+                <!-- Area Pilih File -->
+                <div id="uploadSection" class="mb-3">
+                    <label for="videoFile" class="form-label">Pilih File Video</label>
                     <input class="form-control bg-dark text-white border-secondary mb-3" type="file" id="videoFile" accept="video/*">
-                    
-                    <button id="uploadBtn" class="btn btn-danger w-100 fw-bold" onclick="startUploadProcess()">Mulai Unggah (Cloudinary)</button>
+                    <button class="btn btn-danger w-100 fw-bold" onclick="startUploadProcess()">Mulai Unggah (Cloudinary Simulation)</button>
                 </div>
 
-                <!-- Progress Bar & Gamifikasi (Tersembunyi Awalnya) -->
+                <!-- Progress Bar Interaktif -->
                 <div id="progressContainer" class="d-none">
                     <div class="d-flex justify-content-between mb-1">
                         <span id="statusText" class="small text-info">Mengupload video... 0%</span>
-                        <span id="xpRewardHint" class="small text-warning">+50 XP Menanti!</span>
+                        <span class="small text-warning">+50 XP Menanti!</span>
                     </div>
                     <div class="progress mb-3" style="height: 25px; background-color: #2c2c2c;">
                         <div id="progressBar" class="progress-bar progress-bar-gamer progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;">0%</div>
                     </div>
-                    <button id="cancelBtn" class="btn btn-outline-secondary btn-sm" onclick="cancelUpload()">Batalkan</button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="cancelUpload()">Batalkan</button>
                 </div>
 
-                <!-- Panel Notifikasi Hadiah Gamifikasi -->
-                <div id="rewardBox" class="alert alert-success mt-4 d-none" role="alert">
+                <!-- Notifikasi Hadiah Quest Selesai -->
+                <div id="rewardBox" class="alert alert-success mt-3 d-none" role="alert">
                     <h5 class="alert-heading">🎉 Quest Completed!</h5>
-                    <p id="rewardMessage" class="mb-0">Video berhasil diunggah! Anda mendapatkan +50 XP, 1 Mystery Box, dan Streak Harian bertambah!</p>
+                    <p id="rewardMessage" class="mb-0">Video berhasil diunggah! Anda mendapatkan +50 XP & Streak Harian bertambah.</p>
                 </div>
-
             </div>
         </div>
     </div>
@@ -53,6 +65,28 @@
     <script>
         let uploadInterval;
 
+        // Ambil atau Inisialisasi Data Dompet & Gamifikasi dari LocalStorage
+        function getAppData() {
+            const data = localStorage.getItem('myflix_app_data');
+            return data ? JSON.parse(data) : { coins: 100, xp: 0, streak: 1 };
+        }
+
+        function saveAppData(data) {
+            localStorage.setItem('myflix_app_data', JSON.stringify(data));
+            updateUI();
+        }
+
+        function updateUI() {
+            const data = getAppData();
+            document.getElementById('coinDisplay').textContent = `🪙 ${data.coins} Koin`;
+        }
+
+        // Jalankan saat halaman dimuat
+        window.onload = function() {
+            updateUI();
+        };
+
+        // Proses Upload
         function startUploadProcess() {
             const fileInput = document.getElementById('videoFile');
             if (fileInput.files.length === 0) {
@@ -60,7 +94,6 @@
                 return;
             }
 
-            // Sembunyikan tombol upload, tampilkan progress bar
             document.getElementById('uploadSection').classList.add('d-none');
             document.getElementById('progressContainer').classList.remove('d-none');
             document.getElementById('rewardBox').classList.add('d-none');
@@ -69,9 +102,9 @@
             const progressBar = document.getElementById('progressBar');
             const statusText = document.getElementById('statusText');
 
-            // Simulasi proses upload Cloudinary (Ganti dengan logika API Cloudinary Anda)
+            // Simulasi progress upload (bisa diganti fungsi XMLHttpRequest Cloudinary asli)
             uploadInterval = setInterval(() => {
-                progress += 10;
+                progress += 20;
                 progressBar.style.width = progress + '%';
                 progressBar.textContent = progress + '%';
                 statusText.textContent = `Mengupload video ke Cloudinary... ${progress}%`;
@@ -86,12 +119,15 @@
         function finishUploadSuccess() {
             document.getElementById('progressContainer').classList.add('d-none');
             document.getElementById('uploadSection').classList.remove('d-none');
-            
-            // Tampilkan hadiah gamifikasi
-            const rewardBox = document.getElementById('rewardBox');
-            rewardBox.classList.remove('d-none');
+            document.getElementById('rewardBox').classList.remove('d-none');
 
-            // Reset input file
+            // Update Gamifikasi & Reward Koin Bisnis
+            let appData = getAppData();
+            appData.xp += 50;
+            appData.coins += 10; // Bonus koin dari misi upload
+            appData.streak += 1;
+            saveAppData(appData);
+
             document.getElementById('videoFile').value = '';
         }
 
@@ -101,7 +137,25 @@
             document.getElementById('uploadSection').classList.remove('d-none');
             alert('Unggahan dibatalkan.');
         }
+
+        // Fungsi Tombol Unsur Bisnis
+        function topUpCoins() {
+            let appData = getAppData();
+            appData.coins += 50;
+            saveAppData(appData);
+            alert('Berhasil Top-Up 50 Koin Flix!');
+        }
+
+        function sendTip(creatorName, amount) {
+            let appData = getAppData();
+            if (appData.coins < amount) {
+                alert('Saldo koin Anda tidak cukup untuk mengirim tip!');
+                return;
+            }
+            appData.coins -= amount;
+            saveAppData(appData);
+            alert(`Berhasil mengirim ${amount} Koin Flix ke @${creatorName}! Terima kasih.`);
+        }
     </script>
 </body>
-                      </html>
-  
+</html>
